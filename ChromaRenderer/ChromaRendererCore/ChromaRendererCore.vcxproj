@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{76582D7C-9143-46EB-AAB8-3C99A0012067}</ProjectGuid>
+    <RootNamespace>ChromaRendererCore</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.0.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)extlibs\headers;$(SolutionDir)extlibs\headers\cuda-helpers;$(SolutionDir)extlibs\headers\glad\include;$(ProjectDir)src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)extlibs\libs\$(Configuration);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir)extlibs\headers;$(SolutionDir)extlibs\headers\cuda-helpers;$(SolutionDir)extlibs\headers\glad\include;$(ProjectDir)src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)extlibs\libs\$(Configuration);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level1</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glfw3.lib;assimp-vc141-mt.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;propsys.lib;shlwapi.lib;comctl32.lib</AdditionalDependencies>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_30,sm_30;compute_75,sm_75</CodeGeneration>
+    </CudaCompile>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level1</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glfw3.lib;assimp-vc141-mt.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;propsys.lib;shlwapi.lib;comctl32.lib</AdditionalDependencies>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_30,sm_30;compute_75,sm_75</CodeGeneration>
+    </CudaCompile>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Benchmark.h" />
+    <ClInclude Include="src\BoundingBox.h" />
+    <ClInclude Include="src\BVH.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\ChromaRenderer.h" />
+    <ClInclude Include="src\Color.h" />
+    <ClInclude Include="src\Config.h" />
+    <ClInclude Include="src\CudaPathTracer.h" />
+    <ClInclude Include="src\CudaPathTracerKernel.h" />
+    <ClInclude Include="src\CudaUtils.h" />
+    <ClInclude Include="src\GlslProgram.h" />
+    <ClInclude Include="src\halton.hpp" />
+    <ClInclude Include="src\IIntersectable.h" />
+    <ClInclude Include="src\Image.h" />
+    <ClInclude Include="src\Intersection.h" />
+    <ClInclude Include="src\IRenderer.h" />
+    <ClInclude Include="src\ISpacePartitioningStructure.h" />
+    <ClInclude Include="src\KDTree.h" />
+    <ClInclude Include="src\Material.h" />
+    <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\ModelImporter.h" />
+    <ClInclude Include="src\Object.h" />
+    <ClInclude Include="src\PathTracing.h" />
+    <ClInclude Include="src\Ray.h" />
+    <ClInclude Include="src\RayCasting.h" />
+    <ClInclude Include="src\RendererSettings.h" />
+    <ClInclude Include="src\RTUtils.h" />
+    <ClInclude Include="src\Scene.h" />
+    <ClInclude Include="src\Stopwatch.h" />
+    <ClInclude Include="src\ThreadPool.h" />
+    <ClInclude Include="src\Triangle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Benchmark.cpp" />
+    <ClCompile Include="src\BVH.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\ChromaRenderer.cpp" />
+    <ClCompile Include="src\Color.cpp" />
+    <ClCompile Include="src\CudaPathTracer.cpp" />
+    <ClCompile Include="src\GlslProgram.cpp" />
+    <ClCompile Include="src\halton.cpp" />
+    <ClCompile Include="src\Image.cpp" />
+    <ClCompile Include="src\KDTree.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\ModelImporter.cpp" />
+    <ClCompile Include="src\Object.cpp" />
+    <ClCompile Include="src\PathTracing.cpp" />
+    <ClCompile Include="src\Ray.cpp" />
+    <ClCompile Include="src\RayCasting.cpp" />
+    <ClCompile Include="src\RendererSettings.cpp" />
+    <ClCompile Include="src\RTUtils.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Stopwatch.cpp" />
+    <ClCompile Include="src\ThreadPool.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="src\CudaPathTracerKernel.cu" />
+    <CudaCompile Include="src\CudaUtils.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\convergence.glsl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.0.targets" />
+  </ImportGroup>
+</Project>
