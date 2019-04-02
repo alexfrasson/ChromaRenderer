@@ -1,0 +1,14 @@
+version: 1.0.{build}
+
+image:
+- Visual Studio 2017
+
+platform:
+- x64
+  
+configuration:
+- Release
+
+build_script:
+- cmd: >-
+    call build.cmd
