@@ -24,4 +24,4 @@ nvcc -V
 
 "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-msbuild "C:\projects\chromarenderer\ChromaRenderer\ChromaRenderer.sln" /verbosity:normal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+msbuild "C:\projects\chromarenderer\ChromaRenderer\ChromaRenderer.sln" /verbosity:detailed /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
