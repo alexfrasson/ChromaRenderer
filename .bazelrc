@@ -3,8 +3,6 @@
 
 build --cxxopt=/MD
 
-
-
 ##build --cxxopt=/Zi 
 #build --cxxopt=/Zc:wchar_t 
 #build --cxxopt=/Zc:forScope 

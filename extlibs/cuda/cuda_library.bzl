@@ -49,8 +49,8 @@ def _cuda_library_impl(ctx):
             action_name = C_COMPILE_ACTION_NAME,
         )
 
-        print(cc_toolchain.compiler)
-        print(c_compiler_path)
+        #print(cc_toolchain.compiler)
+        #print(c_compiler_path)
 
         #args.add("--compiler-bindir=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\bin\\Hostx64\\x64\"")
         #args.add("--compiler-bindir={}".format(c_compiler_path))
