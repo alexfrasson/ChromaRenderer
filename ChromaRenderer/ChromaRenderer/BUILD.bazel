@@ -2,15 +2,12 @@ package(default_visibility = ["//visibility:public"])
 
 cc_binary(
     name = "chroma-renderer",
-    srcs = glob(
-        [
-            "src/*.cpp",
-            "src/*.h",
-        ],
-    ),
+    srcs = glob([
+        "src/*.cpp",
+        "src/*.h",
+    ]),
     data = [
         "//ChromaRendererCore:shaders",
-        "//extlibs:assimp-bin",
         "//resources:fonts",
     ],
     includes = ["src"],

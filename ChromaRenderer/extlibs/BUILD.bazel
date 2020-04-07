@@ -2,19 +2,15 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "assimp",
-    srcs = ["libs/Release/assimp-vc141-mt.lib"],
-    hdrs = glob(
-        [
-            "headers/assimp/**/*.h",
-            "headers/assimp/**/*.hpp",
-            "headers/assimp/**/*.inl",
-        ],
-    ),
-)
-
-filegroup(
-    name = "assimp-bin",
-    srcs = ["bin/Release/assimp-vc141-mt.dll"]
+    srcs = [
+        "bin/Release/assimp-vc141-mt.dll",
+        "libs/Release/assimp-vc141-mt.lib",
+    ],
+    hdrs = glob([
+        "headers/assimp/**/*.h",
+        "headers/assimp/**/*.hpp",
+        "headers/assimp/**/*.inl",
+    ]),
 )
 
 cc_library(
