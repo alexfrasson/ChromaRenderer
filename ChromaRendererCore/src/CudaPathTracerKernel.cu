@@ -33,7 +33,7 @@ __device__ __inline__ float3 cosineSampleHemisphere(curandState *randState, floa
 	return normalize(u*cosf(phi)*r2s + v*sinf(phi)*r2s + w*sqrtf(1 - r2));
 }
 
-__device__ __inline__ CudaRay rayDirection(const int i, const int j, CudaCamera cam, curandState *randState)
+__device__ __inline__ CudaRay rayDirectionWithOffset(const int i, const int j, CudaCamera cam, curandState *randState)
 {
 	CudaRay ray;
 	ray.mint = 0;
@@ -226,7 +226,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer, float4* accu
 	// Begin path
 	if (pathIteration.bounce == 0)
 	{
-		ray = rayDirection(x, y, cam, &randState);
+		ray = rayDirectionWithOffset(x, y, cam, &randState);
 		pathIteration.mask = make_float3(1.0f);
 	}
 	else

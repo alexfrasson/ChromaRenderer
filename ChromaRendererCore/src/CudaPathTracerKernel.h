@@ -128,6 +128,3 @@ void bindTextureToArray(cudaArray* aarray);
 //void trace(cudaStream_t &stream, float4* accuBuffer, dim3 texDim, CudaCamera cam, CudaTriangle* triangles, unsigned int nTriangles, CudaMaterial* materials, unsigned int nMaterials, unsigned int seed, CudaLinearBvhNode* linearBVH, CudaEnviromentSettings enviromentSettings);
 extern "C"
 void trace(cudaStream_t &stream, CudaPathIteration* pathIterationBuffer, float4* accuBuffer, dim3 texDim, CudaCamera cam, CudaTriangle* triangles, unsigned int nTriangles, CudaMaterial* materials, unsigned int nMaterials, unsigned int seed, CudaLinearBvhNode* linearBVH, CudaEnviromentSettings enviromentSettings);
-
-extern "C"
-CudaRay rayDirection(const int i, const int j, CudaCamera cam);
