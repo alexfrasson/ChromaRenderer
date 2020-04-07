@@ -1,0 +1,41 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "cuda_headers",
+    hdrs = glob(
+        include = [
+            "include/**/*.h",
+            "include/**/*.hpp",
+        ],
+        #allow_empty = False,
+    ),
+    includes = ["include"],
+)
+
+cc_library(
+    name = "cuda",
+    srcs = ["lib/x64/cuda.lib"],
+    #linkopts = ["-ldl"],
+)
+
+cc_library(
+    name = "cuda_runtime",
+    srcs = ["lib/x64/cudart_static.lib"],
+    deps = [":cuda"],
+    #linkopts = ["-lrt"],
+)
+
+cc_library(
+    name = "curand_static",
+    srcs = [
+        "lib/x64/curand.lib",
+    ],
+    deps = [
+        #":culibos",
+    ],
+)
+
+filegroup(
+    name = "nvcc",
+    srcs = ["bin/nvcc.exe"],
+)

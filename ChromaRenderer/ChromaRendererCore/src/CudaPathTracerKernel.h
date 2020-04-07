@@ -2,7 +2,7 @@
 
 #define MAX_PATH_DEPTH 3
 
-#define cudaErrorCheck(ans) { if(ans != cudaSuccess){ cerr << "CudaError: " << cudaGetErrorString(ans) << "(" << __FILE__ << "(" << __LINE__ << "))" << endl; return;} }
+#define cudaErrorCheck(ans) { if(ans != cudaSuccess){ cerr << "CudaError: " << cudaGetErrorString(ans) << "(" << __FILE__ << "(" << __LINE__ << "))" << endl; exit(-1); return;} }
 
 #include <cfloat>
 #include <stdint.h>

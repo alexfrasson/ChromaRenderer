@@ -1,0 +1,88 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "assimp",
+    srcs = ["libs/Release/assimp-vc141-mt.lib"],
+    hdrs = glob(
+        [
+            "headers/assimp/**/*.h",
+            "headers/assimp/**/*.hpp",
+            "headers/assimp/**/*.inl",
+        ],
+    ),
+)
+
+filegroup(
+    name = "assimp-bin",
+    srcs = ["bin/Release/assimp-vc141-mt.dll"]
+)
+
+cc_library(
+    name = "cuda-helpers",
+    hdrs = glob(["headers/cuda-helpers/*.h"]),
+    deps = ["@cuda//:cuda_headers"],
+)
+
+cc_library(
+    name = "cuda-helpers-headers",
+    hdrs = glob(["headers/cuda-helpers/*.h"]),
+)
+
+cc_library(
+    name = "glad",
+    srcs = glob(["headers/glad/**/*.c"]),
+    hdrs = glob(["headers/glad/**/*.h"]),
+    includes = ["headers/glad/include"],
+)
+
+cc_library(
+    name = "glfw",
+    srcs = ["libs/Release/glfw3.lib"],
+    hdrs = glob(["headers/glfw/**/*.h"]),
+    linkopts = [
+        "-DEFAULTLIB:opengl32.lib",
+        "-DEFAULTLIB:glu32.lib",
+        "-DEFAULTLIB:kernel32.lib",
+        "-DEFAULTLIB:user32.lib",
+        "-DEFAULTLIB:gdi32.lib",
+        "-DEFAULTLIB:winspool.lib",
+        "-DEFAULTLIB:advapi32.lib",
+        "-DEFAULTLIB:shell32.lib",
+        "-DEFAULTLIB:ole32.lib",
+        "-DEFAULTLIB:oleaut32.lib",
+        "-DEFAULTLIB:uuid.lib",
+        "-DEFAULTLIB:odbc32.lib",
+        "-DEFAULTLIB:odbccp32.lib",
+        "-DEFAULTLIB:propsys.lib",
+        "-DEFAULTLIB:shlwapi.lib",
+        "-DEFAULTLIB:comctl32.lib",
+    ],
+)
+
+cc_library(
+    name = "imgui",
+    srcs = glob(["headers/imgui/*.cpp"]),
+    hdrs = glob(["headers/imgui/*.h"]),
+    includes = ["headers/imgui"],
+    deps = [
+        ":glad",
+        ":glm",
+    ],
+)
+
+cc_library(
+    name = "glm",
+    hdrs = glob(
+        [
+            "headers/glm/**/*.h",
+            "headers/glm/**/*.hpp",
+            "headers/glm/**/*.inl",
+        ],
+    ),
+    includes = ["headers"],
+)
+
+cc_library(
+    name = "stb-image",
+    hdrs = ["headers/stb_image.h"],
+)

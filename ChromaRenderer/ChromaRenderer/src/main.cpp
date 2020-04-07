@@ -10,6 +10,33 @@
 #include <ChromaGui.h>
 #include <ChromaRenderer.h>
 
+
+void term_func() 
+{	
+	std::cout << "Terminate!" << std::endl;
+	auto eptr = std::current_exception();
+
+	//if (eptr != nullptr)
+	{
+		try 
+		{
+			std::rethrow_exception(eptr);
+		} 
+		catch(const std::exception& e) 
+		{
+			std::cout << "Unhandled exception1!" << std::endl;
+			std::cout << e.what() << std::endl;
+		}
+		catch(...)
+		{
+			std::cout << "Unhandled exception2!" << std::endl;
+		}
+	}
+
+	std::cout << "Terminate: done" << std::endl;
+	std::abort();
+}
+
 using namespace glm;
 
 GLFWwindow* window;
@@ -196,7 +223,7 @@ bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
 	// - Read 'misc/fonts/README.txt' for more instructions and details.
 	// - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
 	//io.Fonts->AddFontDefault();
-	io.Fonts->AddFontFromFileTTF("../resources/Roboto-Medium.ttf", 16.0f);
+	io.Fonts->AddFontFromFileTTF("./resources/Roboto-Medium.ttf", 16.0f);
 	//io.Fonts->AddFontFromFileTTF("../resources/DroidSans.ttf", 16.0f);
 	//io.Fonts->AddFontFromFileTTF("../resources/Cousine-Regular.ttf", 16.0f);
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
@@ -314,6 +341,8 @@ void MainLoop()
 
 int main(int, char**)
 {
+	std::set_terminate(term_func);
+
 	if (!InitGLFW())
 		return 1;
 

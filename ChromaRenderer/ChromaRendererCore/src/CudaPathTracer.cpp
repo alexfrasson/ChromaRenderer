@@ -209,18 +209,18 @@ CudaPathTracer::CudaPathTracer()
 		cout << endl << endl;
 	}
 
-	try
+	//try
 	{
 		computeShader = new GLSLProgram();
-		computeShader->compileShader("../ChromaRendererCore/shaders/convergence.glsl", GLSLShader::COMPUTE);
+		computeShader->compileShader("./ChromaRendererCore/shaders/convergence.glsl", GLSLShader::COMPUTE);
 		computeShader->link();
 		computeShader->validate();
 		//computeShader->printActiveAttribs();
 	}
-	catch (GLSLProgramException &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
+	//catch (GLSLProgramException &e)
+	//{
+	//	std::cerr << e.what() << std::endl;
+	//}
 }
 
 CudaPathTracer::~CudaPathTracer()

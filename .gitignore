@@ -206,7 +206,8 @@ FakesAssemblies/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -241,6 +242,8 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+bazel-*/
+.vscode/
 
 # =========================
 # Don't ignore
