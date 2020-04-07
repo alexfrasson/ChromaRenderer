@@ -9,6 +9,10 @@ platform:
 configuration:
 - Release
 
+build: off
+test: off
+deploy: off
+
 build_script:
 - cmd: >-
     call build.cmd
