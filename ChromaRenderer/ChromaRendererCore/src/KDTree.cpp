@@ -7,7 +7,8 @@
 #include <glm/gtx/string_cast.hpp>
 #include <random>
 #include <fstream>
-#include <iomanip> 
+#include <iomanip>
+#include <iterator>
 
 
 #define MAX_DEPTH		64	// This is only used in the intersection method, so the stack doesn't have to be dynamically allocated
@@ -2023,7 +2024,7 @@ bool KDTree::eventSahPartition(const std::vector<Face>& ts, BoundingBox nodebb, 
 
 
 
-		// Iteratively “sweep” plane over all split candidates
+		// Iteratively ï¿½sweepï¿½ plane over all split candidates
 		int nl = 0, np = 0, nr = tsbb.size();
 		int esize = events.size();
 		int i = 0;
