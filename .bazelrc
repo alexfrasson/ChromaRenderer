@@ -40,6 +40,4 @@ build --compilation_mode=opt
 build --spawn_strategy=local
 build --experimental_enable_runfiles
 
-startup --output_user_root=C:\\bazel
-
 build:debug --compilation_mode=dbg
