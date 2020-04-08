@@ -7,46 +7,28 @@ cc_library(
     includes = ["src"],
     linkstatic = True,
     deps = [
-        "//extlibs:assimp",
-        "//extlibs:cuda-helpers",
-        "//extlibs:glad",
-        "//extlibs:glfw",
-        "//extlibs:glm",
-        "//extlibs:imgui",
-        "//extlibs:stb-image",
+        "//third_party/assimp",
+        "//third_party/cuda-helpers",
+        "//third_party/glad",
+        "//third_party/glfw",
+        "//third_party/glm",
+        "//third_party/imgui",
+        "//third_party/stb:stb-image",
         "@cuda//:cuda_headers",
         "@cuda//:cuda_runtime",
     ],
 )
 
-load("//extlibs/cuda:cuda_library.bzl", "cuda_library")
+load("//third_party/cuda:cuda_library.bzl", "cuda_library")
 
 cuda_library(
     name = "path-tracer-kernel",
     srcs = ["src/CudaPathTracerKernel.cu"],
     hdrs = ["src/CudaPathTracerKernel.h"],
-    deps = ["//extlibs:cuda-helpers-headers"],
+    deps = ["//third_party/cuda-helpers:cuda-helpers-headers"],
 )
 
 filegroup(
     name = "shaders",
     srcs = ["shaders/convergence.glsl"],
 )
-
-# run_binary(
-#     name = "kernels",
-#     tool = "@cuda//:nvcc",
-#     srcs = ["src/CudaPathTracerKernel.cu", "//extlibs:cuda-helpers-headers"],
-#     outs = ["CudaPathTracerKernel.cu.obj"],
-#     args = [
-#         "--compiler-bindir=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\bin\Hostx64\\x64\" \
-#         -o $(location CudaPathTracerKernel.cu.obj) \
-#         -I\"C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.0\\include\" \
-#         -Iextlibs/headers \
-#         -Iextlibs/headers/cuda-helpers \
-#         --compile $(location src/CudaPathTracerKernel.cu)"]
-# )
-
-#--include-path=$(locations //extlibs:cuda-helpers-headers) \
-
-#"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_75,code=\"sm_75,compute_75\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W1 /nologo /O2 /Fdx64\Release\ChromaRendererCore.pdb /FS /Zi  /MD " -o x64\Release\CudaPathTracerKernel.cu.obj "C:\Users\Alex Frasson\Desktop\Repositiories\ChromaRenderer\ChromaRenderer\ChromaRendererCore\src\CudaPathTracerKernel.cu"

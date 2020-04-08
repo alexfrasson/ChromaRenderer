@@ -1,0 +1,15 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "assimp",
+    srcs = [
+        "bin/release/assimp-vc141-mt.dll",
+        "lib/release/assimp-vc141-mt.lib",
+    ],
+    hdrs = glob([
+        "include/assimp/**/*.h",
+        "include/assimp/**/*.hpp",
+        "include/assimp/**/*.inl",
+    ]),
+    includes = ["include"],
+)

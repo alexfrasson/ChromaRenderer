@@ -66,8 +66,8 @@ def _cuda_library_impl(ctx):
 
         args.add("-I\"C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.0\\include\"")
         args.add("-I\"C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.0\\include\"")
-        args.add("-Iextlibs\\headers")
-        args.add("-Iextlibs\\headers\\cuda-helpers")
+        args.add("-Ithird_party\\cuda-helpers\\include")
+        args.add("-Ithird_party\\cuda-helpers\\include\\cuda-helpers")
         args.add("-IChromaRendererCore/src")
 
         args.add("--keep-dir", obj_file.dirname)

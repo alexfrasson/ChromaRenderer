@@ -14,12 +14,6 @@
 
 AssimpLog.txt
 
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-
 #x64/
 #x86/
 #[Bb]in/
@@ -244,16 +238,6 @@ $RECYCLE.BIN/
 
 bazel-*/
 .vscode/
-
-# =========================
-# Don't ignore
-# =========================
-
-!ChromaRenderer/extlibs/libs/Debug
-!ChromaRenderer/extlibs/libs/Release
-
-!ChromaRenderer/extlibs/bin/Debug
-!ChromaRenderer/extlibs/bin/Release
 
 
 

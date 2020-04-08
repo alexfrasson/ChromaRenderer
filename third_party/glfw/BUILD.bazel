@@ -1,0 +1,14 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "glfw",
+    srcs = ["lib/glfw3.lib"],
+    hdrs = glob(["include/**/*.h"]),
+    includes = ["include"],
+    linkopts = [
+        "-DEFAULTLIB:gdi32.lib",
+        "-DEFAULTLIB:ole32.lib",
+        "-DEFAULTLIB:propsys.lib",
+        "-DEFAULTLIB:shlwapi.lib",
+    ],
+)
