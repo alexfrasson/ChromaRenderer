@@ -119,3 +119,4 @@ namespace ImGui
 */
 
 #define ImTextureID int
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
