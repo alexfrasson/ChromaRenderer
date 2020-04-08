@@ -4,6 +4,9 @@
 build --cxxopt=/MD
 build --cxxopt=/W2
 build --cxxopt=/WX
+build --cxxopt=/experimental:external
+build --cxxopt=/external:Ithird_party
+build --cxxopt=/external:W0
 
 ##build --cxxopt=/Zi 
 #build --cxxopt=/Zc:wchar_t 
