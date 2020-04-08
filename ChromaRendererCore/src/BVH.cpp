@@ -167,7 +167,7 @@ bool BVH::build(std::vector<Object>& o)
 		<< std::endl
 		<< "Avg. tris/leaf:  " << (float)tris.size() / (float)nLeafs
 		<< std::endl
-		<< "Building time:   " << stopwatch.elapsedMillis / 1000.0 << "s"
+		<< "Building time:   " << stopwatch.elapsedMillis.count() / 1000.0 << "s"
 		<< std::endl
 		<< "Done!"
 		<< std::endl;
@@ -249,7 +249,7 @@ bool BVH::build(std::vector<Mesh*>& m)
 		<< std::endl
 		<< "Avg. tris/leaf:  " << (float)triangles.size() / (float)nLeafs
 		<< std::endl
-		<< "Building time:   " << stopwatch.elapsedMillis / 1000.0 << "s"
+		<< "Building time:   " << stopwatch.elapsedMillis.count() / 1000.0 << "s"
 		<< std::endl
 		<< "Size:            " << sizeInBytes() / 1024 << "KB"
 		<< std::endl
@@ -334,7 +334,7 @@ BvhNode* BVH::buildNode(int depth, std::vector<glm::vec3>& centroids, std::vecto
 	for (int i = startID; i < endID; i++)
 	{
 		// Find the centroid'i''s binid on the axis 'j'
-		int binid = truncf(k1 * (centroids[id[i]][widestDim] - k0));
+		int binid = static_cast<int>(truncf(k1 * (centroids[id[i]][widestDim] - k0)));
 		bin[binid]++;
 		//binbound[dim][binid].expand(centroids[id[i]]);
 		binbound[binid].expand(bboxes[id[i]].max);
@@ -367,7 +367,7 @@ BvhNode* BVH::buildNode(int depth, std::vector<glm::vec3>& centroids, std::vecto
 			}
 		}
 
-		float c = cost(bbl.surfaceArea(), NL, bbr.surfaceArea(), NR);
+		float c = cost(bbl.surfaceArea(), static_cast<float>(NL), bbr.surfaceArea(), static_cast<float>(NR));
 		if (c < minCost)
 		{
 			minCost = c;
@@ -456,7 +456,7 @@ BvhNode* BVH::buildNode(int depth, std::vector<glm::vec3>& centroids, std::vecto
 #endif
 
 	// Check if not splitting is a better option
-	if (minCost > cost(trianglesbbox.surfaceArea(), size))
+	if (minCost > cost(trianglesbbox.surfaceArea(), static_cast<float>(size)))
 	{
 		node->bbox = trianglesbbox;
 		node->startID = startID;
@@ -473,10 +473,10 @@ BvhNode* BVH::buildNode(int depth, std::vector<glm::vec3>& centroids, std::vecto
 	{
 		// Find a triangle that is on the left but should be on the right
 		for (int binID = minCostBin - 1; i < endID && binID <= minCostBin && i != j; i++)
-			binID = truncf(k1 * (centroids[id[i]][minCostDim] - k0));
+			binID = static_cast<int>(truncf(k1 * (centroids[id[i]][minCostDim] - k0)));
 		// Find a triangle that is on the right but should be on the left
 		for (int binID = minCostBin + 1; j >= startID && binID > minCostBin && j != i; j--)
-			binID = truncf(k1 * (centroids[id[j]][minCostDim] - k0));
+			binID =  static_cast<int>(truncf(k1 * (centroids[id[j]][minCostDim] - k0)));
 		// Where done
 		if (i == j)
 		{

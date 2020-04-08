@@ -51,7 +51,7 @@ void RTUtils::trace(Scene &scene, Image &img, RendererSettings &settings, std::a
 				}
 				}/**/
 				/**/
-				//Testa colisão com todos objetos
+				//Testa colisï¿½o com todos objetos
 				//const Face* hitTriangle;
 				//float hitDistance;
 				Intersection intersection = Intersection();
@@ -77,10 +77,10 @@ void RTUtils::trace(Scene &scene, Image &img, RendererSettings &settings, std::a
 			treeNodeColor = (unsigned char)(255 * treeNodeColor);
 			unsigned char color = (unsigned char)(255 * diffuseColorAverage);
 
-			uint8_t red = color * 0.2f;
-			uint8_t green = color * 0.2f;
+			uint8_t red = static_cast<uint8_t>(color * 0.2f);
+			uint8_t green = static_cast<uint8_t>(color * 0.2f);
 			//green += treeNodeColor * 0.8f;
-			uint8_t blue = color * 0.2f;
+			uint8_t blue = static_cast<uint8_t>(color * 0.2f);
 
 			//img.setColor(i, j, red, green, blue);
 			img.setColor(i, j, color, color, color, 255);
@@ -746,7 +746,9 @@ bool RTUtils::intersectRayTrianglesMollerTrumboreSIMD128(const Ray &r, const std
 	//Loop over the triangles, computing four triangles at a time
 	for (int i = sequentialsize; i + 3 < f.size(); i += 4)
 	{
-		const __m128 index = _mm_set_ps(i, i + 1, i + 2, i + 3);	//WHY????
+		const float fi = static_cast<float>(i);
+
+		const __m128 index = _mm_set_ps(fi, fi + 1.0f, fi + 2.0f, fi + 3.0f);	//WHY????
 		//Load edge 0 of each triangle
 		const __m128 edge0x = _mm_set_ps(f[i].edgesMollerTrumbore[0].x,
 			f[i + 1].edgesMollerTrumbore[0].x,
@@ -870,7 +872,7 @@ bool RTUtils::intersectRayTrianglesMollerTrumboreSIMD128(const Ray &r, const std
 		{
 			if (distance[j] > 0.0f && distance[j] < hitDistance)
 			{
-				hitIndex = ind[j];
+				hitIndex = static_cast<unsigned int>(ind[j]);
 				hitDistance = distance[j];
 				hit = true;
 			}
@@ -903,7 +905,9 @@ bool RTUtils::intersectRayObjectMollerTrumboreSIMD128(const Ray &r, const Object
 	//Loop over the triangles, computing four triangles at a time
 	for(int i = 0; i+3 < o.f.size(); i += 4) 
 	{
-		const __m128 index = _mm_set_ps(i, i+1, i+2, i+3);	//WHY????
+		const float fi = static_cast<float>(i);
+
+		const __m128 index = _mm_set_ps(fi, fi + 1.0f, fi + 2.0f, fi + 3.0f);	//WHY????
 		//Load edge 0 of each triangle
 		const __m128 edge0x = _mm_set_ps(o.f[i  ].edgesMollerTrumbore[0].x, 
 								   o.f[i+1].edgesMollerTrumbore[0].x, 
@@ -1027,7 +1031,7 @@ bool RTUtils::intersectRayObjectMollerTrumboreSIMD128(const Ray &r, const Object
 		{
 			if(distance[j] > 0.0f && distance[j] < hitDistance)
 			{
-				hitIndex = ind[j];
+				hitIndex = static_cast<unsigned int>(ind[j]);
 				hitDistance = distance[j];
 				hit = true;
 			}
@@ -1061,7 +1065,9 @@ bool RTUtils::intersectRayObjectMollerTrumboreSIMD256(const Ray &r, const Object
 	//Loop over the triangles, computing eight triangles at a time
 	for(int i = 0; i+7 < o.f.size(); i += 8) 
 	{
-		const __m256 index = _mm256_set_ps(i, i+1, i+2, i+3, i+4, i+5, i+6, i+7);	//WHY????
+		const float fi = static_cast<float>(i);
+
+		const __m256 index = _mm256_set_ps(fi, fi+1.0f, fi+2.0f, fi+3.0f, fi+4.0f, fi+5.0f, fi+6.0f, fi+7.0f);	//WHY????
 		//Load edge 0 of each triangle
 		const __m256 edge0x = _mm256_set_ps(o.f[i  ].edgesMollerTrumbore[0].x, 
 								   o.f[i+1].edgesMollerTrumbore[0].x, 
@@ -1222,7 +1228,7 @@ bool RTUtils::intersectRayObjectMollerTrumboreSIMD256(const Ray &r, const Object
 		{
 			if(distance[j] > 0.0f && distance[j] < hitDistance)
 			{
-				hitIndex = ind[j];
+				hitIndex =  static_cast<unsigned int>(ind[j]);
 				hitDistance = distance[j];
 				hit = true;
 			}
@@ -1240,10 +1246,10 @@ bool RTUtils::intersectRayTrianglePlucker(const Ray &r, const Face2 &f, float &t
 	//Plucker coordinates
 	//
 	//Given a ray R with direction D and origin O, its plucker coordinates are:
-	//	Plucker(R) = {D : D × O} = {U : V}
+	//	Plucker(R) = {D : D ï¿½ O} = {U : V}
 	//
 	//Given two rays R and S, the permuted inner product is:
-	//	InnerProduct(Plucker(R), Plucker(S)) = Ur·Vs + Us·Vr
+	//	InnerProduct(Plucker(R), Plucker(S)) = Urï¿½Vs + Usï¿½Vr
 	//
 	//The inner product indicates their relative orientation as follows:
 	//	InnerProduct(Plucker(R), Plucker(S)) > 0, S goes counterclockwise around R
@@ -1276,9 +1282,9 @@ bool RTUtils::intersectRayTrianglePlucker(const Ray &r, const Face2 &f, float &t
 		return false;
 
 	//RayIntersectTrianglePlane(ray, triangle->plane, &t);
-	//calcula o t da equação o raio R(t) = P + t*dir
+	//calcula o t da equaï¿½ï¿½o o raio R(t) = P + t*dir
 	t = (f.planeCoeficient - glm::dot(f.tn, r.origin))/glm::dot(r.direction, f.tn);
-	//substitui t na esquação
+	//substitui t na esquaï¿½ï¿½o
 	//glm::vec3 point;
 	//point = r.origin + t*r.direction;
 	
@@ -1292,7 +1298,7 @@ bool RTUtils::intersectRayTriangleSimple(const Ray &r, const Face2 &f, glm::vec3
 	glm::vec3 triangleV[3];
 	glm::vec3 verticesN[3];
 
-	//carrega os três pontos do triangulo
+	//carrega os trï¿½s pontos do triangulo
 	for(int j = 0; j < 3; j++)
 	{
 		triangleV[j] = f.v[j];
@@ -1305,16 +1311,16 @@ bool RTUtils::intersectRayTriangleSimple(const Ray &r, const Face2 &f, glm::vec3
 	//carrega coeficiente do plano
 	float d = f.planeCoeficient;
 
-	//raio não pode ser paralelo ao plano
+	//raio nï¿½o pode ser paralelo ao plano
 	float angle = glm::dot(r.direction, planeN);
 	if(angle != 0)
 	{
-		//calcula o t da equação o raio R(t) = P + t*dir
+		//calcula o t da equaï¿½ï¿½o o raio R(t) = P + t*dir
 		t = (d - glm::dot(planeN, r.origin))/angle;
-		//substitui t na esquação
+		//substitui t na esquaï¿½ï¿½o
 		glm::vec3 point;
 		point = r.origin + t*r.direction;
-		//testa se o ponto está dentro do triangulo
+		//testa se o ponto estï¿½ dentro do triangulo
 		if( glm::dot(glm::cross((triangleV[1] - triangleV[0]), (point - triangleV[0])), planeN) >= 0 &&
 			glm::dot(glm::cross((triangleV[2] - triangleV[1]), (point - triangleV[1])), planeN) >= 0 &&
 			glm::dot(glm::cross((triangleV[0] - triangleV[2]), (point - triangleV[2])), planeN) >= 0)

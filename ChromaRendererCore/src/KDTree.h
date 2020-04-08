@@ -159,7 +159,7 @@ public:
 
 	float cost(const float probabilityL, const float probabilityR, const int triangleCountL, const int triangleCountR);
 	float cost(const int triangleCount);
-	float sah(const Plane p, const BoundingBox& v, const float triangleCountL, const float triangleCountR, const float triangleCountP, Side& side);
+	float sah(const Plane p, const BoundingBox& v, const int triangleCountL, const int triangleCountR, const int triangleCountP, Side& side);
 	float sah(KDTNode* node);
 
 	//bool clipTriangleToBox(const Face& t, const BoundingBox& v, BoundingBox& clipped);

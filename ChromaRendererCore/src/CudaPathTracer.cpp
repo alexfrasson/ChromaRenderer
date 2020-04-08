@@ -490,7 +490,7 @@ float CudaPathTracer::getProgress()
 
 float CudaPathTracer::instantRaysPerSec()
 {
-	return (registeredImage.width * (double)registeredImage.height) / (lastIterationElapsedMillis * 0.001);
+	return (registeredImage.width * (double)registeredImage.height) / (lastIterationElapsedMillis.count() * 0.001);
 }
 
 void CudaPathTracer::dispatchComputeShader(bool sync)
@@ -504,8 +504,8 @@ void CudaPathTracer::dispatchComputeShader(bool sync)
 	//glBindImageTexture(2, aaFbo0.colorTexId, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 	//glBindImageTexture(4, aaFbo1.colorTexId, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
-	int nGroupsX = ceilf(registeredImage.width / 16.0f);
-	int nGroupsY = ceilf(registeredImage.height / 16.0f);
+	int nGroupsX = static_cast<int>(ceilf(registeredImage.width / 16.0f));
+	int nGroupsY = static_cast<int>(ceilf(registeredImage.height / 16.0f));
 
 	//if (showHeatmap)
 	//	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, convergedPixelCountBufferId);

@@ -32,8 +32,8 @@ void ChromaRenderer::genTasks()
 	const int widthDivs = (int)floor(width / TILESIZE);
 	const int heightDivs = (int)floor(height / TILESIZE);
 
-	const int widthStep = width / (float)widthDivs;
-	const int heightStep = height / (float)heightDivs;
+	const int widthStep = static_cast<int>(std::ceil(width / (float)widthDivs));
+	const int heightStep = static_cast<int>(std::ceil(height / (float)heightDivs));
 
 	//Put all tiles in the queue
 	//std::vector<Interval> tasks;
@@ -519,9 +519,9 @@ void ChromaRenderer::printStatistics()
 		std::cout << std::endl
 			<< "Samples\\pixel:   " << settings.samplesperpixel
 			<< std::endl
-			<< "Samples\\s:       " << ((float)(settings.samplesperpixel * renderer.donePixelCount) / (stopwatch.elapsedMillis / 1000.0)) / 1000.0f << "K"
+			<< "Samples\\s:       " << ((float)(settings.samplesperpixel * renderer.donePixelCount) / (stopwatch.elapsedMillis.count() / 1000.0)) / 1000.0f << "K"
 			<< std::endl
-			<< "Rendering time:  " << stopwatch.elapsedMillis / 1000.0 << "s"
+			<< "Rendering time:  " << stopwatch.elapsedMillis.count() / 1000.0 << "s"
 			<< std::endl
 			<< std::endl;
 	}
@@ -531,9 +531,9 @@ void ChromaRenderer::printStatistics()
 		std::cout << std::endl
 			<< "Samples\\pixel:   " << pathtracing.targetSamplesPerPixel
 			<< std::endl
-			<< "Samples\\s:       " << ((float)(pathtracing.targetSamplesPerPixel * pathtracing.donePixelCount) / (stopwatch.elapsedMillis / 1000.0)) / 1000.0f << "K"
+			<< "Samples\\s:       " << ((float)(pathtracing.targetSamplesPerPixel * pathtracing.donePixelCount) / (stopwatch.elapsedMillis.count() / 1000.0)) / 1000.0f << "K"
 			<< std::endl
-			<< "Rendering time:  " << stopwatch.elapsedMillis / 1000.0 << "s"
+			<< "Rendering time:  " << stopwatch.elapsedMillis.count() / 1000.0 << "s"
 			<< std::endl
 			<< std::endl;
 	}
@@ -542,9 +542,9 @@ void ChromaRenderer::printStatistics()
 		std::cout << std::endl
 			<< "Samples\\pixel:   " << cudaPathTracer.finishedSamplesPerPixel
 			<< std::endl
-			<< "Samples\\s:       " << (((float)cudaPathTracer.finishedSamplesPerPixel*image.getWidth()*image.getHeight()) / (stopwatch.elapsedMillis / 1000.0)) / 1000.0f << "K"
+			<< "Samples\\s:       " << (((float)cudaPathTracer.finishedSamplesPerPixel*image.getWidth()*image.getHeight()) / (stopwatch.elapsedMillis.count() / 1000.0)) / 1000.0f << "K"
 			<< std::endl
-			<< "Rendering time:  " << stopwatch.elapsedMillis / 1000.0 << "s"
+			<< "Rendering time:  " << stopwatch.elapsedMillis.count() / 1000.0 << "s"
 			<< std::endl
 			<< std::endl;
 		break;

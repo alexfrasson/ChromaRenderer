@@ -98,7 +98,7 @@ void PathTracing::trace(Scene &scene, Image &img, Interval interval, bool& abort
 				sampledColor += tracePath(ray, scene, 0);
 			}
 
-			sampledColor /= targetSamplesPerPixel;
+			sampledColor /= static_cast<float>(targetSamplesPerPixel);
 
 			img.setColor(i, j, sampledColor);
 		}

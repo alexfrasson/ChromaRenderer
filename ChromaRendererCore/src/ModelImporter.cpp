@@ -594,7 +594,7 @@ bool convert(const aiScene* aiscene, Scene& s)
 		s.camera.aspectRatio = cam->mAspect;
 		s.camera.width = 640;
 		s.camera.d = ((float)s.camera.width / 2.0f) / tan(cam->mHorizontalFOV / 2.0f);
-		s.camera.height = s.camera.width / cam->mAspect;
+		s.camera.height = static_cast<int>(s.camera.width / cam->mAspect);
 		s.camera.horizontalFOV(cam->mHorizontalFOV);
 
 		//s.camera.computeUVW();

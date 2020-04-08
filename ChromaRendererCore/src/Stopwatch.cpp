@@ -5,25 +5,25 @@
 
 Stopwatch::Stopwatch()
 {
-	elapsedMillis = 0.0;
+	elapsedMillis = std::chrono::milliseconds(0);
 }
 
 void Stopwatch::start()
 {
-	elapsedMillis = 0.0;
+	elapsedMillis = std::chrono::milliseconds(0);
 	begin = std::chrono::steady_clock::now();
 }
 
 void Stopwatch::stop()
 {
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();// / 1000000000.0;
+	elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);// / 1000000000.0;
 }
 
 void Stopwatch::restart()
 {
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();// / 1000000000.0;
+	elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);// / 1000000000.0;
 	begin = end;
 }
 

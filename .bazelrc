@@ -2,6 +2,8 @@
 #build --cxxopt=-stdlib=libc++
 
 build --cxxopt=/MD
+build --cxxopt=/W2
+build --cxxopt=/WX
 
 ##build --cxxopt=/Zi 
 #build --cxxopt=/Zc:wchar_t 

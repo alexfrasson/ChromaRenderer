@@ -306,7 +306,7 @@ bool KDTree::build(std::vector<Object>& objects)
 
 	printInfo();
 
-	std::cout << "Building time:   " << stopwatch.elapsedMillis / 1000.0 << "s"
+	std::cout << "Building time:   " << stopwatch.elapsedMillis.count() / 1000.0 << "s"
 		<< std::endl
 		<< "Done!"
 		<< std::endl;
@@ -847,7 +847,7 @@ float KDTree::sah(KDTNode* node)
 	return (KT + sah(node->children[0]) + sah(node->children[1]));
 
 }
-float KDTree::sah(const Plane p, const BoundingBox& v, const float triangleCountL, const float triangleCountR, const float triangleCountP, Side& side)
+float KDTree::sah(const Plane p, const BoundingBox& v, const int triangleCountL, const int triangleCountR, const int triangleCountP, Side& side)
 {
 	// Split bounding box on p
 	BoundingBox vl, vr;

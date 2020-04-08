@@ -35,8 +35,8 @@ struct CudaEnviromentSettings
 
 struct CudaCamera
 {
-	float width;
-	float height;
+	int width;
+	int height;
 	float d;
 	float3 right, up, forward;
 	float3 eye;

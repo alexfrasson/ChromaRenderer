@@ -7,7 +7,7 @@ class Stopwatch
 {
 public:
 
-	double elapsedMillis;
+	std::chrono::milliseconds elapsedMillis;
 
 	Stopwatch();
 

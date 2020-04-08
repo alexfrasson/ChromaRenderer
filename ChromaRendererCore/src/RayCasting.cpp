@@ -37,7 +37,7 @@ void RayCasting::trace(Scene &scene, Image &img, RendererSettings &settings, Int
 				else
 					diffuseColor += 0.1f;	//Background
 			}
-			diffuseColor /= rays.size();	//Color average
+			diffuseColor /= static_cast<float>(rays.size());	//Color average
 
 
 			img.setColor(i, j, diffuseColor);

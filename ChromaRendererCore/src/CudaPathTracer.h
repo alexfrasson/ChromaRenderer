@@ -65,7 +65,7 @@ private:
 	CudaPathIteration* dev_pathIterationBuffer = 0;
 
 	Stopwatch stopwatch;
-	double lastIterationElapsedMillis;
+	std::chrono::milliseconds lastIterationElapsedMillis;
 
 	GLSLProgram* computeShader;
 };
