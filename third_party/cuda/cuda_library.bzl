@@ -4,9 +4,23 @@ load("@rules_cc//cc:action_names.bzl", "C_COMPILE_ACTION_NAME")
 def _get_headers(deps):
     headers = []
     for dep in deps:
-        if dep == CcInfo:
+        if CcInfo in dep:
             headers.append(dep[CcInfo].compilation_context.headers)
     return headers
+
+def _get_includes(deps):
+    includes = []
+    for dep in deps:
+        if CcInfo in dep:
+            includes.append(dep[CcInfo].compilation_context.includes)
+    return includes
+
+def _get_system_includes(deps):
+    system_includes = []
+    for dep in deps:
+        if CcInfo in dep:
+            system_includes.append(dep[CcInfo].compilation_context.system_includes)
+    return system_includes
 
 # def _filter_files(files, extensions):
 #     filtered = []
@@ -18,10 +32,15 @@ def _get_headers(deps):
 def _cuda_library_impl(ctx):
     cc_toolchain = find_cpp_toolchain(ctx)
 
-    cuda_srcs = ctx.files.srcs
-    cuda_hdrs = ctx.files.hdrs
+    lib_srcs = ctx.files.srcs
+    lib_hdrs = ctx.files.hdrs
 
     deps_headers = _get_headers(ctx.attr.deps)
+    deps_includes = _get_includes(ctx.attr.deps)
+    deps_system_includes = _get_system_includes(ctx.attr.deps)
+
+    print(deps_system_includes)
+    print(deps_includes)
 
     # get system includes
     # get cuda includes
@@ -30,7 +49,7 @@ def _cuda_library_impl(ctx):
     linking_context = cc_common.create_linking_context(libraries_to_link = [], user_link_flags = [])
 
     objt_files = []
-    for src in cuda_srcs:
+    for src in lib_srcs:
         obj_file = ctx.actions.declare_file("_objs/{}/{}.obj".format(ctx.label.name, src.basename))
 
         args = ctx.actions.args()
@@ -64,11 +83,13 @@ def _cuda_library_impl(ctx):
 
         args.add("-x", "cu")
 
-        args.add("-I\"C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.0\\include\"")
-        args.add("-I\"C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.0\\include\"")
-        args.add("-Ithird_party\\cuda-helpers\\include")
-        args.add("-Ithird_party\\cuda-helpers\\include\\cuda-helpers")
-        args.add("-IChromaRendererCore/src")
+        args.add("-I", src.dirname)
+
+        for includes in deps_includes:
+            args.add_all(includes, before_each = "-I")
+
+        for system_include in deps_system_includes:
+            args.add_all(system_include, before_each = "-isystem")
 
         args.add("--keep-dir", obj_file.dirname)
 
@@ -92,9 +113,6 @@ def _cuda_library_impl(ctx):
         #args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /Fdx64\\Release\\ChromaRendererCore.pdb /FS /Zi  /MD \"")
         args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /FS /Zi /MD\"")
 
-        # args.add_all(deps_headers, before_each = "-I")
-        # #args.add_all(cuda_hdrs, before_each = "-I")
-
         args.add("-o", obj_file)
         args.add(src.path)
 
@@ -103,7 +121,7 @@ def _cuda_library_impl(ctx):
             #executable = "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.0\\bin\\nvcc.exe",
             #executable = "nvcc",
             executable = ctx.executable.nvcc,
-            inputs = depset(items = [src] + cuda_hdrs, transitive = deps_headers),
+            inputs = depset(items = [src] + lib_hdrs, transitive = deps_headers),
             outputs = [obj_file],
             arguments = [args],
             use_default_shell_env = True,

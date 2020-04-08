@@ -25,7 +25,7 @@ cuda_library(
     name = "path-tracer-kernel",
     srcs = ["src/CudaPathTracerKernel.cu"],
     hdrs = ["src/CudaPathTracerKernel.h"],
-    deps = ["//third_party/cuda-helpers:cuda-helpers-headers"],
+    deps = ["//third_party/cuda-helpers:cuda-helpers"],
 )
 
 filegroup(

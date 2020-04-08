@@ -3,12 +3,6 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "cuda-helpers",
     hdrs = glob(["include/cuda-helpers/*.h"]),
-    includes = ["include"],
+    includes = ["include", "include/cuda-helpers"],
     deps = ["@cuda//:cuda_headers"],
-)
-
-cc_library(
-    name = "cuda-helpers-headers",
-    hdrs = glob(["include/cuda-helpers/*.h"]),
-    includes = ["include"],
 )
