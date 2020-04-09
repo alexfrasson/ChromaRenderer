@@ -5,36 +5,32 @@
 
 class Stopwatch
 {
-public:
+  public:
+    std::chrono::milliseconds elapsedMillis;
 
-	std::chrono::milliseconds elapsedMillis;
+    Stopwatch();
 
-	Stopwatch();
+    // Starts the stopwatch.
+    void start();
+    // Sum the elapsed time and stops.
+    void stop();
+    // Set the elapsed time to zero and start counting immediately.
+    void restart();
 
-	//Starts the stopwatch.
-	void start();
-	//Sum the elapsed time and stops.
-	void stop();
-	//Set the elapsed time to zero and start counting immediately.
-	void restart();
-
-private:
-
-	std::chrono::steady_clock::time_point begin;
+  private:
+    std::chrono::steady_clock::time_point begin;
 };
-
-
 
 class StopwatchOpenGL
 {
-public:
-	StopwatchOpenGL();
-	~StopwatchOpenGL();
-	void start();
-	void stop();
-	double elapsedMillis();
+  public:
+    StopwatchOpenGL();
+    ~StopwatchOpenGL();
+    void start();
+    void stop();
+    double elapsedMillis();
 
-private:
-	GLuint queries[2];
-	double _elapsedMillis = 0.0;
+  private:
+    GLuint queries[2];
+    double _elapsedMillis = 0.0;
 };

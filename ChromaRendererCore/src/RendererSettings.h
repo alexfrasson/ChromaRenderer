@@ -4,27 +4,27 @@
 
 struct RendererSettings
 {
-public:
-	int width;
-	int height;
+  public:
+    int width;
+    int height;
 
-	float horizontalFOV;
+    float horizontalFOV;
 
-	glm::vec3 enviromentLightColor;
-	float enviromentLightIntensity;
+    glm::vec3 enviromentLightColor;
+    float enviromentLightIntensity;
 
-	unsigned int nthreads;
+    unsigned int nthreads;
 
-	bool supersampling;
-	int samplesperpixel;
-	int maxPathDepth;
+    bool supersampling;
+    int samplesperpixel;
+    int maxPathDepth;
 
-	bool boundingboxtest;
+    bool boundingboxtest;
 
-	bool shadowray;
+    bool shadowray;
 
-	RendererSettings();
+    RendererSettings();
 
-	const bool operator== (const RendererSettings& rs);
-	const bool operator!= (const RendererSettings& rs);
+    const bool operator==(const RendererSettings& rs);
+    const bool operator!=(const RendererSettings& rs);
 };

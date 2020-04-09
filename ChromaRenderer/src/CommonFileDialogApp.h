@@ -12,69 +12,65 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#include <windows.h>      // For common windows data types and function headers
+#include <windows.h> // For common windows data types and function headers
 #define STRICT_TYPED_ITEMIDS
-#include <shlobj.h>
-#include <objbase.h>      // For COM headers
-#include <shobjidl.h>     // for IFileDialogEvents and IFileDialogControlEvents
-#include <shlwapi.h>
 #include <knownfolders.h> // for KnownFolder APIs/datatypes/function headers
-#include <propvarutil.h>  // for PROPVAR-related functions
-#include <propkey.h>      // for the Property key APIs/datatypes
-#include <propidl.h>      // for the Property System APIs
-#include <strsafe.h>      // for StringCchPrintfW
-#include <shtypes.h>      // for COMDLG_FILTERSPEC
 #include <new>
+#include <objbase.h>     // For COM headers
+#include <propidl.h>     // for the Property System APIs
+#include <propkey.h>     // for the Property key APIs/datatypes
+#include <propvarutil.h> // for PROPVAR-related functions
+#include <shlobj.h>
+#include <shlwapi.h>
+#include <shobjidl.h> // for IFileDialogEvents and IFileDialogControlEvents
+#include <shtypes.h>  // for COMDLG_FILTERSPEC
+#include <strsafe.h>  // for StringCchPrintfW
 
-#pragma comment(linker, "\"/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#pragma comment( \
+    linker,      \
+    "\"/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-const COMDLG_FILTERSPEC c_Models[] =
-{
-	{ L"All Formats (*.obj;*.fbx;*.dae;*.blend)",         L"*.obj;*.fbx;*.dae;*.blend" },
-    { L"FBX (*.fbx)",					L"*.fbx"},
-	{ L"Wavefront (*.obj)",				L"*.obj" },
-    { L"Blend (*.blend)",				L"*.blend"},
-	{ L"Collada (*.dae)",				L"*.dae"}
-};
+const COMDLG_FILTERSPEC c_Models[] = {{L"All Formats (*.obj;*.fbx;*.dae;*.blend)", L"*.obj;*.fbx;*.dae;*.blend"},
+                                      {L"FBX (*.fbx)", L"*.fbx"},
+                                      {L"Wavefront (*.obj)", L"*.obj"},
+                                      {L"Blend (*.blend)", L"*.blend"},
+                                      {L"Collada (*.dae)", L"*.dae"}};
 
-const COMDLG_FILTERSPEC c_EnviromentMap[] =
-{
-	{ L"HDR Image (*.hdr)",       L"*.hdr" }
-};
-
+const COMDLG_FILTERSPEC c_EnviromentMap[] = {{L"HDR Image (*.hdr)", L"*.hdr"}};
 
 // Indices of file types
 #define INDEX_COLLADA 4
 #define INDEX_ALL 1
 
 // Controls
-#define CONTROL_GROUP           2000
+#define CONTROL_GROUP 2000
 #define CONTROL_RADIOBUTTONLIST 2
-#define CONTROL_RADIOBUTTON1    1
-#define CONTROL_RADIOBUTTON2    2       // It is OK for this to have the same ID as CONTROL_RADIOBUTTONLIST,
-                                        // because it is a child control under CONTROL_RADIOBUTTONLIST
+#define CONTROL_RADIOBUTTON1 1
+#define CONTROL_RADIOBUTTON2 \
+    2 // It is OK for this to have the same ID as CONTROL_RADIOBUTTONLIST,
+      // because it is a child control under CONTROL_RADIOBUTTONLIST
 
 // IDs for the Task Dialog Buttons
-#define IDC_BASICFILEOPEN                       100
-#define IDC_ADDITEMSTOCUSTOMPLACES              101
-#define IDC_ADDCUSTOMCONTROLS                   102
-#define IDC_SETDEFAULTVALUESFORPROPERTIES       103
-#define IDC_WRITEPROPERTIESUSINGHANDLERS        104
+#define IDC_BASICFILEOPEN 100
+#define IDC_ADDITEMSTOCUSTOMPLACES 101
+#define IDC_ADDCUSTOMCONTROLS 102
+#define IDC_SETDEFAULTVALUESFORPROPERTIES 103
+#define IDC_WRITEPROPERTIESUSINGHANDLERS 104
 #define IDC_WRITEPROPERTIESWITHOUTUSINGHANDLERS 105
 
-/* File Dialog Event Handler *****************************************************************************************************/
+/* File Dialog Event Handler
+ * *****************************************************************************************************/
 
-class CDialogEventHandler : public IFileDialogEvents,
-                            public IFileDialogControlEvents
+class CDialogEventHandler : public IFileDialogEvents, public IFileDialogControlEvents
 {
-public:
+  public:
     // IUnknown methods
     IFACEMETHODIMP QueryInterface(REFIID riid, void** ppv)
     {
         static const QITAB qit[] = {
             QITABENT(CDialogEventHandler, IFileDialogEvents),
             QITABENT(CDialogEventHandler, IFileDialogControlEvents),
-            { 0 },
+            {0},
         };
         return QISearch(this, qit, riid, ppv);
     }
@@ -93,41 +89,72 @@ public:
     }
 
     // IFileDialogEvents methods
-    IFACEMETHODIMP OnFileOk(IFileDialog *) { return S_OK; };
-    IFACEMETHODIMP OnFolderChange(IFileDialog *) { return S_OK; };
-    IFACEMETHODIMP OnFolderChanging(IFileDialog *, IShellItem *) { return S_OK; };
-    IFACEMETHODIMP OnHelp(IFileDialog *) { return S_OK; };
-    IFACEMETHODIMP OnSelectionChange(IFileDialog *) { return S_OK; };
-    IFACEMETHODIMP OnShareViolation(IFileDialog *, IShellItem *, FDE_SHAREVIOLATION_RESPONSE *) { return S_OK; };
-    IFACEMETHODIMP OnTypeChange(IFileDialog *pfd);
-    IFACEMETHODIMP OnOverwrite(IFileDialog *, IShellItem *, FDE_OVERWRITE_RESPONSE *) { return S_OK; };
+    IFACEMETHODIMP OnFileOk(IFileDialog*)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnFolderChange(IFileDialog*)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnFolderChanging(IFileDialog*, IShellItem*)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnHelp(IFileDialog*)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnSelectionChange(IFileDialog*)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnShareViolation(IFileDialog*, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnTypeChange(IFileDialog* pfd);
+    IFACEMETHODIMP OnOverwrite(IFileDialog*, IShellItem*, FDE_OVERWRITE_RESPONSE*)
+    {
+        return S_OK;
+    };
 
     // IFileDialogControlEvents methods
-    IFACEMETHODIMP OnItemSelected(IFileDialogCustomize *pfdc, DWORD dwIDCtl, DWORD dwIDItem);
-    IFACEMETHODIMP OnButtonClicked(IFileDialogCustomize *, DWORD) { return S_OK; };
-    IFACEMETHODIMP OnCheckButtonToggled(IFileDialogCustomize *, DWORD, BOOL) { return S_OK; };
-    IFACEMETHODIMP OnControlActivating(IFileDialogCustomize *, DWORD) { return S_OK; };
+    IFACEMETHODIMP OnItemSelected(IFileDialogCustomize* pfdc, DWORD dwIDCtl, DWORD dwIDItem);
+    IFACEMETHODIMP OnButtonClicked(IFileDialogCustomize*, DWORD)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnCheckButtonToggled(IFileDialogCustomize*, DWORD, BOOL)
+    {
+        return S_OK;
+    };
+    IFACEMETHODIMP OnControlActivating(IFileDialogCustomize*, DWORD)
+    {
+        return S_OK;
+    };
 
-    CDialogEventHandler() : _cRef(1) { };
-private:
-    ~CDialogEventHandler() { };
+    CDialogEventHandler() : _cRef(1){};
+
+  private:
+    ~CDialogEventHandler(){};
     long _cRef;
 };
 
 // IFileDialogEvents methods
 // This method gets called when the file-type is changed (combo-box selection changes).
 // For sample sake, let's react to this event by changing the properties show.
-HRESULT CDialogEventHandler::OnTypeChange(IFileDialog *pfd)
+HRESULT CDialogEventHandler::OnTypeChange(IFileDialog* pfd)
 {
-    IFileSaveDialog *pfsd;
+    IFileSaveDialog* pfsd;
     HRESULT hr = pfd->QueryInterface(&pfsd);
     if (SUCCEEDED(hr))
     {
         UINT uIndex;
-        hr = pfsd->GetFileTypeIndex(&uIndex);   // index of current file-type
+        hr = pfsd->GetFileTypeIndex(&uIndex); // index of current file-type
         if (SUCCEEDED(hr))
         {
-            IPropertyDescriptionList *pdl = NULL;
+            IPropertyDescriptionList* pdl = NULL;
 
             switch (uIndex)
             {
@@ -173,9 +200,9 @@ HRESULT CDialogEventHandler::OnTypeChange(IFileDialog *pfd)
 // IFileDialogControlEvents
 // This method gets called when an dialog control item selection happens (radio-button selection. etc).
 // For sample sake, let's react to this event by changing the dialog title.
-HRESULT CDialogEventHandler::OnItemSelected(IFileDialogCustomize *pfdc, DWORD dwIDCtl, DWORD dwIDItem)
+HRESULT CDialogEventHandler::OnItemSelected(IFileDialogCustomize* pfdc, DWORD dwIDCtl, DWORD dwIDItem)
 {
-    IFileDialog *pfd = NULL;
+    IFileDialog* pfd = NULL;
     HRESULT hr = pfdc->QueryInterface(&pfd);
     if (SUCCEEDED(hr))
     {
@@ -198,10 +225,10 @@ HRESULT CDialogEventHandler::OnItemSelected(IFileDialogCustomize *pfdc, DWORD dw
 }
 
 //// Instance creation helper
-HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
+HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void** ppv)
 {
     *ppv = NULL;
-    CDialogEventHandler *pDialogEventHandler = new (std::nothrow) CDialogEventHandler();
+    CDialogEventHandler* pDialogEventHandler = new (std::nothrow) CDialogEventHandler();
     HRESULT hr = pDialogEventHandler ? S_OK : E_OUTOFMEMORY;
     if (SUCCEEDED(hr))
     {
@@ -211,11 +238,12 @@ HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
     return hr;
 }
 
-///* Utility Functions *************************************************************************************************************/
+///* Utility Functions
+///*************************************************************************************************************/
 //
 //// A helper function that converts UNICODE data to ANSI and writes it to the given file.
 //// We write in ANSI format to make it easier to open the output file in Notepad.
-//HRESULT _WriteDataToFile(HANDLE hFile, PCWSTR pszDataIn)
+// HRESULT _WriteDataToFile(HANDLE hFile, PCWSTR pszDataIn)
 //{
 //    // First figure out our required buffer size.
 //    DWORD cbData = WideCharToMultiByte(CP_ACP, 0, pszDataIn, -1, NULL, 0, NULL, NULL);
@@ -251,7 +279,7 @@ HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
 //// [ENDAPPDATA]
 //// [PROPERTY]foo=bar[ENDPROPERTY]
 //// [PROPERTY]foo2=bar2[ENDPROPERTY]
-//HRESULT _WritePropertyToCustomFile(PCWSTR pszFileName, PCWSTR pszPropertyName, PCWSTR pszValue)
+// HRESULT _WritePropertyToCustomFile(PCWSTR pszFileName, PCWSTR pszPropertyName, PCWSTR pszValue)
 //{
 //    HANDLE hFile = CreateFileW(pszFileName,
 //                               GENERIC_READ | GENERIC_WRITE,
@@ -308,7 +336,7 @@ HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
 //// [ENDAPPDATA]
 //// [PROPERTY]foo=bar[ENDPROPERTY]
 //// [PROPERTY]foo2=bar2[ENDPROPERTY]
-//HRESULT _WriteDataToCustomFile(PCWSTR pszFileName)
+// HRESULT _WriteDataToCustomFile(PCWSTR pszFileName)
 //{
 //    HANDLE hFile = CreateFileW(pszFileName,
 //                               GENERIC_READ | GENERIC_WRITE,
@@ -321,7 +349,8 @@ HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
 //    HRESULT hr = (hFile == INVALID_HANDLE_VALUE) ? HRESULT_FROM_WIN32(GetLastError()) : S_OK;
 //    if (SUCCEEDED(hr))
 //    {
-//        WCHAR wszDummyContent[] = L"[MYAPPDATA]\r\nThis is an example of how to use the IFileSaveDialog interface.\r\n[ENDMYAPPDATA]\r\n";
+//        WCHAR wszDummyContent[] = L"[MYAPPDATA]\r\nThis is an example of how to use the IFileSaveDialog
+//        interface.\r\n[ENDMYAPPDATA]\r\n";
 //
 //        hr = _WriteDataToFile(hFile, wszDummyContent);
 //        CloseHandle(hFile);
@@ -329,18 +358,23 @@ HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
 //    return hr;
 //}
 
-/* Common File Dialog Snippets ***************************************************************************************************/
+/* Common File Dialog Snippets
+ * ***************************************************************************************************/
 
 // This code snippet demonstrates how to work with the common file dialog interface
-HRESULT FileOpenDialog(std::string& path, GLFWwindow* window, const COMDLG_FILTERSPEC* extensions, const int arraysize, const int initialIndex)
+HRESULT FileOpenDialog(std::string& path,
+                       GLFWwindow* window,
+                       const COMDLG_FILTERSPEC* extensions,
+                       const int arraysize,
+                       const int initialIndex)
 {
     // CoCreate the File Open Dialog object.
-    IFileDialog *pfd = NULL;
+    IFileDialog* pfd = NULL;
     HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
     if (SUCCEEDED(hr))
     {
         // Create an event handling object, and hook it up to the dialog.
-        IFileDialogEvents *pfde = NULL;
+        IFileDialogEvents* pfde = NULL;
         hr = CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
         if (SUCCEEDED(hr))
         {
@@ -361,8 +395,8 @@ HRESULT FileOpenDialog(std::string& path, GLFWwindow* window, const COMDLG_FILTE
                     if (SUCCEEDED(hr))
                     {
                         // Set the file types to display only. Notice that, this is a 1-based array.
-						//hr = pfd->SetFileTypes(ARRAYSIZE(extensions), extensions);
-						hr = pfd->SetFileTypes(arraysize, extensions);
+                        // hr = pfd->SetFileTypes(ARRAYSIZE(extensions), extensions);
+                        hr = pfd->SetFileTypes(arraysize, extensions);
                         if (SUCCEEDED(hr))
                         {
                             // Set the selected file type index
@@ -379,7 +413,7 @@ HRESULT FileOpenDialog(std::string& path, GLFWwindow* window, const COMDLG_FILTE
                                     {
                                         // Obtain the result, once the user clicks the 'Open' button.
                                         // The result is an IShellItem object.
-                                        IShellItem *psiResult;
+                                        IShellItem* psiResult;
                                         hr = pfd->GetResult(&psiResult);
                                         if (SUCCEEDED(hr))
                                         {
@@ -397,15 +431,15 @@ HRESULT FileOpenDialog(std::string& path, GLFWwindow* window, const COMDLG_FILTE
                                                            TD_INFORMATION_ICON,
                                                            NULL);*/
 
-												//convert from wide char to narrow char array
-												char ch[1024];
-												char DefChar = ' ';
-												WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, ch, 1024, NULL, NULL);
+                                                // convert from wide char to narrow char array
+                                                char ch[1024];
+                                                char DefChar = ' ';
+                                                WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, ch, 1024, NULL, NULL);
 
-												//A std:string  using the char* constructor.
-												path = std::string(ch);
+                                                // A std:string  using the char* constructor.
+                                                path = std::string(ch);
 
-                                                //CoTaskMemFree(pszFilePath);
+                                                // CoTaskMemFree(pszFilePath);
                                             }
                                             psiResult->Release();
                                         }
@@ -426,18 +460,18 @@ HRESULT FileOpenDialog(std::string& path, GLFWwindow* window, const COMDLG_FILTE
 }
 HRESULT FileOpenDialogModels(std::string& path, GLFWwindow* window)
 {
-	return FileOpenDialog(path, window, c_Models, ARRAYSIZE(c_Models), 0);
+    return FileOpenDialog(path, window, c_Models, ARRAYSIZE(c_Models), 0);
 }
 HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 {
-	return FileOpenDialog(path, window, c_EnviromentMap, ARRAYSIZE(c_EnviromentMap), 0);
+    return FileOpenDialog(path, window, c_EnviromentMap, ARRAYSIZE(c_EnviromentMap), 0);
 }
 
 // The Common Places area in the File Dialog is extensible.
 // This code snippet demonstrates how to extend the Common Places area.
 // Look at CDialogEventHandler::OnItemSelected to see how messages pertaining to the added
 // controls can be processed.
-//HRESULT AddItemsToCommonPlaces()
+// HRESULT AddItemsToCommonPlaces()
 //{
 //    // CoCreate the File Open Dialog object.
 //    IFileDialog *pfd = NULL;
@@ -485,7 +519,7 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //}
 //
 //// This code snippet demonstrates how to add custom controls in the Common File Dialog.
-//HRESULT AddCustomControls()
+// HRESULT AddCustomControls()
 //{
 //    // CoCreate the File Open Dialog object.
 //    IFileDialog *pfd = NULL;
@@ -573,7 +607,7 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //// This code snippet demonstrates how to add default metadata in the Common File Dialog.
 //// Look at CDialogEventHandler::OnTypeChange to see to change the order/list of properties
 //// displayed in the Common File Dialog.
-//HRESULT SetDefaultValuesForProperties()
+// HRESULT SetDefaultValuesForProperties()
 //{
 //    // CoCreate the File Open Dialog object.
 //    IFileSaveDialog *pfsd = NULL;
@@ -667,7 +701,7 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //// 2.  Replicating properties in the "Save As" scenario where the user choses to save an existing file
 ////     with a different name.  We need to make sure we replicate not just the data,
 ////     but also the properties of the original file.
-//HRESULT WritePropertiesUsingHandlers()
+// HRESULT WritePropertiesUsingHandlers()
 //{
 //    // CoCreate the File Open Dialog object.
 //    IFileSaveDialog *pfsd;
@@ -702,7 +736,8 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //                        // Let's first get the current property set of the file we are replicating
 //                        // and give it to the file dialog object.
 //                        //
-//                        // For simplicity sake, let's just get the property set from a pre-existing jpg file (in the Pictures folder).
+//                        // For simplicity sake, let's just get the property set from a pre-existing jpg file (in the
+//                        Pictures folder).
 //                        // In the real-world, you would actually add code to get the property set of the file
 //                        // that is currently open and is being replicated.
 //                        if (SUCCEEDED(hr))
@@ -711,15 +746,16 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //                            hr = SHGetKnownFolderPath(FOLDERID_SamplePictures, 0, NULL, &pszPicturesFolderPath);
 //                            if (SUCCEEDED(hr))
 //                            {
-//                                hr = PathCombineW(szFullPathToTestFile, pszPicturesFolderPath, L"Flower.jpg") ? S_OK : E_FAIL;
-//                                if (SUCCEEDED(hr))
+//                                hr = PathCombineW(szFullPathToTestFile, pszPicturesFolderPath, L"Flower.jpg") ? S_OK :
+//                                E_FAIL; if (SUCCEEDED(hr))
 //                                {
 //                                    IPropertyStore *pps;
-//                                    hr = SHGetPropertyStoreFromParsingName(szFullPathToTestFile, NULL, GPS_DEFAULT, IID_PPV_ARGS(&pps));
-//                                    if (FAILED(hr))
+//                                    hr = SHGetPropertyStoreFromParsingName(szFullPathToTestFile, NULL, GPS_DEFAULT,
+//                                    IID_PPV_ARGS(&pps)); if (FAILED(hr))
 //                                    {
 //                                        // Flower.jpg is probably not in the Pictures folder.
-//                                        TaskDialog(NULL, NULL, L"CommonFileDialogApp", L"Create Flower.jpg in the Pictures folder and try again.",
+//                                        TaskDialog(NULL, NULL, L"CommonFileDialogApp", L"Create Flower.jpg in the
+//                                        Pictures folder and try again.",
 //                                                   NULL, TDCBF_OK_BUTTON, TD_ERROR_ICON , NULL);
 //                                    }
 //                                    else
@@ -756,12 +792,13 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //                        //
 //                        // In the real-world, you would actually add code to replicate the data of
 //                        // file that is currently open.
-//                        hr = CopyFileW(szFullPathToTestFile, pszNewFileName, FALSE) ? S_OK : HRESULT_FROM_WIN32(GetLastError());
-//                        if (SUCCEEDED(hr))
+//                        hr = CopyFileW(szFullPathToTestFile, pszNewFileName, FALSE) ? S_OK :
+//                        HRESULT_FROM_WIN32(GetLastError()); if (SUCCEEDED(hr))
 //                        {
 //                            // Now apply the properties.
 //                            //
-//                            // Get the property store first by calling GetPropertyStore and pass it on to ApplyProperties.
+//                            // Get the property store first by calling GetPropertyStore and pass it on to
+//                            ApplyProperties.
 //                            // This will make the registered propety handler for the specified file type (jpg)
 //                            // do all the work of writing the properties for you.
 //                            //
@@ -774,11 +811,13 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //                            hr = pfsd->GetProperties(&pps);
 //                            if (SUCCEEDED(hr))
 //                            {
-//                                // Now apply the properties making use of the registered property handler for the file type.
+//                                // Now apply the properties making use of the registered property handler for the file
+//                                type.
 //                                //
-//                                // hWnd is used as parent for any error dialogs that might popup when writing properties.
-//                                // Pass NULL for IFileOperationProgressSink as we don't want to register any callback for progress notifications.
-//                                hr = pfsd->ApplyProperties(psiResult, pps, NULL, NULL);
+//                                // hWnd is used as parent for any error dialogs that might popup when writing
+//                                properties.
+//                                // Pass NULL for IFileOperationProgressSink as we don't want to register any callback
+//                                for progress notifications. hr = pfsd->ApplyProperties(psiResult, pps, NULL, NULL);
 //                                pps->Release();
 //                            }
 //                        }
@@ -794,7 +833,7 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //}
 
 // This code snippet demonstrates how to write properties without using property handlers.
-//HRESULT WritePropertiesWithoutUsingHandlers()
+// HRESULT WritePropertiesWithoutUsingHandlers()
 //{
 //    // CoCreate the File Open Dialog object.
 //    IFileSaveDialog *pfsd;
@@ -889,7 +928,8 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //                                                if (SUCCEEDED(hr))
 //                                                {
 //                                                    // Write the property to the file.
-//                                                    hr = _WritePropertyToCustomFile(pszNewFileName, pszPropertyName, wszValue);
+//                                                    hr = _WritePropertyToCustomFile(pszNewFileName, pszPropertyName,
+//                                                    wszValue);
 //                                                }
 //                                            }
 //                                            PropVariantClear(&propvarValue);
@@ -912,7 +952,7 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //}
 
 // Application entry point
-//int APIENTRY wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
+// int APIENTRY wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 //{
 //    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 //    if (SUCCEEDED(hr))

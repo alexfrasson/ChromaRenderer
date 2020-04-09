@@ -1,196 +1,211 @@
 #pragma once
 
+#include <ISpacePartitioningStructure.h>
 #include <Object.h>
 #include <Ray.h>
-#include <ISpacePartitioningStructure.h>
-#include <vector>
 #include <glm/glm.hpp>
-
-
+#include <vector>
 
 struct Plane
 {
-	Plane()
-		: dim(0), value(0)
-	{
-	}
-	Plane(int dim, float value)
-	{
-		this->dim = dim;
-		this->value = value;
-	}
-	int dim;		// 0 = X, 1 = Y, 2 = Z
-	float value;
+    Plane() : dim(0), value(0)
+    {
+    }
+    Plane(int dim, float value)
+    {
+        this->dim = dim;
+        this->value = value;
+    }
+    int dim; // 0 = X, 1 = Y, 2 = Z
+    float value;
 };
 
-struct KDTNode 
+struct KDTNode
 {
-	KDTNode() 
-		: isLeaf(false)
-	{
-		children[0] = NULL;
-		children[1] = NULL;
-	}
-	bool isLeaf;
-	
-	/**/union
-	{
-		// Interior
-		struct
-		{
-			Plane plane;						
-			KDTNode* children[2];
-		};
-		// Leaf
-		struct
-		{
-			//std::vector<Face*> triangles;
-			Face** tris;
-			unsigned int nTris;
-		};
-	};/**/
-	/*Plane plane;
-	KDTNode* children[2];
-	//std::vector<Face*> triangles;
-	Face** tris;
-	unsigned int nTris;/**/
+    KDTNode() : isLeaf(false)
+    {
+        children[0] = NULL;
+        children[1] = NULL;
+    }
+    bool isLeaf;
+
+    /**/ union {
+        // Interior
+        struct
+        {
+            Plane plane;
+            KDTNode* children[2];
+        };
+        // Leaf
+        struct
+        {
+            // std::vector<Face*> triangles;
+            Face** tris;
+            unsigned int nTris;
+        };
+    }; /**/
+       /*Plane plane;
+       KDTNode* children[2];
+       //std::vector<Face*> triangles;
+       Face** tris;
+       unsigned int nTris;/**/
 };
 
 struct KDTNodeToDo
 {
-	KDTNode* node;
-	float tmin, tmax;
+    KDTNode* node;
+    float tmin, tmax;
 };
 
 enum Side
 {
-	LEFT,
-	RIGHT,
-	BOTH
+    LEFT,
+    RIGHT,
+    BOTH
 };
 
-#define EVENT_TYPE_END		0
-#define EVENT_TYPE_PLANAR	1
-#define EVENT_TYPE_START	2
+#define EVENT_TYPE_END 0
+#define EVENT_TYPE_PLANAR 1
+#define EVENT_TYPE_START 2
 
 struct Event
 {
-	Event()
-		: triangle(0), type(0)
-	{
-	}
-	Event(Plane p, int tri, int type)
-	{
-		plane = p;
-		triangle = tri;
-		this->type = type;
-	}
-	Plane plane;	// The spliting candidate plane
-	int triangle;	// Triangle that generated the event
-	int type;		// Type +, - or | 
+    Event() : triangle(0), type(0)
+    {
+    }
+    Event(Plane p, int tri, int type)
+    {
+        plane = p;
+        triangle = tri;
+        this->type = type;
+    }
+    Plane plane;  // The spliting candidate plane
+    int triangle; // Triangle that generated the event
+    int type;     // Type +, - or |
 };
 
 struct PEvent
 {
-	PEvent()
-		: triangle(NULL), type(0)
-	{
-	}
-	PEvent(Plane p, Face* tri, Side* s, int type)
-	{
-		plane = p;
-		triangle = tri;
-		this->type = type;
-		flag = s;
-	}
-	Plane plane;	// The spliting candidate plane
-	Face* triangle;	// Triangle that generated the event
-	int type;		// Type +, - or |
-	Side* flag;
+    PEvent() : triangle(NULL), type(0)
+    {
+    }
+    PEvent(Plane p, Face* tri, Side* s, int type)
+    {
+        plane = p;
+        triangle = tri;
+        this->type = type;
+        flag = s;
+    }
+    Plane plane;    // The spliting candidate plane
+    Face* triangle; // Triangle that generated the event
+    int type;       // Type +, - or |
+    Side* flag;
 };
 
 struct TFpointers
 {
-	Face* triangle;
-	Side* flag;
-	TFpointers(Face* t, Side* f)
-	{
-		triangle = t;
-		flag = f;
-	}
+    Face* triangle;
+    Side* flag;
+    TFpointers(Face* t, Side* f)
+    {
+        triangle = t;
+        flag = f;
+    }
 };
 
-
-class KDTree
-	: public ISpacePartitioningStructure
+class KDTree : public ISpacePartitioningStructure
 {
-public:
+  public:
+    bool build(std::vector<Mesh*>& meshes)
+    {
+        return false;
+    }
 
+    BoundingBox bb;
+    KDTNode* root;
 
+    bool stop = false;
 
-	bool build(std::vector<Mesh*> &meshes){ return false; }
+    unsigned int nNodes;
+    unsigned int nLeafs;
+    unsigned int nTriangles;
+    unsigned int depth;
 
-	BoundingBox bb;
-	KDTNode* root;
+    // Building parameters
+    unsigned int maxDepth = 24;
+    unsigned int sizeToBecomeLeaf = 5;
+    // Cost function parameters
+    float emptySpaceBonus = 1.0f;
+    float KT = 1.0f; // Node traversal cost
+    float KI = 1.5f; // Triangle intersection cost
 
-	bool stop = false;
+    KDTree();
+    ~KDTree();
 
-	unsigned int nNodes;
-	unsigned int nLeafs;
-	unsigned int nTriangles;
-	unsigned int depth;
+    void abort(void)
+    {
+        stop = true;
+    }
 
-	// Building parameters
-	unsigned int maxDepth = 24;
-	unsigned int sizeToBecomeLeaf = 5;
-	// Cost function parameters
-	float emptySpaceBonus = 1.0f;
-	float KT = 1.0f;		// Node traversal cost
-	float KI = 1.5f; 		// Triangle intersection cost
+    long sizeInBytes(void);
+    void printInfo();
 
-	KDTree();
-	~KDTree();
+    float cost(const float probabilityL, const float probabilityR, const int triangleCountL, const int triangleCountR);
+    float cost(const int triangleCount);
+    float sah(const Plane p,
+              const BoundingBox& v,
+              const int triangleCountL,
+              const int triangleCountR,
+              const int triangleCountP,
+              Side& side);
+    float sah(KDTNode* node);
 
-	void abort(void){ stop = true; }
+    // bool clipTriangleToBox(const Face& t, const BoundingBox& v, BoundingBox& clipped);
+    // std::vector<Plane> perfectSplit(const Face& t, const BoundingBox& v);
+    // std::vector<Plane> perfectSplit(const BoundingBox& b, const BoundingBox& v);
+    // void classify(const std::vector<BoundingBox>& ts, /*const BoundingBox& vleft, const BoundingBox& vright,*/ const
+    // Plane p, int& tl, int& tr, int& tp); void classify(const std::vector<std::pair<BoundingBox, int>>& ts, const
+    // Plane p, std::vector<int>& tl, std::vector<int>& tr, std::vector<int>& tp); void classify(const
+    // std::vector<std::pair<BoundingBox, int>>& ts, const Plane p, int& tl, int& tr, int& tp);
 
-	long sizeInBytes(void);
-	void printInfo();
+    // bool naiveSahPartition(const std::vector<Face>& ts, BoundingBox nodebb, Plane& splitP, std::vector<Face>& leftTs,
+    // std::vector<Face>& rightTs); bool eventSahPartition(const std::vector<Face>& ts, BoundingBox nodebb, Plane&
+    // splitP, std::vector<Face>& leftTs, std::vector<Face>& rightTs);
+    float presortedEventFindBestPlane(const int triangles,
+                                      const std::vector<PEvent>& events,
+                                      const BoundingBox& nodebb,
+                                      Side& side,
+                                      Plane& plane);
 
+    // void presortedGenEventsFromClipped(const std::vector<std::pair<Face*, Side*>>& tfs, const BoundingBox& nodebb,
+    // std::vector<PEvent>& events);
+    void presortedGenEvents(const std::vector<TFpointers>& tfs, const BoundingBox& nodebb, std::vector<PEvent>& events);
+    // void genEvents(const std::vector<Face>& ts, const BoundingBox& nodebb, std::vector<PEvent>& events);
 
-	float cost(const float probabilityL, const float probabilityR, const int triangleCountL, const int triangleCountR);
-	float cost(const int triangleCount);
-	float sah(const Plane p, const BoundingBox& v, const int triangleCountL, const int triangleCountR, const int triangleCountP, Side& side);
-	float sah(KDTNode* node);
+    // KDTNode* buildNode(int depth, int plane, std::vector<Face> faces, BoundingBox nodebb);
+    // KDTNode* buildNodeSah(int depth, std::vector<Face> faces, BoundingBox nodebb);
+    KDTNode* presortedBuildNodeSah(int depth,
+                                   std::vector<TFpointers>& triandflag,
+                                   std::vector<PEvent>& events,
+                                   BoundingBox& nodebb);
+    void presortedClassify(const std::vector<TFpointers>& tfs,
+                           const std::vector<PEvent>& events,
+                           const Plane& splitPlane,
+                           const Side& splitPlaneSide);
+    void presortedSplitEvents(const std::vector<PEvent>& events,
+                              const std::vector<TFpointers>& tfs,
+                              const BoundingBox& nodebb,
+                              const Plane& splitplane,
+                              std::vector<PEvent>& eventsl,
+                              std::vector<PEvent>& eventsr);
 
-	//bool clipTriangleToBox(const Face& t, const BoundingBox& v, BoundingBox& clipped);
-	//std::vector<Plane> perfectSplit(const Face& t, const BoundingBox& v);
-	//std::vector<Plane> perfectSplit(const BoundingBox& b, const BoundingBox& v);
-	//void classify(const std::vector<BoundingBox>& ts, /*const BoundingBox& vleft, const BoundingBox& vright,*/ const Plane p, int& tl, int& tr, int& tp);
-	//void classify(const std::vector<std::pair<BoundingBox, int>>& ts, const Plane p, std::vector<int>& tl, std::vector<int>& tr, std::vector<int>& tp);
-	//void classify(const std::vector<std::pair<BoundingBox, int>>& ts, const Plane p, int& tl, int& tr, int& tp);
+    // bool intersectNode(KDTNode* node, const Ray& r, float tmin, float tmax, float& hitT, const Face** hitTriangle);
 
-	//bool naiveSahPartition(const std::vector<Face>& ts, BoundingBox nodebb, Plane& splitP, std::vector<Face>& leftTs, std::vector<Face>& rightTs);
-	//bool eventSahPartition(const std::vector<Face>& ts, BoundingBox nodebb, Plane& splitP, std::vector<Face>& leftTs, std::vector<Face>& rightTs);
-	float presortedEventFindBestPlane(const int triangles, const std::vector<PEvent>& events, const BoundingBox& nodebb, Side& side, Plane& plane);
+    bool build(std::vector<Object>& objects);
+    // bool intersect(const Ray& r, const Face** hitTriangle, float& hitDistance);
+    // bool intersectNonRecursive(const Ray& r, const Face** hitTriangle, float& hitDistance) const;
+    // bool intersectNonRecursiveP(const Ray& r, const Face** hitTriangle, float& hitDistance) const;
+    bool intersect(const Ray& r, Intersection& intersection) const;
 
-	//void presortedGenEventsFromClipped(const std::vector<std::pair<Face*, Side*>>& tfs, const BoundingBox& nodebb, std::vector<PEvent>& events);
-	void presortedGenEvents(const std::vector<TFpointers>& tfs, const BoundingBox& nodebb, std::vector<PEvent>& events);
-	//void genEvents(const std::vector<Face>& ts, const BoundingBox& nodebb, std::vector<PEvent>& events);
-
-	//KDTNode* buildNode(int depth, int plane, std::vector<Face> faces, BoundingBox nodebb);
-	//KDTNode* buildNodeSah(int depth, std::vector<Face> faces, BoundingBox nodebb);
-	KDTNode* presortedBuildNodeSah(int depth, std::vector<TFpointers>& triandflag, std::vector<PEvent>& events, BoundingBox& nodebb);
-	void presortedClassify(const std::vector<TFpointers>& tfs, const std::vector<PEvent>& events, const Plane& splitPlane, const Side& splitPlaneSide);
-	void presortedSplitEvents(const std::vector<PEvent>& events, const std::vector<TFpointers>& tfs, const BoundingBox& nodebb, const Plane& splitplane, std::vector<PEvent>& eventsl, std::vector<PEvent>& eventsr);
-
-	//bool intersectNode(KDTNode* node, const Ray& r, float tmin, float tmax, float& hitT, const Face** hitTriangle);
-
-	bool build(std::vector<Object>& objects);
-	//bool intersect(const Ray& r, const Face** hitTriangle, float& hitDistance);
-	//bool intersectNonRecursive(const Ray& r, const Face** hitTriangle, float& hitDistance) const;
-	//bool intersectNonRecursiveP(const Ray& r, const Face** hitTriangle, float& hitDistance) const;
-	bool intersect(const Ray& r, Intersection& intersection) const;
-
-	
-	KDTNode* free(KDTNode* node);
+    KDTNode* free(KDTNode* node);
 };

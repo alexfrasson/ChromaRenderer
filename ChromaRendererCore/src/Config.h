@@ -7,13 +7,12 @@
 //#define PIXELSPERTILE (64*64)
 //#define NUM_THREADS 8					//Number of threads
 
-
 //#define SUPERSAMPLING
 //#define SHADOWRAY
 //#define BOUNDINGBOXTEST
 #define SIMD
 
 //#define TEST
-#define TEST_WARMUPS		0
-#define TEST_ITERACTIONS	2
-#define TEST_TOTAL			(TEST_WARMUPS + TEST_ITERACTIONS)
+#define TEST_WARMUPS 0
+#define TEST_ITERACTIONS 2
+#define TEST_TOTAL (TEST_WARMUPS + TEST_ITERACTIONS)

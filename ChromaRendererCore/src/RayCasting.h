@@ -1,31 +1,26 @@
 #pragma once
 
-#include <IRenderer.h>
 #include <Color.h>
+#include <IRenderer.h>
 
-
-class RayCasting
-	: public IRenderer
+class RayCasting : public IRenderer
 {
 
-public:
+  public:
+    // Progress
+    bool running = false;
+    float invPixelCount;
+    int pixelCount;
+    std::atomic<int> donePixelCount;
+    // Progress
 
-	// Progress
-	bool running = false;
-	float invPixelCount;
-	int pixelCount;
-	std::atomic<int> donePixelCount;
-	// Progress
-	
-
-	RayCasting();
-	void init()
-	{
-		donePixelCount = 0;
-	}
-	void trace(Scene &scene, Image &img, RendererSettings &settings, Interval interval, bool& abort);
-	Color calcColor(Intersection& is);
-	float getProgress();
-	bool isRunning();
-
+    RayCasting();
+    void init()
+    {
+        donePixelCount = 0;
+    }
+    void trace(Scene& scene, Image& img, RendererSettings& settings, Interval interval, bool& abort);
+    Color calcColor(Intersection& is);
+    float getProgress();
+    bool isRunning();
 };
