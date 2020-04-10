@@ -47,3 +47,13 @@ for filename in files:
         check=True,
         text=True,
     )
+
+# Black for python files
+
+subprocess.run(
+    ["python", "-m", "black", "./scripts",],
+    capture_output=True,
+    shell=True,
+    check=True,
+    text=True,
+)
