@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Stopwatch.h>
+#include <iostream>
 #include <thread>
 
 class Benchmark
@@ -49,15 +50,15 @@ class Benchmark
             f();
             stopwatch.stop();
             // Sum for the average
-            sumFinalizedTasks += stopwatch.elapsedWallTime;
+            sumFinalizedTasks += stopwatch.elapsedMillis.count();
             // Slower execution
-            if (stopwatch.elapsedWallTime > max)
-                max = stopwatch.elapsedWallTime;
+            if (stopwatch.elapsedMillis.count() > max)
+                max = stopwatch.elapsedMillis.count();
             // Faster execution
-            if (stopwatch.elapsedWallTime < min)
-                min = stopwatch.elapsedWallTime;
+            if (stopwatch.elapsedMillis.count() < min)
+                min = stopwatch.elapsedMillis.count();
             nFinalizedTasks++;
-            std::cout << stopwatch.elapsedWallTime << std::endl;
+            std::cout << stopwatch.elapsedMillis.count() << std::endl;
         }
         // Average execution time
         average = sumFinalizedTasks / nFinalizedTasks;
@@ -82,15 +83,15 @@ class Benchmark
                 ;
             stopwatch.stop();
             // Sum for the average
-            sumFinalizedTasks += stopwatch.elapsedWallTime;
+            sumFinalizedTasks += stopwatch.elapsedMillis.count();
             // Slower execution
-            if (stopwatch.elapsedWallTime > max)
-                max = stopwatch.elapsedWallTime;
+            if (stopwatch.elapsedMillis.count() > max)
+                max = stopwatch.elapsedMillis.count();
             // Faster execution
-            if (stopwatch.elapsedWallTime < min)
-                min = stopwatch.elapsedWallTime;
+            if (stopwatch.elapsedMillis.count() < min)
+                min = stopwatch.elapsedMillis.count();
             nFinalizedTasks++;
-            std::cout << stopwatch.elapsedWallTime << std::endl;
+            std::cout << stopwatch.elapsedMillis.count() << std::endl;
         }
 
         // Remove both faster and slower executions from average

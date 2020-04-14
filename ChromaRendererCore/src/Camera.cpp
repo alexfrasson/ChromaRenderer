@@ -1,4 +1,6 @@
 #include "Camera.h"
+
+#include <cmath>
 #include <halton.hpp>
 #include <iostream>
 #include <random>
@@ -103,7 +105,7 @@ void Camera::rayDirection(const int i, const int j, std::vector<Ray>& rays) cons
 
 void Camera::rayDirection(const int i, const int j, std::vector<Ray>& rays, const unsigned int nRays) const
 {
-    const float numDivs = std::ceil(std::sqrtf(static_cast<float>(nRays))); // Number of subcells = numDivs^2
+    const float numDivs = std::ceil(sqrtf(static_cast<float>(nRays))); // Number of subcells = numDivs^2
     const float step = 1.0f / numDivs;
 
     int count = 0;

@@ -1,13 +1,18 @@
+build --compilation_mode=opt
+build --spawn_strategy=local
+build --experimental_enable_runfiles
+
+build:debug --compilation_mode=dbg
+
+build:windows --cxxopt=/MD
+build:windows --cxxopt=/W2
+build:windows --cxxopt=/WX
+build:windows --cxxopt=/experimental:external
+build:windows --cxxopt=/external:Ithird_party
+build:windows --cxxopt=/external:W0
+
 #build --cxxopt=-std=c++17
 #build --cxxopt=-stdlib=libc++
-
-build --cxxopt=/MD
-build --cxxopt=/W2
-build --cxxopt=/WX
-build --cxxopt=/experimental:external
-build --cxxopt=/external:Ithird_party
-build --cxxopt=/external:W0
-
 ##build --cxxopt=/Zi 
 #build --cxxopt=/Zc:wchar_t 
 #build --cxxopt=/Zc:forScope 
@@ -28,19 +33,13 @@ build --cxxopt=/external:W0
 #build --cxxopt=/fp:precise 
 #build --cxxopt=/TP 
 #build --cxxopt=/FC 
-#
-
-
-build --compilation_mode=opt
 
 #build --action_env=CUDAFE_FLAGS="--sdk_dir \"C:\\Program Files (x86)\\Windows Kits\\10\\\""
-
 #build --action_env=BAZEL_VS="C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools"
 #build --action_env=BAZEL_VC="C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC"
 #build --action_env=BAZEL_VC_FULL_VERSION=14.16.27023
 #build --action_env=CC_CONFIGURE_DEBUG=1
 
-build --spawn_strategy=local
-build --experimental_enable_runfiles
-
-build:debug --compilation_mode=dbg
+build:linux --cxxopt=-w
+build:linux --cxxopt=-std=c++17
+build:linux --cxxopt=-mavx

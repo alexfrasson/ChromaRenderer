@@ -2,7 +2,7 @@
 
 //#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cfloat>
-#include <cuda-helpers\helper_math.h>
+#include <cuda-helpers/helper_math.h>
 
 void writeAccuBufferToTexture(cudaStream_t& stream,
                               float4* accuBuffer,

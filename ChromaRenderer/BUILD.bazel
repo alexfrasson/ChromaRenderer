@@ -11,5 +11,9 @@ cc_binary(
         "//resources:fonts",
     ],
     includes = ["src"],
-    deps = ["//ChromaRendererCore:chroma-renderer-core"],
+    linkopts = ["-lstdc++fs"],
+    deps = [
+        "//ChromaRendererCore:chroma-renderer-core",
+        "//third_party/nfd",
+    ],
 )

@@ -1,9 +1,29 @@
 workspace(name = "chromarenderer")
 
+# config_setting(
+#     name = "linux",
+#     values = {"define": "build_target=linux"},
+# )
+
+# new_local_repository(
+#     name = "cuda",
+#     build_file = "//third_party/cuda:BUILD.bazel",
+#     path = select({
+#         ":linux": ["C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/"],
+#         "//conditions:default": ["C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/"],
+#     }),
+# )
+
 new_local_repository(
     name = "cuda",
     build_file = "//third_party/cuda:BUILD.bazel",
-    path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/",
+    path = "/usr/local/cuda/",
+)
+
+new_local_repository(
+    name = "gtk",
+    build_file = "//third_party/gtk:BUILD.bazel",
+    path = "/usr/",
 )
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")

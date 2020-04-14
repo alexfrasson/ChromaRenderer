@@ -48,7 +48,7 @@ class ThreadPool
     // Reserves memory for 'maxNumberWorkers' and creates 'nworkers' workers.
     ThreadPool(unsigned int maxNumberWorkers, size_t nworkers);
     ~ThreadPool();
-    template <typename T> void enqueue(T& t)
+    template <typename T> void enqueue(const T& t)
     {
         {
             std::unique_lock<std::mutex> lock(queue_mutex);

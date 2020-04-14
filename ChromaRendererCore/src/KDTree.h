@@ -22,33 +22,35 @@ struct Plane
 
 struct KDTNode
 {
+    struct InteriorPayload
+    {
+        Plane plane;
+        KDTNode* children[2];
+    };
+
+    struct LeafPayload
+    {
+        // std::vector<Face*> triangles;
+        Face** tris;
+        unsigned int nTris;
+    };
+
     KDTNode() : isLeaf(false)
     {
-        children[0] = NULL;
-        children[1] = NULL;
+        interiorPayload.children[0] = NULL;
+        interiorPayload.children[1] = NULL;
     }
     bool isLeaf;
 
-    /**/ union {
-        // Interior
-        struct
-        {
-            Plane plane;
-            KDTNode* children[2];
-        };
-        // Leaf
-        struct
-        {
-            // std::vector<Face*> triangles;
-            Face** tris;
-            unsigned int nTris;
-        };
-    }; /**/
-       /*Plane plane;
-       KDTNode* children[2];
-       //std::vector<Face*> triangles;
-       Face** tris;
-       unsigned int nTris;/**/
+    union {
+        InteriorPayload interiorPayload;
+        LeafPayload leafPayload;
+    };
+    /*Plane plane;
+    KDTNode* children[2];
+    //std::vector<Face*> triangles;
+    Face** tris;
+    unsigned int nTris;/**/
 };
 
 struct KDTNodeToDo

@@ -104,14 +104,14 @@ def _cuda_library_impl(ctx):
         #args.add("-G")
         #args.add("-g")
 
-        args.add("-DWIN32")
-        args.add("-DWIN64")
-        args.add("-DNDEBUG")
-        args.add("-D_CONSOLE")
-        args.add("-D_MBCS")
+        #args.add("-DWIN32")
+        #args.add("-DWIN64")
+        #args.add("-DNDEBUG")
+        #args.add("-D_CONSOLE")
+        #args.add("-D_MBCS")
 
         #args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /Fdx64\\Release\\ChromaRendererCore.pdb /FS /Zi  /MD \"")
-        args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /FS /Zi /MD\"")
+        #args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /FS /Zi /MD\"")
 
         args.add("-o", obj_file)
         args.add(src.path)

@@ -1,6 +1,8 @@
 #include <Image.h>
+
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <iostream>
 
 Image::Image() : width(0), height(0), buffer(nullptr), hasDataChanged(false), textureID(0)

@@ -13,7 +13,7 @@
 #include <RayCasting.h>
 #include <RendererSettings.h>
 #include <Scene.h>
-#include <StopWatch.h>
+#include <Stopwatch.h>
 #include <ThreadPool.h>
 
 class ChromaRenderer

@@ -7,10 +7,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //
 
+#if defined(_WIN32) || defined(WIN32)
+
 #define GLFW_EXPOSE_NATIVE_WIN32
 
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
+#include <glfw/glfw3.h>
+#include <glfw/glfw3native.h>
 
 #include <windows.h> // For common windows data types and function headers
 #define STRICT_TYPED_ITEMIDS
@@ -1015,3 +1017,5 @@ HRESULT FileOpenDialogHDRI(std::string& path, GLFWwindow* window)
 //    }
 //    return 0;
 //}
+
+#endif

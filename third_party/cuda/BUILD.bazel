@@ -1,5 +1,19 @@
 package(default_visibility = ["//visibility:public"])
 
+config_setting(
+    name = "on_linux",
+    constraint_values = [
+        "@platforms//os:linux",
+    ],
+)
+
+config_setting(
+    name = "on_windows",
+    constraint_values = [
+        "@platforms//os:windows",
+    ],
+)
+
 cc_library(
     name = "cuda_headers",
     hdrs = glob(
@@ -14,22 +28,29 @@ cc_library(
 
 cc_library(
     name = "cuda",
-    srcs = ["lib/x64/cuda.lib"],
+    srcs = select({
+        ":on_linux": [],
+        ":on_windows": ["lib/x64/cuda.lib"],
+    }),
     #linkopts = ["-ldl"],
 )
 
 cc_library(
     name = "cuda_runtime",
-    srcs = ["lib/x64/cudart_static.lib"],
+    srcs = select({
+        ":on_linux": ["lib64/libcudart_static.a"],
+        ":on_windows": ["lib/x64/cudart_static.lib"],
+    }),
+    linkopts = [
+        "-lpthread",
+        "-lrt",
+    ],
     deps = [":cuda"],
-    #linkopts = ["-lrt"],
 )
 
 cc_library(
     name = "curand_static",
-    srcs = [
-        "lib/x64/curand.lib",
-    ],
+    srcs = ["lib/x64/curand.lib"],
     deps = [
         #":culibos",
     ],
@@ -37,5 +58,8 @@ cc_library(
 
 filegroup(
     name = "nvcc",
-    srcs = ["bin/nvcc.exe"],
+    srcs = select({
+        ":on_linux": ["bin/nvcc"],
+        ":on_windows": ["bin/nvcc.exe"],
+    }),
 )

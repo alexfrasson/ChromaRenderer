@@ -10,7 +10,7 @@
 
 #define THREAD_DIM 8
 #define EPSILON 0.000001f
-#define M_PI 3.1415926535897932384626422832795028841971f
+//#define M_PI 3.1415926535897932384626422832795028841971f
 #define SAMPLES 1
 
 texture<float4, cudaTextureType2D, /*cudaReadModeNormalizedFloat*/ cudaReadModeElementType> accuTex;
