@@ -1,29 +1,15 @@
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "on_linux",
-    constraint_values = [
-        "@platforms//os:linux",
-    ],
-)
-
-config_setting(
-    name = "on_windows",
-    constraint_values = [
-        "@platforms//os:windows",
-    ],
-)
-
 cc_library(
     name = "assimp",
     srcs = select({
-        ":on_linux": [
+        "//:on_linux": [
             "lib/release/libassimp.so",
             "lib/release/libassimp.so.4",
             "lib/release/libassimp.so.4.1.0",
             "lib/release/libIrrXML.a",
         ],
-        ":on_windows": [
+        "//:on_windows": [
             "bin/release/assimp-vc141-mt.dll",
             "lib/release/assimp-vc141-mt.lib",
         ],
@@ -34,5 +20,8 @@ cc_library(
         "include/**/*.inl",
     ]),
     includes = ["include"],
-    linkopts = ["-lz"],
+    linkopts = select({
+        "//:on_linux": ["-lz"],
+        "//:on_windows": [],
+    }),
 )

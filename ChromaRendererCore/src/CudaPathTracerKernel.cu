@@ -7,10 +7,11 @@
 #include <curand_kernel.h>
 #include <device_launch_parameters.h>
 #include <iostream>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #define THREAD_DIM 8
 #define EPSILON 0.000001f
-//#define M_PI 3.1415926535897932384626422832795028841971f
 #define SAMPLES 1
 
 texture<float4, cudaTextureType2D, /*cudaReadModeNormalizedFloat*/ cudaReadModeElementType> accuTex;
@@ -386,7 +387,7 @@ extern "C" void trace(cudaStream_t& stream,
                       CudaEnviromentSettings enviromentSettings)
 {
     dim3 thread(THREAD_DIM, THREAD_DIM);
-    dim3 block(ceilf((float)texDim.x / (float)thread.x), ceilf((float)texDim.y / (float)thread.y));
+    dim3 block((unsigned int)ceilf((float)texDim.x / (float)thread.x), (unsigned int)ceilf((float)texDim.y / (float)thread.y));
     traceKernel<<<block, thread, 0, stream>>>(pathIterationBuffer,
                                               accuBuffer,
                                               texDim,

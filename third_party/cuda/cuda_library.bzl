@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("@rules_cc//cc:action_names.bzl", "C_COMPILE_ACTION_NAME")
+load("@bazel_tools//tools/cpp:cc_flags_supplier_lib.bzl", "build_cc_flags")
+load("@rules_cc//cc:action_names.bzl", "CC_FLAGS_MAKE_VARIABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
 
 def _get_headers(deps):
     headers = []
@@ -68,6 +69,19 @@ def _cuda_library_impl(ctx):
             action_name = C_COMPILE_ACTION_NAME,
         )
 
+        # cc_flags = build_cc_flags(ctx, cc_toolchain, CC_FLAGS_MAKE_VARIABLE_ACTION_NAME)
+
+        # c_compile_variables = cc_common.create_compile_variables(
+        #     feature_configuration = feature_configuration,
+        #     cc_toolchain = cc_toolchain,
+        #     user_compile_flags = ctx.fragments.cpp.copts + ctx.fragments.cpp.conlyopts,
+        # )
+
+        print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.conlyopts))
+        print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.copts))
+        print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.cxxopts))
+        print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.linkopts))
+
         #print(cc_toolchain.compiler)
         #print(c_compiler_path)
 
@@ -112,6 +126,15 @@ def _cuda_library_impl(ctx):
 
         #args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /Fdx64\\Release\\ChromaRendererCore.pdb /FS /Zi  /MD \"")
         #args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /FS /Zi /MD\"")
+        #if ctx.attr.copts:
+
+        compiler_options = ctx.fragments.cpp.cxxopts
+
+        if "-std=c++17" in compiler_options: compiler_options.remove("-std=c++17")
+
+        args.add_all(compiler_options, before_each = "--compiler-options")
+
+        #args.add("-Xcompiler", "\"{}\"".format(" -".join(ctx.fragments.cpp.cxxopts)))
 
         args.add("-o", obj_file)
         args.add(src.path)

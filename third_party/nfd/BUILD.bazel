@@ -2,11 +2,24 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "nfd",
-    srcs = [
-        "src/nfd_common.c",
-        "src/nfd_gtk.c",
-    ],
+    srcs = select({
+        "//:on_linux": [
+            "src/nfd_common.c",
+            "src/nfd_gtk.c",
+        ],
+        "//:on_windows": [
+            "src/nfd_common.c",
+            "src/nfd_win.cpp",
+        ],
+    }),
     hdrs = glob(["src/**/*.h"]),
     includes = ["src/include"],
-    deps = ["@gtk"],
+    linkopts = select({
+        "//:on_linux": [],
+        "//:on_windows": ["-DEFAULTLIB:comctl32.lib"],
+    }),
+    deps = select({
+        "//:on_linux": ["@gtk"],
+        "//:on_windows": [],
+    }),
 )

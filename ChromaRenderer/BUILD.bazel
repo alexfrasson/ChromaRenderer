@@ -11,7 +11,10 @@ cc_binary(
         "//resources:fonts",
     ],
     includes = ["src"],
-    linkopts = ["-lstdc++fs"],
+    linkopts = select({
+        "//:on_linux": ["-lstdc++fs"],
+        "//:on_windows": [],
+    }),
     deps = [
         "//ChromaRendererCore:chroma-renderer-core",
         "//third_party/nfd",

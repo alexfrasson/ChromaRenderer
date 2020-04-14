@@ -41,10 +41,13 @@ cc_library(
         ":on_linux": ["lib64/libcudart_static.a"],
         ":on_windows": ["lib/x64/cudart_static.lib"],
     }),
-    linkopts = [
-        "-lpthread",
-        "-lrt",
-    ],
+    linkopts = select({
+        "//:on_linux": [
+            "-lpthread",
+            "-lrt",
+        ],
+        "//:on_windows": [],
+    }),
     deps = [":cuda"],
 )
 
