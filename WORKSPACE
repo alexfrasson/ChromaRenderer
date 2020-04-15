@@ -1,12 +1,15 @@
 workspace(name = "chromarenderer")
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("//third_party/cuda:cuda_configure.bzl", "cuda_configure")
 
-new_local_repository(
-    name = "cuda",
-    build_file = "//third_party/cuda:BUILD.bazel",
-    #path = "/usr/local/cuda/",
-    path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/",
+cuda_configure(name = "cuda")
+
+register_toolchains(
+    "//third_party/cuda/toolchain:cuda_linux_toolchain",
+    "//third_party/cuda/toolchain:cuda_windows_toolchain",
+    # Target patterns are also permitted, so we could have also written:
+    # "//bar_tools:all",
 )
 
 new_local_repository(

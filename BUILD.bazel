@@ -1,4 +1,3 @@
-
 config_setting(
     name = "on_linux",
     constraint_values = [

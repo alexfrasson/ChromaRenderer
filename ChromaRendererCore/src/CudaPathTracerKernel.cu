@@ -387,7 +387,8 @@ extern "C" void trace(cudaStream_t& stream,
                       CudaEnviromentSettings enviromentSettings)
 {
     dim3 thread(THREAD_DIM, THREAD_DIM);
-    dim3 block((unsigned int)ceilf((float)texDim.x / (float)thread.x), (unsigned int)ceilf((float)texDim.y / (float)thread.y));
+    dim3 block((unsigned int)ceilf((float)texDim.x / (float)thread.x),
+               (unsigned int)ceilf((float)texDim.y / (float)thread.y));
     traceKernel<<<block, thread, 0, stream>>>(pathIterationBuffer,
                                               accuBuffer,
                                               texDim,
