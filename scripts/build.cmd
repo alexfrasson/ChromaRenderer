@@ -7,7 +7,7 @@ set CUDA_PATH=%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v10.2
 echo "CUDA_PATH: %CUDA_PATH%"
 
 echo "Downloading CUDA toolkit 10.2"
-curl -L --url "http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda_10.2.89_441.22_win10.exe" --output "%TEMP%\cuda_installer.exe"
+curl -L --url "http://developer.download.nvidia.com/compute/cuda/10.2/Prod/network_installers/cuda_10.2.89_win10_network.exe" --output "%TEMP%\cuda_installer.exe"
 echo "Installing CUDA toolkit 10.2"
 %TEMP%\cuda_installer.exe -s nvcc_10.2 ^
                              curand_10.2 ^
