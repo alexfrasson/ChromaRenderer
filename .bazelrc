@@ -11,6 +11,8 @@ build:windows --cxxopt=/experimental:external
 build:windows --cxxopt=/external:Ithird_party
 build:windows --cxxopt=/external:W0
 
+build:linux --client_env=CC=/usr/bin/gcc-7
+build:linux --client_env=CXX=/usr/bin/g++-7
 build:linux --cxxopt=-w
 build:linux --cxxopt=-std=c++17
 build:linux --cxxopt=-mavx
