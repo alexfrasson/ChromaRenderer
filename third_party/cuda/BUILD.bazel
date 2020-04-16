@@ -62,7 +62,7 @@ cc_library(
 filegroup(
     name = "nvcc",
     srcs = select({
-        ":on_linux": ["bin/nvcc"],
-        ":on_windows": ["bin/nvcc.exe"],
+        ":on_linux": ["cuda/bin/nvcc"],
+        ":on_windows": ["cuda/bin/nvcc.exe"],
     }),
 )

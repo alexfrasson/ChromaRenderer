@@ -49,7 +49,7 @@ def _cuda_library_impl(ctx):
     compilation_context = cc_common.create_compilation_context()
     linking_context = cc_common.create_linking_context(libraries_to_link = [], user_link_flags = [])
 
-    cudainfo = ctx.toolchains["//third_party/cuda/toolchain:toolchain_type"].cudainfo
+    #cudainfo = ctx.toolchains["//third_party/cuda/toolchain:toolchain_type"].cudainfo
 
     objt_files = []
     for src in lib_srcs:
@@ -146,8 +146,8 @@ def _cuda_library_impl(ctx):
             progress_message = "Compiling cuda source file {}".format(obj_file.basename),
             #executable = "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.0\\bin\\nvcc.exe",
             #executable = "nvcc",
-            #executable = ctx.executable.nvcc,
-            executable = cudainfo.nvcc_path,
+            executable = ctx.executable.nvcc,
+            #executable = cudainfo.nvcc_path,
             inputs = depset(items = [src] + lib_hdrs, transitive = deps_headers),
             outputs = [obj_file],
             arguments = [args],
@@ -179,14 +179,17 @@ cuda_library = rule(
         "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
-        # "nvcc": attr.label(
-        #     executable = True,
-        #     cfg = "host",
-        #     allow_files = True,
-        #     default = Label("@cuda//:nvcc"),
-        # ),
+        "nvcc": attr.label(
+            executable = True,
+            cfg = "host",
+            allow_files = True,
+            default = Label("@cuda//:nvcc"),
+        ),
     },
     provides = [CcInfo],
     fragments = ["cpp"],
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type", "//third_party/cuda/toolchain:toolchain_type"],
+    toolchains = [
+        "@bazel_tools//tools/cpp:toolchain_type",  
+        #"//third_party/cuda/toolchain:toolchain_type"
+    ],
 )
