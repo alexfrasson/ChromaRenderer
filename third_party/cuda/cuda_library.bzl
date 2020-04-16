@@ -134,6 +134,8 @@ def _cuda_library_impl(ctx):
 
         if "-std=c++17" in compiler_options:
             compiler_options.remove("-std=c++17")
+        if "/std:c++17" in compiler_options:
+            compiler_options.remove("/std:c++17")
 
         args.add_all(compiler_options, before_each = "--compiler-options")
 

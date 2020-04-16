@@ -1,6 +1,6 @@
 #include <ChromaGui.h>
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <iostream>
 
 #include <ChromaGUIUtils.h>
@@ -15,7 +15,7 @@
 constexpr auto RADTODEGREE = 57.295779513082320876798154814105;
 constexpr auto DEGREETORAD = 0.01745329251994329576923690768489;
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 ImVec2 mainMenuBarSize;
 

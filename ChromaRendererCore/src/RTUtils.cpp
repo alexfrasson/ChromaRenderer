@@ -193,7 +193,7 @@ bool RTUtils::hitBoundingBox(const Ray& r, const BoundingBox& bb)
 
     bool inside = true;
     char quadrant[NUMDIM];
-    register int i;
+    int i;
     int whichPlane;
     float maxT[NUMDIM];
     float candidatePlane[NUMDIM];
@@ -269,7 +269,7 @@ bool RTUtils::hitBoundingBox(const Ray& r, const BoundingBox& bb, float& tnear, 
 {
     bool inside = true;
     char quadrant[NUMDIM];
-    register int i;
+    int i;
     glm::vec3 entryCoord;
     int entryMaxTPlane;
     float entryT[NUMDIM];
