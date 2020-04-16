@@ -22,7 +22,7 @@ class Color
         return Color(r * f, g * f, b * f);
     }
 
-    void operator+=(Color& rhs)
+    void operator+=(const Color& rhs)
     {
         r += rhs.r;
         g += rhs.g;

@@ -2,13 +2,19 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "glfw",
-    srcs = ["lib/glfw3.lib"],
+    srcs = select({
+        "//:on_linux": ["lib/libglfw3.a"],
+        "//:on_windows": ["lib/glfw3.lib"],
+    }),
     hdrs = glob(["include/**/*.h"]),
     includes = ["include"],
-    linkopts = [
-        "-DEFAULTLIB:gdi32.lib",
-        "-DEFAULTLIB:ole32.lib",
-        "-DEFAULTLIB:propsys.lib",
-        "-DEFAULTLIB:shlwapi.lib",
-    ],
+    linkopts = select({
+        "//:on_linux": ["-lX11 -ldl"],
+        "//:on_windows": [
+            "-DEFAULTLIB:gdi32.lib",
+            "-DEFAULTLIB:ole32.lib",
+            "-DEFAULTLIB:propsys.lib",
+            "-DEFAULTLIB:shlwapi.lib",
+        ],
+    }),
 )

@@ -7,6 +7,8 @@
 #include <CommonFileDialogApp.h>
 #include <imgui/imgui.h>
 
+#include "third_party/nfd/src/include/nfd.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -42,35 +44,63 @@ void ChromaGui::MainMenu(GLFWwindow* window, ChromaRenderer* cr)
                 {
                     path.clear();
 
-                    FileOpenDialogModels(path, window);
-
-                    if (fs::exists(path))
+                    nfdchar_t* outPath = NULL;
+                    nfdresult_t result = NFD_OpenDialog("obj,fbx,dae,blend", NULL, &outPath);
+                    if (result == NFD_OKAY)
                     {
-                        if (cr->isRunning())
-                            cr->stopRender();
+                        path = std::string(outPath);
 
-                        std::cout << path << std::endl;
-                        cr->importScene(path);
+                        if (fs::exists(path))
+                        {
+                            if (cr->isRunning())
+                                cr->stopRender();
+
+                            std::cout << path << std::endl;
+                            cr->importScene(path);
+                        }
+                        free(outPath);
                     }
+                    // else if (result == NFD_CANCEL)
+                    // {
+                    //     puts("User pressed cancel.");
+                    // }
+                    // else
+                    // {
+                    //     printf("Error: %s\n", NFD_GetError());
+                    // }
                 }
                 if (ImGui::MenuItem("Enviroment Map..."))
                 {
                     path.clear();
 
-                    FileOpenDialogHDRI(path, window);
-
-                    if (fs::exists(path))
+                    nfdchar_t* outPath = NULL;
+                    nfdresult_t result = NFD_OpenDialog("hdr", NULL, &outPath);
+                    if (result == NFD_OKAY)
                     {
-                        bool wasRendering = cr->isRunning();
-                        if (wasRendering)
-                            cr->stopRender();
+                        path = std::string(outPath);
 
-                        std::cout << path << std::endl;
-                        cr->importEnviromentMap(path);
+                        if (fs::exists(path))
+                        {
+                            bool wasRendering = cr->isRunning();
+                            if (wasRendering)
+                                cr->stopRender();
 
-                        if (wasRendering)
-                            cr->startRender();
+                            std::cout << path << std::endl;
+                            cr->importEnviromentMap(path);
+
+                            if (wasRendering)
+                                cr->startRender();
+                        }
+                        free(outPath);
                     }
+                    // else if (result == NFD_CANCEL)
+                    // {
+                    //     puts("User pressed cancel.");
+                    // }
+                    // else
+                    // {
+                    //     printf("Error: %s\n", NFD_GetError());
+                    // }
                 }
                 ImGui::EndMenu();
             }

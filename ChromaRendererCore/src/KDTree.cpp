@@ -336,11 +336,11 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
         node->triangles.emplace_back(triandflag[i].triangle);
         node->triangles.shrink_to_fit();
         nTriangles += node->triangles.size();/**/
-        /**/ node->nTris = triandflag.size();
-        node->tris = new Face*[node->nTris];
+        /**/ node->leafPayload.nTris = triandflag.size();
+        node->leafPayload.tris = new Face*[node->leafPayload.nTris];
         for (int i = 0; i < triandflag.size(); i++)
-            node->tris[i] = triandflag[i].triangle;
-        nTriangles += node->nTris; /**/
+            node->leafPayload.tris[i] = triandflag[i].triangle;
+        nTriangles += node->leafPayload.nTris; /**/
         node->isLeaf = true;
         nLeafs++;
         if (depth > this->depth)
@@ -361,11 +361,11 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
         node->triangles.emplace_back(triandflag[i].triangle);
         node->triangles.shrink_to_fit();
         nTriangles += node->triangles.size();/**/
-        /**/ node->nTris = triandflag.size();
-        node->tris = new Face*[node->nTris];
+        /**/ node->leafPayload.nTris = triandflag.size();
+        node->leafPayload.tris = new Face*[node->leafPayload.nTris];
         for (int i = 0; i < triandflag.size(); i++)
-            node->tris[i] = triandflag[i].triangle;
-        nTriangles += node->nTris; /**/
+            node->leafPayload.tris[i] = triandflag[i].triangle;
+        nTriangles += node->leafPayload.nTris; /**/
         node->isLeaf = true;
         nLeafs++;
         if (depth > this->depth)
@@ -406,7 +406,7 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
     BoundingBox childbb = nodebb;
     childbb.max[splitPlane.dim] = splitPlane.value;
 
-    node->children[0] = presortedBuildNodeSah(depth + 1, triandflagl, eventsl, childbb);
+    node->interiorPayload.children[0] = presortedBuildNodeSah(depth + 1, triandflagl, eventsl, childbb);
 
     // Deallocate memory as soon as possible
     triandflagl = std::vector<TFpointers>();
@@ -415,10 +415,10 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
     childbb = nodebb;
     childbb.min[splitPlane.dim] = splitPlane.value;
 
-    node->children[1] = presortedBuildNodeSah(depth + 1, triandflagr, eventsr, childbb);
+    node->interiorPayload.children[1] = presortedBuildNodeSah(depth + 1, triandflagr, eventsr, childbb);
 
     node->isLeaf = false;
-    node->plane = splitPlane;
+    node->interiorPayload.plane = splitPlane;
 
     return node;
 } /**/
@@ -916,9 +916,9 @@ float KDTree::sah(KDTNode* node)
 {
     if (node->isLeaf)
         // return (node->triangles.size() * KI);
-        return (node->nTris * KI);
+        return (node->leafPayload.nTris * KI);
 
-    return (KT + sah(node->children[0]) + sah(node->children[1]));
+    return (KT + sah(node->interiorPayload.children[0]) + sah(node->interiorPayload.children[1]));
 }
 float KDTree::sah(const Plane p,
                   const BoundingBox& v,
@@ -957,14 +957,14 @@ KDTNode* KDTree::free(KDTNode* node)
 
     if (node->isLeaf)
     {
-        delete[] node->tris;
+        delete[] node->leafPayload.tris;
     }
     else
     {
-        if (node->children[0] != NULL)
-            node->children[0] = free(node->children[0]);
-        if (node->children[1] != NULL)
-            node->children[1] = free(node->children[1]);
+        if (node->interiorPayload.children[0] != NULL)
+            node->interiorPayload.children[0] = free(node->interiorPayload.children[0]);
+        if (node->interiorPayload.children[1] != NULL)
+            node->interiorPayload.children[1] = free(node->interiorPayload.children[1]);
     }
     delete node;
     return NULL; /**/
@@ -974,10 +974,10 @@ KDTNode* KDTree::free(KDTNode* node)
 
     if (!node->isLeaf)
     {
-    if (node->children[0] != NULL)
-    node->children[0] = free(node->children[0]);
-    if (node->children[1] != NULL)
-    node->children[1] = free(node->children[1]);
+    if (node->interiorPayload.children[0] != NULL)
+    node->interiorPayload.children[0] = free(node->interiorPayload.children[0]);
+    if (node->interiorPayload.children[1] != NULL)
+    node->interiorPayload.children[1] = free(node->interiorPayload.children[1]);
     }
     delete node;
     return NULL;*/
@@ -1062,7 +1062,10 @@ bool KDTree::intersect(const Ray& r, Intersection& intersection) const
         // Leaf
         if (n->isLeaf)
         {
-            if (RTUtils::intersectRayTrianglesMollerTrumbore(r, n->tris, n->nTris, _intersection))
+            if (RTUtils::intersectRayTrianglesMollerTrumbore(r,
+                                                             n->leafPayload.tris,
+                                                             n->leafPayload.nTris,
+                                                             _intersection))
             {
                 if (_intersection.distance < intersection.distance)
                 {
@@ -1088,22 +1091,24 @@ bool KDTree::intersect(const Ray& r, Intersection& intersection) const
             KDTNode* first = NULL;
             KDTNode* second = NULL;
 
-            bool belowFirst = (r.origin[n->plane.dim] < n->plane.value) ||
-                              (r.origin[n->plane.dim] == n->plane.value && r.direction[n->plane.dim] >= 0);
+            bool belowFirst = (r.origin[n->interiorPayload.plane.dim] < n->interiorPayload.plane.value) ||
+                              (r.origin[n->interiorPayload.plane.dim] == n->interiorPayload.plane.value &&
+                               r.direction[n->interiorPayload.plane.dim] >= 0);
             if (belowFirst)
             {
-                first = n->children[0];
-                second = n->children[1];
+                first = n->interiorPayload.children[0];
+                second = n->interiorPayload.children[1];
             }
             else
             {
-                first = n->children[1];
-                second = n->children[0];
+                first = n->interiorPayload.children[1];
+                second = n->interiorPayload.children[0];
             }
 
             // Find t for the split plane
-            if (r.direction[n->plane.dim] != 0.f)
-                tplane = (n->plane.value - r.origin[n->plane.dim]) / r.direction[n->plane.dim];
+            if (r.direction[n->interiorPayload.plane.dim] != 0.f)
+                tplane = (n->interiorPayload.plane.value - r.origin[n->interiorPayload.plane.dim]) /
+                         r.direction[n->interiorPayload.plane.dim];
             else
                 tplane = -1.f;
 
@@ -1167,7 +1172,7 @@ bool KDTree::intersectNonRecursive(const Ray& r, const Face** hitTriangle, float
         if (n->isLeaf)
         {
             float dist;
-            if (RTUtils::intersectRayTrianglesMollerTrumbore(r, n->tris, n->nTris, &hitf, dist))
+            if (RTUtils::intersectRayTrianglesMollerTrumbore(r, n->leafPayload.tris, n->leafPayload.nTris, &hitf, dist))
                 //if (RTUtils::intersectRayTrianglesMollerTrumbore(r, n->triangles, &hitf, dist))
                 //if (RTUtils::intersectRayTrianglesMollerTrumboreSIMD128(r, n->triangles, &hitf, dist))
             {
@@ -1196,24 +1201,23 @@ bool KDTree::intersectNonRecursive(const Ray& r, const Face** hitTriangle, float
             KDTNode* first = NULL;
             KDTNode* second = NULL;
 
-            bool belowFirst = (r.origin[n->plane.dim] < n->plane.value) ||
-                (r.origin[n->plane.dim] == n->plane.value && r.direction[n->plane.dim] >= 0);
-            if (belowFirst)
+            bool belowFirst = (r.origin[n->interiorPayload.plane.dim] < n->interiorPayload.plane.value) ||
+                (r.origin[n->interiorPayload.plane.dim] == n->interiorPayload.plane.value &&
+r.direction[n->interiorPayload.plane.dim] >= 0); if (belowFirst)
             {
-                first = n->children[0];
-                second = n->children[1];
+                first = n->interiorPayload.children[0];
+                second = n->interiorPayload.children[1];
             }
             else
             {
-                first = n->children[1];
-                second = n->children[0];
+                first = n->interiorPayload.children[1];
+                second = n->interiorPayload.children[0];
             }
 
             // Find t for the split plane
-            if (r.direction[n->plane.dim] != 0.f)
-                tplane = (n->plane.value - r.origin[n->plane.dim]) / r.direction[n->plane.dim];
-            else
-                tplane = -1.f;
+            if (r.direction[n->interiorPayload.plane.dim] != 0.f)
+                tplane = (n->interiorPayload.plane.value - r.origin[n->interiorPayload.plane.dim]) /
+r.direction[n->interiorPayload.plane.dim]; else tplane = -1.f;
 
             // We test only the first child
             if (tplane > tmax || tplane <= 0)
@@ -1266,7 +1270,7 @@ bool KDTree::intersectNonRecursiveP(const Ray& r, const Face** hitTriangle, floa
         if (n->isLeaf)
         {
             float dist;
-            if (RTUtils::intersectRayTrianglesMollerTrumbore(r, n->tris, n->nTris, &hitf, dist))
+            if (RTUtils::intersectRayTrianglesMollerTrumbore(r, n->leafPayload.tris, n->leafPayload.nTris, &hitf, dist))
                 //if (RTUtils::intersectRayTrianglesMollerTrumbore(r, n->triangles, &hitf, dist))
                 //if (RTUtils::intersectRayTrianglesMollerTrumboreSIMD128(r, n->triangles, &hitf, dist))
             {
@@ -1295,24 +1299,23 @@ bool KDTree::intersectNonRecursiveP(const Ray& r, const Face** hitTriangle, floa
             KDTNode* first = NULL;
             KDTNode* second = NULL;
 
-            bool belowFirst = (r.origin[n->plane.dim] < n->plane.value) ||
-                (r.origin[n->plane.dim] == n->plane.value && r.direction[n->plane.dim] >= 0);
-            if (belowFirst)
+            bool belowFirst = (r.origin[n->interiorPayload.plane.dim] < n->interiorPayload.plane.value) ||
+                (r.origin[n->interiorPayload.plane.dim] == n->interiorPayload.plane.value &&
+r.direction[n->interiorPayload.plane.dim] >= 0); if (belowFirst)
             {
-                first = n->children[0];
-                second = n->children[1];
+                first = n->interiorPayload.children[0];
+                second = n->interiorPayload.children[1];
             }
             else
             {
-                first = n->children[1];
-                second = n->children[0];
+                first = n->interiorPayload.children[1];
+                second = n->interiorPayload.children[0];
             }
 
             // Find t for the split plane
-            if (r.direction[n->plane.dim] != 0.f)
-                tplane = (n->plane.value - r.origin[n->plane.dim]) / r.direction[n->plane.dim];
-            else
-                tplane = -1.f;
+            if (r.direction[n->interiorPayload.plane.dim] != 0.f)
+                tplane = (n->interiorPayload.plane.value - r.origin[n->interiorPayload.plane.dim]) /
+r.direction[n->interiorPayload.plane.dim]; else tplane = -1.f;
 
             // We test only the first child
             if (tplane > tmax || tplane <= 0)
@@ -2221,7 +2224,7 @@ leftTs, std::vector<Face>& rightTs)
     {
         node->isLeaf = false;
         plane = plane % 3;
-        node->plane.dim = plane;
+        node->interiorPayload.plane.dim = plane;
         // Find mid
         float mid = (nodebb.max[plane] + nodebb.min[plane]) * .5f;
 
@@ -2249,11 +2252,11 @@ leftTs, std::vector<Face>& rightTs)
         float aux;
         aux = nodebb.max[plane];
         nodebb.max[plane] = mid;
-        node->children[0] = buildNode(depth + 1, plane + 1, left, nodebb);
+        node->interiorPayload.children[0] = buildNode(depth + 1, plane + 1, left, nodebb);
 
         nodebb.max[plane] = aux;
         nodebb.min[plane] = mid;
-        node->children[1] = buildNode(depth + 1, plane + 1, right, nodebb);
+        node->interiorPayload.children[1] = buildNode(depth + 1, plane + 1, right, nodebb);
     }
 
     return node;
@@ -2291,15 +2294,15 @@ KDTNode* KDTree::buildNodeSah(int depth, std::vector<Face> faces, BoundingBox no
 
     // Or a interior node.
     node->isLeaf = false;
-    node->plane = splitP;
+    node->interiorPayload.plane = splitP;
 
     BoundingBox childbb = nodebb;
     childbb.max[splitP.dim] = splitP.value;
-    node->children[0] = buildNodeSah(depth + 1, left, childbb);
+    node->interiorPayload.children[0] = buildNodeSah(depth + 1, left, childbb);
 
     childbb = nodebb;
     childbb.min[splitP.dim] = splitP.value;
-    node->children[1] = buildNodeSah(depth + 1, right, childbb);
+    node->interiorPayload.children[1] = buildNodeSah(depth + 1, right, childbb);
 
     return node;
 }*/
@@ -2404,7 +2407,8 @@ bool KDTree::intersectNode(KDTNode* node, const Ray& r, float tmin, float tmax, 
         // Intersect leaf
         // Return true if hit something and the t for the closest hit
         //if (RTUtils::intersectRayTrianglesMollerTrumbore(r, node->triangles, hitTriangle, t))
-        if (RTUtils::intersectRayTrianglesMollerTrumbore(r, node->tris, node->nTris, hitTriangle, t))
+        if (RTUtils::intersectRayTrianglesMollerTrumbore(r, node->leafPayload.tris, node->leafPayload.nTris,
+hitTriangle, t))
         {
             if (t < hitT)
                 hitT = t;
@@ -2418,25 +2422,25 @@ bool KDTree::intersectNode(KDTNode* node, const Ray& r, float tmin, float tmax, 
     KDTNode* first;
     KDTNode* second;
 
-    int axis = node->plane.dim;
+    int axis = node->interiorPayload.plane.dim;
 
-    bool belowFirst = (r.origin[axis] < node->plane.value) ||
-        (r.origin[axis] == node->plane.value && r.direction[axis] >= 0);
+    bool belowFirst = (r.origin[axis] < node->interiorPayload.plane.value) ||
+        (r.origin[axis] == node->interiorPayload.plane.value && r.direction[axis] >= 0);
     if (belowFirst)
     {
-        first = node->children[0];
-        second = node->children[1];
+        first = node->interiorPayload.children[0];
+        second = node->interiorPayload.children[1];
     }
     else
     {
-        first = node->children[1];
-        second = node->children[0];
+        first = node->interiorPayload.children[1];
+        second = node->interiorPayload.children[0];
     }
 
     // Find t for the split plane
     float tplane;
     if (r.direction[axis] != 0.f)
-        tplane = (node->plane.value - r.origin[axis]) / r.direction[axis];
+        tplane = (node->interiorPayload.plane.value - r.origin[axis]) / r.direction[axis];
     else
         tplane = -1.f;
 

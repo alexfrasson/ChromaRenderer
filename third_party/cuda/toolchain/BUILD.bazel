@@ -1,0 +1,56 @@
+load("//third_party/cuda/toolchain:cuda_toolchain.bzl", "cuda_toolchain")
+
+package(default_visibility = ["//visibility:public"])
+
+# By convention, toolchain_type targets are named "toolchain_type" and
+# distinguished by their package path. So the full path for this would be
+# //bar_tools:toolchain_type.
+toolchain_type(name = "toolchain_type")
+
+cuda_toolchain(
+    name = "cuda_linux",
+    nvcc_path = "/usr/local/cuda/bin/nvcc",
+    # arch_flags = [
+    #     "--arch=Linux",
+    #     "--debug_everything",
+    # ],
+    #system_lib = "/usr/lib/libbarc.so",
+)
+
+cuda_toolchain(
+    name = "cuda_windows",
+    nvcc_path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/bin/nvcc.exe",
+    # arch_flags = [
+    #     "--arch=Windows",
+    #     # Different flags, no debug support on windows.
+    # ],
+    #system_lib = "C:\\path\\on\\windows\\barclib.dll",
+)
+
+toolchain(
+    name = "cuda_linux_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    toolchain = ":cuda_linux",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "cuda_windows_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    toolchain = ":cuda_windows",
+    toolchain_type = ":toolchain_type",
+)

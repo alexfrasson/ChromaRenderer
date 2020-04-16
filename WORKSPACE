@@ -1,12 +1,22 @@
 workspace(name = "chromarenderer")
 
-new_local_repository(
-    name = "cuda",
-    build_file = "//third_party/cuda:BUILD.bazel",
-    path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/",
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("//third_party/cuda:cuda_configure.bzl", "cuda_configure")
+
+cuda_configure(name = "cuda")
+
+register_toolchains(
+    "//third_party/cuda/toolchain:cuda_linux_toolchain",
+    "//third_party/cuda/toolchain:cuda_windows_toolchain",
+    # Target patterns are also permitted, so we could have also written:
+    # "//bar_tools:all",
 )
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+new_local_repository(
+    name = "gtk",
+    build_file = "//third_party/gtk:BUILD.bazel",
+    path = "/usr/",
+)
 
 git_repository(
     name = "bazel_skylib",

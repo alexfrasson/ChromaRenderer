@@ -35,4 +35,4 @@ if NOT EXIST "%BAZELISK_PATH%\bazel.exe" (
     exit /B 1
 )
 
-bazel build //ChromaRenderer:chroma-renderer
+bazel build --config=windows //ChromaRenderer:chroma-renderer

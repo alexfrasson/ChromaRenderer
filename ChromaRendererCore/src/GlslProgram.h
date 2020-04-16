@@ -70,22 +70,19 @@ class GLSLProgram
     GLSLProgram();
     ~GLSLProgram();
 
-    void compileShader(const char* fileName) throw(GLSLProgramException);
-    void compileShader(
-        const char* fileName,
-        GLSLShader::GLSLShaderType type,
-        vector<string> defines = vector<string>(),
-        std::map<std::string, int> definesINT = std::map<std::string, int>()) throw(GLSLProgramException);
+    void compileShader(const char* fileName);
+    void compileShader(const char* fileName,
+                       GLSLShader::GLSLShaderType type,
+                       vector<string> defines = vector<string>(),
+                       std::map<std::string, int> definesINT = std::map<std::string, int>());
 
   private:
-    void compileShader(const string& source,
-                       GLSLShader::GLSLShaderType type,
-                       const char* fileName = NULL) throw(GLSLProgramException);
+    void compileShader(const string& source, GLSLShader::GLSLShaderType type, const char* fileName = NULL);
 
   public:
-    void link() throw(GLSLProgramException);
-    void validate() throw(GLSLProgramException);
-    void use() throw(GLSLProgramException);
+    void link();
+    void validate();
+    void use();
 
     int getHandle();
     bool isLinked();

@@ -6,8 +6,8 @@
 
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp> //OO version Header!
-#include <assimp/PostProcess.h>
-#include <assimp/Scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/version.h>
 
 // Example stream
