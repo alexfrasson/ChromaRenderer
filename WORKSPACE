@@ -3,7 +3,7 @@ workspace(name = "chromarenderer")
 new_local_repository(
     name = "cuda",
     build_file = "//third_party/cuda:BUILD.bazel",
-    path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/",
+    path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2/",
 )
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")

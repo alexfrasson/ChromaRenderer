@@ -15,4 +15,4 @@ deploy: off
 
 build_script:
 - cmd: >-
-    call scripts/build.cmd
+     call ./scripts/build.cmd
