@@ -25,6 +25,6 @@ struct RendererSettings
 
     RendererSettings();
 
-    const bool operator==(const RendererSettings& rs);
-    const bool operator!=(const RendererSettings& rs);
+    bool operator==(const RendererSettings& rs) const;
+    bool operator!=(const RendererSettings& rs) const;
 };
