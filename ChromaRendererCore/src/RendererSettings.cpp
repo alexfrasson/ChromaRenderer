@@ -10,7 +10,7 @@ RendererSettings::RendererSettings()
     nthreads = std::max(std::thread::hardware_concurrency(), 2u);
 }
 
-const bool RendererSettings::operator==(const RendererSettings& rs)
+bool RendererSettings::operator==(const RendererSettings& rs) const
 {
     return width == rs.width && height == rs.height && nthreads == rs.nthreads && supersampling == rs.supersampling &&
            samplesperpixel == rs.samplesperpixel && boundingboxtest == rs.boundingboxtest &&
@@ -18,7 +18,7 @@ const bool RendererSettings::operator==(const RendererSettings& rs)
            enviromentLightColor == rs.enviromentLightColor && enviromentLightIntensity == rs.enviromentLightIntensity;
 }
 
-const bool RendererSettings::operator!=(const RendererSettings& rs)
+bool RendererSettings::operator!=(const RendererSettings& rs) const
 {
     return !((*this) == rs);
 }

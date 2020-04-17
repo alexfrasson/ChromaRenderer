@@ -77,7 +77,7 @@ bool saveImage(std::string path, Image* img)
         }
     }
 
-    for (unsigned int i = img->getHeight() - 1; i >= 0; i--)
+    for (int i = (int)img->getHeight() - 1; i >= 0; i--)
     {
         // fwrite(img->buffer + (img->width*(img->height - i - 1) * 3), 3, img->width, f);
         fwrite(bgr + (img->getWidth() * (img->getHeight() - i - 1) * 3), 3, img->getWidth(), f);

@@ -17,7 +17,7 @@ size_t Scene::triangleCount()
         tc += objects[i].f.size();
     return tc;
 }
-void Scene::LoadMesh(std::string file)
+void Scene::LoadMesh(std::string /*file*/)
 {
     /*Object o;
     ModelImporter::import(file, o);
@@ -26,7 +26,7 @@ void Scene::LoadMesh(std::string file)
     objects.push_back( o );*/
 }
 
-void Scene::addObject(Object o)
+void Scene::addObject(Object /*o*/)
 {
     /*ready = false;
     objects.push_back( o );
@@ -34,7 +34,7 @@ void Scene::addObject(Object o)
     camera.fit(getBoundingBox());
     ready = true;*/
 }
-void Scene::addObject(Object o, std::function<void(void)> cb)
+void Scene::addObject(Object /*o*/, std::function<void(void)> /*cb*/)
 {
     /*ready = false;
     objects.push_back(o);

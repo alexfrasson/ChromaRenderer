@@ -368,8 +368,8 @@ KDTNode* KDTree::presortedBuildNodeSah(int pdepth,
         nTriangles += node->leafPayload.nTris;
         node->isLeaf = true;
         nLeafs++;
-        if (depth > this->depth)
-            this->depth = depth;
+        if (pdepth > depth)
+            depth = pdepth;
         return node;
     }
 
