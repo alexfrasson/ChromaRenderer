@@ -118,7 +118,7 @@ struct TFpointers
 class KDTree : public ISpacePartitioningStructure
 {
   public:
-    bool build(std::vector<Mesh*>& meshes)
+    bool build(std::vector<Mesh*>&)
     {
         return false;
     }

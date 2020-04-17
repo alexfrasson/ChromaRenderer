@@ -25,7 +25,7 @@ int currentFrameTimeIndex = 0;
 
 float movementSpeed = 30.0f;
 
-void ChromaGui::MainMenu(GLFWwindow* window, ChromaRenderer* cr)
+void ChromaGui::MainMenu(GLFWwindow* /*window*/, ChromaRenderer* cr)
 {
     if (ImGui::BeginMainMenuBar())
     {

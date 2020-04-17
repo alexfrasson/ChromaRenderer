@@ -17,13 +17,12 @@ Camera::~Camera(void)
 {
 }
 
-void Camera::setSize(int width, int height)
+void Camera::setSize(int pwidth, int pheight)
 {
-    aspectRatio = width / static_cast<float>(height);
-    this->width = width;
-    this->height = height;
-
-    d = ((float)width / 2.0f) / tan(m_HorizontalFOV / 2.0f);
+    aspectRatio = pwidth / static_cast<float>(pheight);
+    width = pwidth;
+    height = pheight;
+    d = ((float)pwidth / 2.0f) / tan(m_HorizontalFOV / 2.0f);
 }
 void Camera::lookAt(glm::vec3 target)
 {
