@@ -12,8 +12,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
-constexpr auto RADTODEGREE = 57.295779513082320876798154814105;
-constexpr auto DEGREETORAD = 0.01745329251994329576923690768489;
+constexpr auto RADTODEGREE = 57.295779513082320876798154814105f;
+constexpr auto DEGREETORAD = 0.01745329251994329576923690768489f;
 
 namespace fs = std::filesystem;
 
@@ -281,7 +281,7 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
 
     // Iterate dummy objects with dummy members (all the same data)
     for (size_t i = 0; i < cr->scene.materials.size(); i++)
-        if (funcs::ShowDummyObject(cr->scene.materials[i], i))
+        if (funcs::ShowDummyObject(cr->scene.materials[i], (int)i))
             somethingChanged = true;
     // for (int obj_i = 0; obj_i < 3; obj_i++)
     //	funcs::ShowDummyObject("Object", obj_i);
@@ -307,7 +307,7 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
         ImGui::Text("Current %.2f ms (%.1f FPS)", ImGui::GetIO().DeltaTime * 1000.0f, 1.0f / ImGui::GetIO().DeltaTime);
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        ImGui::PlotLines("", &frameTimes[0], frameTimes.size(), currentFrameTimeIndex, "", 0.0f, 150.0f, ImVec2(0, 75));
+        ImGui::PlotLines("", &frameTimes[0], (int)frameTimes.size(), currentFrameTimeIndex, "", 0.0f, 150.0f, ImVec2(0, 75));
         ImGui::PopItemWidth();
 
         // Settings

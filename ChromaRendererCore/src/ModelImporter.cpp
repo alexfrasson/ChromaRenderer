@@ -80,7 +80,7 @@ aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
 
     aiMatrix4x4 localToWorld = aiMatrix4x4();
 
-    for (int i = transforms.size() - 1; i >= 0; i--)
+    for (int i = (int)transforms.size() - 1; i >= 0; i--)
     // for (size_t i = 0; i < transforms.size(); i++)
     {
         localToWorld *= transforms[i];

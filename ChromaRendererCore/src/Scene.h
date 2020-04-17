@@ -29,7 +29,7 @@ class Scene
 
     Scene(void);
     ~Scene(void);
-    long triangleCount();
+    size_t triangleCount();
     void LoadMesh(std::string file);
     void addObject(Object o);
     void addObject(Object o, std::function<void()> cb);

@@ -149,7 +149,7 @@ class KDTree : public ISpacePartitioningStructure
         stop = true;
     }
 
-    long sizeInBytes(void);
+    size_t sizeInBytes(void);
     void printInfo();
 
     float cost(const float probabilityL, const float probabilityR, const int triangleCountL, const int triangleCountR);

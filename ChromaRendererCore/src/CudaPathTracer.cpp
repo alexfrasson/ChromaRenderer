@@ -96,7 +96,7 @@ vector<CudaTriangle> SceneToCudaTriangles(Scene& scene)
             {
                 if (t.material == &scene.materials[i])
                 {
-                    ct.material = i;
+                    ct.material = (int)i;
                     break;
                 }
             }
@@ -183,7 +183,7 @@ vector<CudaTriangle> SceneToCudaTrianglesBVH(Scene& scene)
         {
             if (t->material == &scene.materials[i])
             {
-                ct.material = i;
+                ct.material = (int)i;
                 break;
             }
         }
@@ -363,7 +363,7 @@ void CudaPathTracer::renderThread(bool& abort)
     for (size_t i = 0; i < targetSamplesPerPixel * MAX_PATH_DEPTH; i++)
     {
         // calculate a new seed for the random number generator, based on the framenumber
-        unsigned int hashedframes = WangHash(i);
+        unsigned int hashedframes = WangHash((uint32_t)i);
 
         trace(stream,
               dev_pathIterationBuffer,
@@ -442,7 +442,7 @@ void CudaPathTracer::init(Scene& scene)
     cudaMemcpyHostToDevice));*/
 
     vector<CudaTriangle> cudaTrianglesBVH = SceneToCudaTrianglesBVH(scene);
-    nCudaTrianglesBVH = cudaTrianglesBVH.size();
+    nCudaTrianglesBVH = (int)cudaTrianglesBVH.size();
     cout << "Triangles BVH: " << cudaTrianglesBVH.size() << endl;
     cout << "Triangles BVH size: " << (cudaTrianglesBVH.size() * sizeof(CudaTriangle)) / (1024) << "KB" << endl;
     cudaErrorCheck(cudaMalloc((void**)&dev_cudaTrianglesBVH, cudaTrianglesBVH.size() * sizeof(CudaTriangle)));
@@ -455,7 +455,7 @@ void CudaPathTracer::init(Scene& scene)
                                    stream));
 
     vector<CudaLinearBvhNode> cudaLinearBVH = SceneToCudaLinearBvhNode(scene);
-    nCudaLinearBVHNodes = cudaLinearBVH.size();
+    nCudaLinearBVHNodes = (int)cudaLinearBVH.size();
     cout << "CudaLinearBVHNodes: " << cudaLinearBVH.size() << endl;
     cout << "CudaLinearBVHNodes size: " << (cudaLinearBVH.size() * sizeof(CudaLinearBvhNode)) / (1024) << "KB" << endl;
     cudaErrorCheck(cudaMalloc((void**)&dev_cudaLinearBVHNodes, cudaLinearBVH.size() * sizeof(CudaLinearBvhNode)));
@@ -468,7 +468,7 @@ void CudaPathTracer::init(Scene& scene)
                                    stream));
 
     vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(scene);
-    nCudaMaterials = cudaMaterials.size();
+    nCudaMaterials = (int)cudaMaterials.size();
     cout << "Materials: " << cudaMaterials.size() << endl;
     cout << "Materials size: " << (cudaMaterials.size() * sizeof(CudaMaterial)) / (1024) << "KB" << endl;
     cudaErrorCheck(cudaMalloc((void**)&dev_cudaMaterials, cudaMaterials.size() * sizeof(CudaMaterial)));
@@ -537,7 +537,7 @@ void CudaPathTracer::init(Image& img, Camera& cam)
 void CudaPathTracer::uploadMaterials(Scene& scene)
 {
     vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(scene);
-    nCudaMaterials = cudaMaterials.size();
+    nCudaMaterials = (uint32_t)cudaMaterials.size();
     if (dev_cudaMaterials == nullptr)
         cudaErrorCheck(cudaMalloc((void**)&dev_cudaMaterials, cudaMaterials.size() * sizeof(CudaMaterial)));
     // cudaErrorCheck(cudaMemcpy(dev_cudaMaterials, &cudaMaterials[0], cudaMaterials.size() * sizeof(CudaMaterial),
@@ -568,7 +568,7 @@ float CudaPathTracer::getProgress()
 
 float CudaPathTracer::instantRaysPerSec()
 {
-    return (registeredImage.width * (double)registeredImage.height) / (lastIterationElapsedMillis.count() * 0.001);
+    return (registeredImage.width * (float)registeredImage.height) / (lastIterationElapsedMillis.count() * 0.001f);
 }
 
 void CudaPathTracer::dispatchComputeShader(bool sync)

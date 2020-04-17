@@ -336,7 +336,7 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
         node->triangles.emplace_back(triandflag[i].triangle);
         node->triangles.shrink_to_fit();
         nTriangles += node->triangles.size();*/
-        node->leafPayload.nTris = triandflag.size();
+        node->leafPayload.nTris = (uint32_t)triandflag.size();
         node->leafPayload.tris = new Face*[node->leafPayload.nTris];
         for (size_t i = 0; i < triandflag.size(); i++)
             node->leafPayload.tris[i] = triandflag[i].triangle;
@@ -350,18 +350,18 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
 
     Side splitPlaneSide;
     Plane splitPlane;
-    float splitPlaneCost = presortedEventFindBestPlane(triandflag.size(), events, nodebb, splitPlaneSide, splitPlane);
+    float splitPlaneCost = presortedEventFindBestPlane((int)triandflag.size(), events, nodebb, splitPlaneSide, splitPlane);
 
     // Now that we know the best split is time to check if not splitting at all is better
     // If the cost of not splitting(making this node a leaf) is better, we just... don't split
-    if (cost(triandflag.size()) < splitPlaneCost)
+    if (cost((int)triandflag.size()) < splitPlaneCost)
     {
         // Store triangles
         /*for (int i = 0; i < triandflag.size(); i++)
         node->triangles.emplace_back(triandflag[i].triangle);
         node->triangles.shrink_to_fit();
         nTriangles += node->triangles.size();*/
-        node->leafPayload.nTris = triandflag.size();
+        node->leafPayload.nTris = (uint32_t)triandflag.size();
         node->leafPayload.tris = new Face*[node->leafPayload.nTris];
         for (size_t i = 0; i < triandflag.size(); i++)
             node->leafPayload.tris[i] = triandflag[i].triangle;
@@ -771,7 +771,7 @@ bool clipTriangleToBoxSHD(const Face& t, const BoundingBox& v, BoundingBox& clip
     {
         for (size_t j = 0; j < vertices.size(); j++)
         {
-            int next = (j + 1) % vertices.size();
+            size_t next = (j + 1) % vertices.size();
 
             if (vertices[j][dim] < v.min[dim])
             {
@@ -839,7 +839,7 @@ bool clipTriangleToBoxSHD(const Face& t, const BoundingBox& v, BoundingBox& clip
     {
         for (size_t j = 0; j < vertices.size(); j++)
         {
-            int next = (j + 1) % vertices.size();
+            size_t next = (j + 1) % vertices.size();
 
             // vetices[j] outside
             if (vertices[j][dim] > v.max[dim])
@@ -1019,9 +1019,9 @@ bool intersectLineSegmentPlaneD(const glm::dvec3& planeP,
     }
     return false;
 }
-long KDTree::sizeInBytes()
+size_t KDTree::sizeInBytes()
 {
-    long size = sizeof(KDTree);
+    size_t size = sizeof(KDTree);
     size += sizeof(KDTNode) * nNodes;
     size += sizeof(Face*) * nTriangles;
     return size;

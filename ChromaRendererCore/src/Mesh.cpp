@@ -4,9 +4,9 @@ Mesh::Mesh()
 {
 }
 
-long Mesh::sizeInBytes()
+size_t Mesh::sizeInBytes()
 {
-    long size = sizeof(Mesh);
+    size_t size = sizeof(Mesh);
     size += sizeof(Triangle) * t.size();
     size += sizeof(glm::vec3) * v.size();
     size += sizeof(glm::vec3) * n.size();
@@ -15,12 +15,12 @@ long Mesh::sizeInBytes()
 
 void Mesh::genBoundingBox()
 {
-    int size = t.size();
+    size_t size = t.size();
 
     // find boundaries
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        for (int j = 0; j < 3; j++)
+        for (size_t j = 0; j < 3; j++)
         {
             if (v[t[i].v[j]].x > boundingBox.max.x)
                 boundingBox.max.x = v[t[i].v[j]].x;

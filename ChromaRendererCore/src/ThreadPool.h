@@ -71,5 +71,5 @@ class ThreadPool
     // Requests and waits for every worker to quit.
     void abort();
     unsigned int getCapacity();
-    unsigned int getNumberWorkers();
+    size_t getNumberWorkers();
 };
