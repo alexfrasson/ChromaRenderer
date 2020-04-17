@@ -1,0 +1,13 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "imgui",
+    srcs = glob(["src/**/*.cpp"]),
+    hdrs = glob(["src/**/*.h"]),
+    includes = ["src"],
+    deps = [
+        "//third-party/glad",
+        "//third-party/glfw",
+        "//third-party/glm",
+    ],
+)
