@@ -130,7 +130,7 @@ def _cuda_library_impl(ctx):
         #args.add("-Xcompiler", "\"/EHsc /W1 /nologo /O2 /FS /Zi /MD\"")
         #if ctx.attr.copts:
 
-        compiler_options = ctx.fragments.cpp.cxxopts
+        compiler_options = ctx.fragments.cpp.copts + ctx.fragments.cpp.cxxopts 
 
         if "-std=c++17" in compiler_options:
             compiler_options.remove("-std=c++17")
