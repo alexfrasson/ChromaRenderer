@@ -15,19 +15,23 @@ class Camera
 
   public:
     // Image image;
-    int width, height;
+    int width;
+    int height;
     glm::vec3 eye;
     glm::vec3 up;
-    glm::vec3 right, forward;
-    float d;
-    float aspectRatio;
+    glm::vec3 right;
+    glm::vec3 forward;
 
   private:
     float m_HorizontalFOV;
 
   public:
-    Camera(void);
-    ~Camera(void);
+    float aspectRatio;
+    float d;
+
+  public:
+    Camera();
+    ~Camera();
 
     float horizontalFOV()
     {

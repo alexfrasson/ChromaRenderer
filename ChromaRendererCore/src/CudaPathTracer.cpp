@@ -92,7 +92,7 @@ vector<CudaTriangle> SceneToCudaTriangles(Scene& scene)
             }
 
             // Find material index
-            for (int i = 0; i < scene.materials.size(); i++)
+            for (size_t i = 0; i < scene.materials.size(); i++)
             {
                 if (t.material == &scene.materials[i])
                 {
@@ -179,7 +179,7 @@ vector<CudaTriangle> SceneToCudaTrianglesBVH(Scene& scene)
         }
 
         // Find material index
-        for (int i = 0; i < scene.materials.size(); i++)
+        for (size_t i = 0; i < scene.materials.size(); i++)
         {
             if (t->material == &scene.materials[i])
             {

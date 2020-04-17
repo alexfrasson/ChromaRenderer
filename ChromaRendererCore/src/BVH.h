@@ -80,7 +80,7 @@ class BVH : public ISpacePartitioningStructure
 
     unsigned int nLeafs;
     unsigned int nNodes;
-    unsigned int maxDepth;
+    int maxDepth;
 
     std::vector<Face> tris;
     std::vector<Triangle*> triangles;

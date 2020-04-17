@@ -5,7 +5,7 @@
 #include <cstring>
 #include <iostream>
 
-Image::Image() : width(0), height(0), buffer(nullptr), hasDataChanged(false), textureID(0)
+Image::Image() : buffer(nullptr), width(0), height(0), hasDataChanged(false), textureID(0)
 {
 }
 

@@ -83,6 +83,8 @@ void ChromaRenderer::genTasks()
                                              interval,
                                              std::placeholders::_1));
                 break;
+            default:
+                break;
             }
         }
     }

@@ -127,13 +127,13 @@ bool BVH::build(std::vector<Object>& o)
     // Compute each triangle's bbox, it's centroid and the bbox of all triangles and of all centroids
     std::vector<BVHPrimitiveInfo> primitive;
     primitive.reserve(o[0].f.size());
-    for (int i = 0; i < o[0].f.size(); i++)
+    for (size_t i = 0; i < o[0].f.size(); i++)
     {
         BoundingBox bb;
         bb = BoundingBox();
         for (int dim = 0; dim < 3; dim++)
             bb.expand(o[0].f[i].v[dim]);
-        primitive.emplace_back(bb, i);
+        primitive.emplace_back(bb, (int)i);
     }
 
     root = buildnode(0, primitive, 0, primitive.size());
@@ -196,13 +196,13 @@ bool BVH::build(std::vector<Mesh*>& m)
     // Compute each triangle's bbox, it's centroid and the bbox of all triangles and of all centroids
     std::vector<BVHPrimitiveInfo> primitive;
     primitive.reserve(mesh.t.size());
-    for (int i = 0; i < mesh.t.size(); i++)
+    for (size_t i = 0; i < mesh.t.size(); i++)
     {
         BoundingBox bb;
         bb = BoundingBox();
         for (int dim = 0; dim < 3; dim++)
             bb.expand(*mesh.t[i].getVertex(dim));
-        primitive.emplace_back(bb, i);
+        primitive.emplace_back(bb, (int)i);
     }
 
     root = buildnode(0, primitive, 0, primitive.size());
@@ -449,7 +449,7 @@ BvhNode* BVH::buildNode(int depth,
 
 #ifdef WIDEST_AXIS_SPLIT_ONLY
     // Reorganize id array
-    int mid;
+    int mid = 0;
     for (int i = startID, j = endID - 1; i < endID && j >= startID && i <= j;)
     {
         // Find a triangle that is on the left but should be on the right
@@ -580,7 +580,7 @@ bool BVH::splitMidpoint(std::vector<BVHPrimitiveInfo>& primitive,
     float midpoint = (trianglesbbox.max[widestDim] + trianglesbbox.min[widestDim]) / 2.0f;
 
     // Reorganize array
-    int mid;
+    int mid = 0;
     for (int i = startID, j = endID - 1; i < endID && j >= startID && i <= j;)
     {
         // Find a triangle that is on the left but should be on the right
@@ -685,7 +685,6 @@ bool BVH::intersect(Ray& r, Intersection& intersection) const
         return false;
 
     bool hit = false;
-    glm::vec3 origin = r.origin;
     glm::vec3 invRayDir = 1.f / r.direction;
     glm::bvec3 dirIsNeg(invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0);
 
@@ -709,7 +708,7 @@ bool BVH::intersect(Ray& r, Intersection& intersection) const
             if (node->nPrimitives > 0)
             {
                 // Intersect primitives
-                for (int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                for (uint32_t i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
                 {
                     // float t;
                     // if (RTUtils::intersectRayTriangleMollerTrumbore(r, tris[id[i]], t))
@@ -842,7 +841,6 @@ bool BVH::intersectF(const Ray& r, Intersection& intersection, float& nNodeHitsN
 
     nNodeHitsNormalized = 0;
     bool hit = false;
-    glm::vec3 origin = r.origin;
     glm::vec3 invRayDir = 1.f / r.direction;
     glm::bvec3 dirIsNeg(invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0);
 
@@ -850,7 +848,6 @@ bool BVH::intersectF(const Ray& r, Intersection& intersection, float& nNodeHitsN
     uint32_t nodeNum = 0;
     uint32_t todo[64];
 
-    bool leafhit = false;
     uint16_t nNodeTests = 0;
     uint16_t nPrimTests = 0;
 
@@ -867,9 +864,8 @@ bool BVH::intersectF(const Ray& r, Intersection& intersection, float& nNodeHitsN
             nNodeHitsNormalized++;
             if (node->nPrimitives > 0)
             {
-                leafhit = true;
                 // Intersect primitives
-                for (int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                for (uint32_t i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
                 {
                     float t;
                     nPrimTests++;
@@ -930,7 +926,6 @@ bool BVH::intersectF(const Ray& r, Intersection& intersection) const
     int todoPos = -1;
 
     bool hit = false;
-    const Face* hitf = NULL;
     intersection.distance = FLT_MAX;
     const BvhNode* n = root;
     glm::vec3 invRayDir = 1.f / r.direction;

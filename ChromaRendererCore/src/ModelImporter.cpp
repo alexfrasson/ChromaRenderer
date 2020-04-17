@@ -94,12 +94,12 @@ void getTotalNumvberOfTrianglesAndVertices(const aiScene* scene,
                                            uint64_t* nTriangles,
                                            uint64_t* nVertices)
 {
-    for (int i = 0; i < node->mNumChildren; i++)
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
         getTotalNumvberOfTrianglesAndVertices(scene, node->mChildren[i], nTriangles, nVertices);
     }
 
-    for (int i = 0; i < node->mNumMeshes; i++)
+    for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         *nTriangles += mesh->mNumFaces;
@@ -115,7 +115,7 @@ void printSceneInfo(const aiScene* scene)
     uint64_t triangles = 0;
     uint64_t vertices = 0;
     // Count triangles and vertices
-    for (int i = 0; i < scene->mNumMeshes; i++)
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[i];
 
@@ -144,7 +144,7 @@ void printMeshInfo(const aiScene* scene)
     uint64_t triangles = 0;
     uint64_t vertices = 0;
     // Count triangles and vertices
-    for (int i = 0; i < scene->mNumMeshes; i++)
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[i];
         triangles += mesh->mNumFaces;
@@ -182,7 +182,7 @@ void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, 
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
         // Copy vertex and normal data
-        for (int k = 0; k < mesh->mNumVertices; k++)
+        for (unsigned int k = 0; k < mesh->mNumVertices; k++)
         {
             aiVector3D v = node->mTransformation * mesh->mVertices[k];
             m->v.emplace_back(v.x, v.y, v.z);
@@ -197,14 +197,14 @@ void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, 
         }
 
         // Copy everything
-        for (int j = 0; j < mesh->mNumFaces; j++)
+        for (unsigned int j = 0; j < mesh->mNumFaces; j++)
         {
             // Copy triangle data
             aiFace* face = &mesh->mFaces[j];
             if (face->mNumIndices != 3) // if the face is not a triangle
                 continue;
             Triangle t;
-            for (int k = 0; k < face->mNumIndices; k++)
+            for (unsigned int k = 0; k < face->mNumIndices; k++)
             {
                 t.v[k] = face->mIndices[k] + offset;
                 if (mesh->HasNormals())
@@ -257,7 +257,7 @@ void convertToMeshRecursive(Scene& s,
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
         // Copy vertex and normal data
-        for (int k = 0; k < mesh->mNumVertices; k++)
+        for (unsigned int k = 0; k < mesh->mNumVertices; k++)
         {
             aiVector3D v = transform * mesh->mVertices[k];
             m->v.emplace_back(v.x, v.y, v.z);
@@ -273,14 +273,14 @@ void convertToMeshRecursive(Scene& s,
         }
 
         // Copy everything
-        for (int j = 0; j < mesh->mNumFaces; j++)
+        for (unsigned int j = 0; j < mesh->mNumFaces; j++)
         {
             // Copy triangle data
             aiFace* face = &mesh->mFaces[j];
             if (face->mNumIndices != 3) // if the face is not a triangle
                 continue;
             Triangle t;
-            for (int k = 0; k < face->mNumIndices; k++)
+            for (unsigned int k = 0; k < face->mNumIndices; k++)
             {
                 t.v[k] = face->mIndices[k] + offset;
                 if (mesh->HasNormals())
@@ -314,7 +314,7 @@ bool convert(const aiScene* scene, Mesh& m)
 {
     int triangles = 0;
     int vertices = 0;
-    for (int i = 0; i < scene->mNumMeshes; i++)
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[i];
         triangles += mesh->mNumFaces;
@@ -328,7 +328,7 @@ bool convert(const aiScene* scene, Mesh& m)
 
     uint32_t offset = 0;
 
-    for (int i = 0; i < scene->mNumMeshes; i++)
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[i];
 
@@ -338,7 +338,7 @@ bool convert(const aiScene* scene, Mesh& m)
         // m.n.reserve(mesh->mNumVertices);
 
         // Copy vertex and normal data
-        for (int k = 0; k < mesh->mNumVertices; k++)
+        for (unsigned int k = 0; k < mesh->mNumVertices; k++)
         {
             m.v.emplace_back(mesh->mVertices[k].x, mesh->mVertices[k].y, mesh->mVertices[k].z);
             if (mesh->HasNormals())
@@ -346,14 +346,14 @@ bool convert(const aiScene* scene, Mesh& m)
         }
 
         // Copy everything
-        for (int j = 0; j < mesh->mNumFaces; j++)
+        for (unsigned int j = 0; j < mesh->mNumFaces; j++)
         {
             // Copy triangle data
             aiFace* face = &mesh->mFaces[j];
             if (face->mNumIndices != 3) // if the face is not a triangle
                 continue;
             Triangle t;
-            for (int k = 0; k < face->mNumIndices; k++)
+            for (unsigned int k = 0; k < face->mNumIndices; k++)
             {
                 t.v[k] = face->mIndices[k] + offset;
                 if (mesh->HasNormals())
@@ -465,6 +465,8 @@ void printMaterialInfo(const aiMaterial* mat)
             break;
         }
         case aiPTI_Buffer:
+            break;
+        default:
             break;
         }
     }

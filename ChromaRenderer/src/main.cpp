@@ -44,7 +44,7 @@ const char* glsl_version;
 
 ChromaRenderer* cr;
 
-#pragma region ImGuiStuff
+
 #ifndef WM_DPICHANGED
 #define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers
 #endif
@@ -245,9 +245,9 @@ void ImGuiCleanup()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
-#pragma endregion
 
-#pragma region GLFWStuff
+
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -287,7 +287,7 @@ bool InitGLFW()
 
     return true;
 }
-#pragma endregion
+
 
 void MainLoop()
 {

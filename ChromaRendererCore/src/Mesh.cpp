@@ -46,7 +46,7 @@ void Mesh::genSmoothNormals()
     n.insert(n.begin(), v.size(), glm::vec3());
 
     // Go through all triangles
-    for (int i = 0; i < t.size(); i++)
+    for (size_t i = 0; i < t.size(); i++)
     {
         // Calc triangle normal
         glm::vec3 edge0 = *t[i].getVertex(1) - *t[i].getVertex(0);
@@ -66,6 +66,6 @@ void Mesh::genSmoothNormals()
     }
 
     // Normalize normals
-    for (int i = 0; i < n.size(); i++)
+    for (size_t i = 0; i < n.size(); i++)
         n[i] = glm::normalize(n[i]);
 }

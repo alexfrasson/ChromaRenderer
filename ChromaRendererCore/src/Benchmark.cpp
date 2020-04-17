@@ -1,7 +1,7 @@
 #include <Benchmark.h>
 #include <iostream>
 
-Benchmark::Benchmark() : running(false), stop(false)
+Benchmark::Benchmark() : stop(false), running(false)
 {
 }
 void Benchmark::stopBenchmark()

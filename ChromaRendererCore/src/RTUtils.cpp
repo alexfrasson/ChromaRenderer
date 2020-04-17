@@ -32,27 +32,25 @@ void RTUtils::trace(Scene& scene,
 
             float diffuseColorSum = 0.0f;
             float treeNodeColor = 0.f;
-            bool hitSomething = false;
             // Para todos os raios do pixel
             const int raysVecSize = rays.size();
             for (int k = 0; k < raysVecSize; k++)
             {
-                /*const Face* hitTriangle0;
-                const Face* hitTriangle1;
-                float hitDistance0, hitDistance1;
-                if(RTUtils::closestIntersectionRayObjectsKensler(ray, scene.objects, &hitTriangle0, hitDistance0))
-                {
-                if(RTUtils::closestIntersectionRayObjects2(ray, scene.objects, &hitTriangle1, hitDistance1))
-                {
-                hitSomething = true;
-                //if(hitDistance0 == hitDistance1)
-                if(hitTriangle0 == hitTriangle1)
-                diffuseColorSum += 1.0f;
-                //diffuseColorSum += RTUtils::calcColor(ray, hitTriangle0, hitDistance1);
+                // const Face* hitTriangle0;
+                // const Face* hitTriangle1;
+                // float hitDistance0, hitDistance1;
+                // if(RTUtils::closestIntersectionRayObjectsKensler(ray, scene.objects, &hitTriangle0, hitDistance0))
+                // {
+                // if(RTUtils::closestIntersectionRayObjects2(ray, scene.objects, &hitTriangle1, hitDistance1))
+                // {
+                // hitSomething = true;
+                // //if(hitDistance0 == hitDistance1)
+                // if(hitTriangle0 == hitTriangle1)
+                // diffuseColorSum += 1.0f;
+                // //diffuseColorSum += RTUtils::calcColor(ray, hitTriangle0, hitDistance1);
 
-                }
-                }/**/
-                /**/
+                // }
+                // }
                 // Testa colis�o com todos objetos
                 // const Face* hitTriangle;
                 // float hitDistance;
@@ -60,16 +58,13 @@ void RTUtils::trace(Scene& scene,
                 intersection.n = glm::vec3();
                 intersection.p = glm::vec3();
 
-                float nNodeHitsNormalized;
                 if (scene.sps->intersect(rays[k], intersection))
                 // if (RTUtils::closestIntersectionRayObjects(rays[k], scene.objects, &hitTriangle, hitDistance,
                 // settings.boundingboxtest))
                 {
-                    hitSomething = true;
                     // diffuseColorSum += RTUtils::calcColor(rays[k], intersection.triangle, intersection.distance);
                     diffuseColorSum += RTUtils::calcColor(intersection);
                 }
-                /**/
                 else
                     diffuseColorSum += 0.1f; // Background
                 // treeNodeColor += nNodeHitsNormalized;
@@ -80,10 +75,10 @@ void RTUtils::trace(Scene& scene,
             treeNodeColor = (unsigned char)(255 * treeNodeColor);
             unsigned char color = (unsigned char)(255 * diffuseColorAverage);
 
-            uint8_t red = static_cast<uint8_t>(color * 0.2f);
-            uint8_t green = static_cast<uint8_t>(color * 0.2f);
+            //uint8_t red = static_cast<uint8_t>(color * 0.2f);
+            //uint8_t green = static_cast<uint8_t>(color * 0.2f);
             // green += treeNodeColor * 0.8f;
-            uint8_t blue = static_cast<uint8_t>(color * 0.2f);
+            //uint8_t blue = static_cast<uint8_t>(color * 0.2f);
 
             // img.setColor(i, j, red, green, blue);
             img.setColor(i, j, color, color, color, 255);
@@ -519,8 +514,7 @@ void RTUtils::rayDirection(const Camera& camera, const int i, const int j, Ray* 
 }
 
 bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vector<Face>& f, Intersection& intersection)
-{
-    float hitU, hitV;                                    // Hit barycentric coordinates
+{                       // Hit barycentric coordinates
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
     unsigned int hitIndex;                               // Index of the closest triangle
     bool hit = false;
@@ -534,8 +528,6 @@ bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vecto
             if (t < hitT)
             {
                 hit = true;
-                hitU = u;
-                hitV = v;
                 hitT = t;
                 hitIndex = i;
                 intersection.distance = t;
@@ -548,7 +540,6 @@ bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vecto
 }
 bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vector<Face*>& f, Intersection& intersection)
 {
-    float hitU, hitV;                                    // Hit barycentric coordinates
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
     unsigned int hitIndex;                               // Index of the closest triangle
     bool hit = false;
@@ -562,8 +553,6 @@ bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vecto
             if (t < hitT)
             {
                 hit = true;
-                hitU = u;
-                hitV = v;
                 hitT = t;
                 hitIndex = i;
                 intersection.distance = t;
@@ -579,7 +568,6 @@ bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r,
                                                   const unsigned int nFaces,
                                                   Intersection& intersection)
 {
-    float hitU, hitV;                                    // Hit barycentric coordinates
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
     unsigned int hitIndex;                               // Index of the closest triangle
     bool hit = false;
@@ -592,8 +580,6 @@ bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r,
             if (t < hitT)
             {
                 hit = true;
-                hitU = u;
-                hitV = v;
                 hitT = t;
                 hitIndex = i;
                 intersection.distance = t;
@@ -717,8 +703,7 @@ bool RTUtils::intersectRayTriangleMollerTrumboreNOBACKFACECULLING(const Ray& r, 
     return false;
 }
 bool RTUtils::intersectRayObjectMollerTrumbore(const Ray& r, const Object& o, const Face** hitFace, float& hitDistance)
-{
-    float hitU, hitV;                                    // Hit barycentric coordinates
+{                              // Hit barycentric coordinates
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
     unsigned int hitIndex;                               // Index of the closest triangle
     bool hit = false;
@@ -732,8 +717,6 @@ bool RTUtils::intersectRayObjectMollerTrumbore(const Ray& r, const Object& o, co
             if (t < hitT)
             {
                 hit = true;
-                hitU = u;
-                hitV = v;
                 hitT = t;
                 hitIndex = i;
                 hitDistance = t;
@@ -756,7 +739,7 @@ bool RTUtils::intersectRayTrianglesMollerTrumboreSIMD128(const Ray& r,
     int sequentialsize = f.size() % 4;
 
     // Run a sequencial intersection in the remaining triangles
-    for (unsigned int i = 0; i < sequentialsize; i++)
+    for (int i = 0; i < sequentialsize; i++)
     {
         float t;
         if (intersectRayTriangleMollerTrumbore(r, f[i], t))
@@ -784,7 +767,7 @@ bool RTUtils::intersectRayTrianglesMollerTrumboreSIMD128(const Ray& r,
     const __m128 ones = _mm_set_ps1(1.0f);
 
     // Loop over the triangles, computing four triangles at a time
-    for (int i = sequentialsize; i + 3 < f.size(); i += 4)
+    for (size_t i = sequentialsize; i + 3 < f.size(); i += 4)
     {
         const float fi = static_cast<float>(i);
 
@@ -920,7 +903,7 @@ bool RTUtils::intersectRayObjectMollerTrumboreSIMD128(const Ray& r,
     const __m128 ones = _mm_set_ps1(1.0f);
 
     // Loop over the triangles, computing four triangles at a time
-    for (int i = 0; i + 3 < o.f.size(); i += 4)
+    for (size_t i = 0; i + 3 < o.f.size(); i += 4)
     {
         const float fi = static_cast<float>(i);
 
@@ -1057,7 +1040,7 @@ bool RTUtils::intersectRayObjectMollerTrumboreSIMD256(const Ray& r,
     const __m256 ones = _mm256_set1_ps(1.0f);
 
     // Loop over the triangles, computing eight triangles at a time
-    for (int i = 0; i + 7 < o.f.size(); i += 8)
+    for (size_t i = 0; i + 7 < o.f.size(); i += 8)
     {
         const float fi = static_cast<float>(i);
 

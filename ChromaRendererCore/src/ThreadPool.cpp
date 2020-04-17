@@ -126,20 +126,20 @@ void ThreadPool::abort()
     {
         std::unique_lock<std::mutex> lock(queue_mutex);
         quit = true;
-        for (int i = 0; i < workers.size(); i++)
+        for (size_t i = 0; i < workers.size(); i++)
         {
             QUIT(workers[i]) = true;
             STOP(workers[i]) = true;
         }
     }
     condition.notify_all();
-    for (int i = 0; i < workers.size(); i++)
+    for (size_t i = 0; i < workers.size(); i++)
         if (THREAD(workers[i]).joinable())
             THREAD(workers[i]).join();
 }
 void ThreadPool::stopAll()
 {
-    for (int i = 0; i < workers.size(); i++)
+    for (size_t i = 0; i < workers.size(); i++)
         STOP(workers[i]) = true;
 }
 unsigned int ThreadPool::getCapacity()
