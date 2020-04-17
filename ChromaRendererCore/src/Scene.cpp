@@ -73,7 +73,7 @@ void Scene::addMesh(Mesh* m, std::function<void(void)> cb)
 void Scene::clear()
 {
     objects.clear();
-    for (int i = 0; i < meshes.size(); i++)
+    for (size_t i = 0; i < meshes.size(); i++)
         delete meshes[i];
     meshes.clear();
     materials.clear();
@@ -84,7 +84,7 @@ BoundingBox Scene::getBoundingBox()
 {
     BoundingBox bb;
 
-    for (int i = 0; i < objects.size(); i++)
+    for (size_t i = 0; i < objects.size(); i++)
     {
         if (objects[i].boundingBox.max.x > bb.max.x)
             bb.max.x = objects[i].boundingBox.max.x;
@@ -101,7 +101,7 @@ BoundingBox Scene::getBoundingBox()
             bb.min.y = objects[i].boundingBox.min.y;
     }
 
-    for (int i = 0; i < meshes.size(); i++)
+    for (size_t i = 0; i < meshes.size(); i++)
     {
         if (meshes[i]->boundingBox.max.x > bb.max.x)
             bb.max.x = meshes[i]->boundingBox.max.x;

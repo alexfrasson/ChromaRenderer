@@ -6,7 +6,7 @@
 #include <random>
 
 Camera::Camera(void)
-    : eye(-3, 2, 10), up(0, 1, 0), right(1, 0, 0), forward(0, 0, 1), width(1017), height(720), m_HorizontalFOV(1.0f),
+    : width(1017), height(720), eye(-3, 2, 10), up(0, 1, 0), right(1, 0, 0), forward(0, 0, 1), m_HorizontalFOV(1.0f),
       aspectRatio(width / static_cast<float>(height)), d(((float)width / 2.0f) / tan(m_HorizontalFOV / 2.0f))
 {
     // computeUVW();
@@ -108,7 +108,7 @@ void Camera::rayDirection(const int i, const int j, std::vector<Ray>& rays, cons
     const float numDivs = std::ceil(sqrtf(static_cast<float>(nRays))); // Number of subcells = numDivs^2
     const float step = 1.0f / numDivs;
 
-    int count = 0;
+    unsigned int count = 0;
 
     rays.clear();
 

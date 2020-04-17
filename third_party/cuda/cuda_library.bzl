@@ -79,10 +79,10 @@ def _cuda_library_impl(ctx):
         #     user_compile_flags = ctx.fragments.cpp.copts + ctx.fragments.cpp.conlyopts,
         # )
 
-        print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.conlyopts))
+        print("ctx.fragments.cpp.conlyopts: {}".format(ctx.fragments.cpp.conlyopts))
         print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.copts))
-        print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.cxxopts))
-        print("ctx.fragments.cpp.copts: {}".format(ctx.fragments.cpp.linkopts))
+        print("ctx.fragments.cpp.cxxopts: {}".format(ctx.fragments.cpp.cxxopts))
+        print("ctx.fragments.cpp.linkopts: {}".format(ctx.fragments.cpp.linkopts))
 
         #print(cc_toolchain.compiler)
         #print(c_compiler_path)

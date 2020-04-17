@@ -1,6 +1,6 @@
 #include <RayCasting.h>
 
-RayCasting::RayCasting() : donePixelCount(0), pixelCount(0)
+RayCasting::RayCasting() : pixelCount(0), donePixelCount(0)
 {
 }
 void RayCasting::trace(Scene& scene, Image& img, RendererSettings& settings, Interval interval, bool& abort)
@@ -21,13 +21,12 @@ void RayCasting::trace(Scene& scene, Image& img, RendererSettings& settings, Int
 
             Color diffuseColor(0.0f, 0.0f, 0.0f);
             // Para todos os raios do pixel
-            for (int k = 0; k < rays.size(); k++)
+            for (size_t k = 0; k < rays.size(); k++)
             {
                 Intersection intersection = Intersection();
                 intersection.n = glm::vec3();
                 intersection.p = glm::vec3();
 
-                float nNodeHitsNormalized;
                 if (scene.sps->intersect(rays[k], intersection))
                     diffuseColor += calcColor(intersection);
                 else

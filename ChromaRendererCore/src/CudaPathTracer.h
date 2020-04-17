@@ -35,7 +35,8 @@ class CudaPathTracer
   private:
     struct RegisteredImage
     {
-        int width = -1, height = -1;
+        uint32_t width = 0;
+        uint32_t height = 0;
         GLuint texID = 0;
         cudaGraphicsResource* cudaTextureResource = nullptr;
 

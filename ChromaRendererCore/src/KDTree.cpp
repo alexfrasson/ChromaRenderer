@@ -56,9 +56,9 @@ KDTree::KDTree() : root(NULL)
     //std::cout << "(" << intersection.x << ", " << intersection.y << ", " << intersection.z << ")" << std::endl;
     std::cout << intersection2.y << std::endl;
 
-    return;/**/
+    return;
 
-    /*BoundingBox b;
+    BoundingBox b;
     b.max = glm::vec3(2.f, -2.f, 3.f);
     b.min = glm::vec3(-2.f, -4.f, 0.f);
 
@@ -83,11 +83,11 @@ KDTree::KDTree() : root(NULL)
 
     std::cout << "    Max " << "(" << clipped.max.x << ", " << clipped.max.y << ", " << clipped.max.z << ")" <<
     std::endl
-    << "    Min " << "(" << clipped.min.x << ", " << clipped.min.y << ", " << clipped.min.z << ")" << std::endl;/**/
+    << "    Min " << "(" << clipped.min.x << ", " << clipped.min.y << ", " << clipped.min.z << ")" << std::endl;
 
     // return;
 
-    /*int nBBs = 10;
+    int nBBs = 10;
     int nTris = 10;
     int bbmax = 5;
     int bbmin = -5;
@@ -283,19 +283,19 @@ bool KDTree::build(std::vector<Object>& objects)
     // presorted
     // kdtriangles = objects[0].f;
 
-    /**/ std::vector<Side> flags(objects[0].f.size(), Side::BOTH);
+    std::vector<Side> flags(objects[0].f.size(), Side::BOTH);
 
     // std::vector<std::pair<Face*, Side*>> triandflag;
     std::vector<TFpointers> triandflag;
     triandflag.reserve(objects[0].f.size());
-    for (int i = 0; i < objects[0].f.size(); i++)
+    for (size_t i = 0; i < objects[0].f.size(); i++)
         triandflag.emplace_back(objects[0].f.data() + i, flags.data() + i);
 
     std::vector<PEvent> events;
     presortedGenEvents(triandflag, bb, events);
     std::sort(events.begin(), events.end(), peventCmp);
 
-    root = presortedBuildNodeSah(0, triandflag, events, bb); /**/
+    root = presortedBuildNodeSah(0, triandflag, events, bb);
 
     // presorted
 
@@ -329,18 +329,18 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
     nNodes++;
 
     // Definitely leaf.
-    if (depth >= maxDepth || triandflag.size() <= sizeToBecomeLeaf)
+    if (depth >= maxDepth || (int)triandflag.size() <= sizeToBecomeLeaf)
     {
         // Store triangles
         /*for (int i = 0; i < triandflag.size(); i++)
         node->triangles.emplace_back(triandflag[i].triangle);
         node->triangles.shrink_to_fit();
-        nTriangles += node->triangles.size();/**/
-        /**/ node->leafPayload.nTris = triandflag.size();
+        nTriangles += node->triangles.size();*/
+        node->leafPayload.nTris = triandflag.size();
         node->leafPayload.tris = new Face*[node->leafPayload.nTris];
-        for (int i = 0; i < triandflag.size(); i++)
+        for (size_t i = 0; i < triandflag.size(); i++)
             node->leafPayload.tris[i] = triandflag[i].triangle;
-        nTriangles += node->leafPayload.nTris; /**/
+        nTriangles += node->leafPayload.nTris;
         node->isLeaf = true;
         nLeafs++;
         if (depth > this->depth)
@@ -360,12 +360,12 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
         /*for (int i = 0; i < triandflag.size(); i++)
         node->triangles.emplace_back(triandflag[i].triangle);
         node->triangles.shrink_to_fit();
-        nTriangles += node->triangles.size();/**/
-        /**/ node->leafPayload.nTris = triandflag.size();
+        nTriangles += node->triangles.size();*/
+        node->leafPayload.nTris = triandflag.size();
         node->leafPayload.tris = new Face*[node->leafPayload.nTris];
-        for (int i = 0; i < triandflag.size(); i++)
+        for (size_t i = 0; i < triandflag.size(); i++)
             node->leafPayload.tris[i] = triandflag[i].triangle;
-        nTriangles += node->leafPayload.nTris; /**/
+        nTriangles += node->leafPayload.nTris;
         node->isLeaf = true;
         nLeafs++;
         if (depth > this->depth)
@@ -383,7 +383,7 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
     events = std::vector<PEvent>();
 
     std::vector<TFpointers> triandflagl, triandflagr;
-    for (int i = 0; i < triandflag.size(); i++)
+    for (size_t i = 0; i < triandflag.size(); i++)
     {
         if (*triandflag[i].flag == Side::LEFT)
         {
@@ -421,7 +421,7 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
     node->interiorPayload.plane = splitPlane;
 
     return node;
-} /**/
+}
 void KDTree::presortedGenEvents(const std::vector<TFpointers>& tfs,
                                 const BoundingBox& nodebb,
                                 std::vector<PEvent>& events)
@@ -433,7 +433,7 @@ void KDTree::presortedGenEvents(const std::vector<TFpointers>& tfs,
     for (int dim = 0; dim < 3; dim++)
     {
         // For each triangle
-        for (int i = 0; i < tfs.size(); i++)
+        for (size_t i = 0; i < tfs.size(); i++)
         {
             float min = std::numeric_limits<float>::max();
             float max = std::numeric_limits<float>::lowest();
@@ -466,14 +466,14 @@ float KDTree::presortedEventFindBestPlane(const int triangles,
 {
     float minCost = std::numeric_limits<float>::max();
     Plane minCostPlane;
-    Side minCostSide;
+    Side minCostSide = Side::BOTH;
 
     int nl[3] = {0, 0, 0};
     int np[3] = {0, 0, 0};
     int nr[3] = {triangles, triangles, triangles};
 
-    int esize = events.size();
-    int i = 0;
+    size_t esize = events.size();
+    size_t i = 0;
     while (i < esize)
     {
         Plane p;
@@ -572,7 +572,7 @@ float KDTree::presortedEventFindBestPlane(const int triangles,
 
 
     // For each clipped triangle
-    /*leftTs.clear();
+    leftTs.clear();
     rightTs.clear();
     for (int i = 0; i < tsbb.size(); i++)
     {
@@ -600,8 +600,7 @@ float KDTree::presortedEventFindBestPlane(const int triangles,
     rightTs.push_back(ts[tsbb[i].second]);
     }
     }
-    }*/
-    /*
+    }
     splitP = minCostPlane;
 
     return true;*/
@@ -612,10 +611,10 @@ void KDTree::presortedClassify(const std::vector<TFpointers>& tfs,
                                const Side& splitPlaneSide)
 {
     // Set all triangles to BOTH
-    for (int i = 0; i < tfs.size(); i++)
+    for (size_t i = 0; i < tfs.size(); i++)
         *tfs[i].flag = Side::BOTH;
 
-    for (int i = 0; i < events.size(); i++)
+    for (size_t i = 0; i < events.size(); i++)
     {
         if (events[i].type == EVENT_TYPE_END && events[i].plane.dim == splitPlane.dim &&
             events[i].plane.value < splitPlane.value)
@@ -657,7 +656,7 @@ void KDTree::presortedSplitEvents(const std::vector<PEvent>& events,
     leftonly.reserve(events.size() / 2);
     rightonly.reserve(events.size() / 2);
     // Events flagged as LEFT or RIGHT go directly to the new events list
-    for (int i = 0; i < events.size(); i++)
+    for (size_t i = 0; i < events.size(); i++)
     {
         if (*events[i].flag == Side::LEFT)
             leftonly.emplace_back(events[i]);
@@ -670,7 +669,7 @@ void KDTree::presortedSplitEvents(const std::vector<PEvent>& events,
     BoundingBox vr = nodebb;
     vr.min[splitplane.dim] = splitplane.value;
     // For every triangle that was flagged as BOTH, generates the new events
-    for (int i = 0; i < tfs.size(); i++)
+    for (size_t i = 0; i < tfs.size(); i++)
     {
         if (*tfs[i].flag == Side::BOTH)
         {
@@ -770,7 +769,7 @@ bool clipTriangleToBoxSHD(const Face& t, const BoundingBox& v, BoundingBox& clip
     // Clip min planes
     for (int dim = 0; dim < 3; dim++)
     {
-        for (int j = 0; j < vertices.size(); j++)
+        for (size_t j = 0; j < vertices.size(); j++)
         {
             int next = (j + 1) % vertices.size();
 
@@ -838,7 +837,7 @@ bool clipTriangleToBoxSHD(const Face& t, const BoundingBox& v, BoundingBox& clip
     // Clip max planes
     for (int dim = 0; dim < 3; dim++)
     {
-        for (int j = 0; j < vertices.size(); j++)
+        for (size_t j = 0; j < vertices.size(); j++)
         {
             int next = (j + 1) % vertices.size();
 
@@ -907,7 +906,7 @@ bool clipTriangleToBoxSHD(const Face& t, const BoundingBox& v, BoundingBox& clip
     if (vertices.empty())
         return false;
 
-    for (int j = 0; j < vertices.size(); j++)
+    for (size_t j = 0; j < vertices.size(); j++)
         clipped.expand(glm::vec3(vertices[j]));
 
     return true;
@@ -952,7 +951,7 @@ float KDTree::sah(const Plane p,
 }
 KDTNode* KDTree::free(KDTNode* node)
 {
-    /**/ if (node == NULL)
+    if (node == NULL)
         return NULL;
 
     if (node->isLeaf)
@@ -967,7 +966,7 @@ KDTNode* KDTree::free(KDTNode* node)
             node->interiorPayload.children[1] = free(node->interiorPayload.children[1]);
     }
     delete node;
-    return NULL; /**/
+    return NULL;
 
     /*if (node == NULL)
     return NULL;

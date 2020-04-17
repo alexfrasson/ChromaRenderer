@@ -67,9 +67,9 @@ bool saveImage(std::string path, Image* img)
     // To bgr
     unsigned char* bgr = new unsigned char[img->getWidth() * img->getHeight() * 3];
 
-    for (int i = 0; i < img->getWidth(); i++)
+    for (unsigned int i = 0; i < img->getWidth(); i++)
     {
-        for (int j = 0; j < img->getHeight(); j++)
+        for (unsigned int j = 0; j < img->getHeight(); j++)
         {
             bgr[(img->getWidth() * j + i) * 3 + 0] = (unsigned char)img->getBuffer()[(img->getWidth() * j + i) * 4 + 2];
             bgr[(img->getWidth() * j + i) * 3 + 1] = (unsigned char)img->getBuffer()[(img->getWidth() * j + i) * 4 + 1];
@@ -77,7 +77,7 @@ bool saveImage(std::string path, Image* img)
         }
     }
 
-    for (int i = img->getHeight() - 1; i >= 0; i--)
+    for (unsigned int i = img->getHeight() - 1; i >= 0; i--)
     {
         // fwrite(img->buffer + (img->width*(img->height - i - 1) * 3), 3, img->width, f);
         fwrite(bgr + (img->getWidth() * (img->getHeight() - i - 1) * 3), 3, img->getWidth(), f);

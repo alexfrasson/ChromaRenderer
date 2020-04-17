@@ -128,14 +128,14 @@ class KDTree : public ISpacePartitioningStructure
 
     bool stop = false;
 
-    unsigned int nNodes;
-    unsigned int nLeafs;
-    unsigned int nTriangles;
-    unsigned int depth;
+    int nNodes;
+    int nLeafs;
+    int nTriangles;
+    int depth;
 
     // Building parameters
-    unsigned int maxDepth = 24;
-    unsigned int sizeToBecomeLeaf = 5;
+    int maxDepth = 24;
+    int sizeToBecomeLeaf = 5;
     // Cost function parameters
     float emptySpaceBonus = 1.0f;
     float KT = 1.0f; // Node traversal cost
