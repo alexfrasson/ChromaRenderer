@@ -317,7 +317,7 @@ bool KDTree::build(std::vector<Object>& objects)
 
     return true;
 }
-KDTNode* KDTree::presortedBuildNodeSah(int depth,
+KDTNode* KDTree::presortedBuildNodeSah(int pdepth,
                                        std::vector<TFpointers>& triandflag,
                                        std::vector<PEvent>& events,
                                        BoundingBox& nodebb)
@@ -329,7 +329,7 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
     nNodes++;
 
     // Definitely leaf.
-    if (depth >= maxDepth || (int)triandflag.size() <= sizeToBecomeLeaf)
+    if (pdepth >= maxDepth || (int)triandflag.size() <= sizeToBecomeLeaf)
     {
         // Store triangles
         /*for (int i = 0; i < triandflag.size(); i++)
@@ -343,8 +343,8 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
         nTriangles += node->leafPayload.nTris;
         node->isLeaf = true;
         nLeafs++;
-        if (depth > this->depth)
-            this->depth = depth;
+        if (pdepth > depth)
+            depth = pdepth;
         return node;
     }
 
@@ -423,7 +423,7 @@ KDTNode* KDTree::presortedBuildNodeSah(int depth,
     return node;
 }
 void KDTree::presortedGenEvents(const std::vector<TFpointers>& tfs,
-                                const BoundingBox& nodebb,
+                                const BoundingBox& /*nodebb*/,
                                 std::vector<PEvent>& events)
 {
     // Reserve all necessary memory at once

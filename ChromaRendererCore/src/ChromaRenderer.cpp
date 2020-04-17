@@ -98,9 +98,9 @@ void ChromaRenderer::setSize(unsigned int width, unsigned int height)
     scene.camera.setSize(width, height);
     // scene.camera.computeUVW();
 }
-void ChromaRenderer::setSettings(RendererSettings& settings)
+void ChromaRenderer::setSettings(RendererSettings& psettings)
 {
-    this->settings = settings;
+    settings = psettings;
     scene.camera.horizontalFOV(settings.horizontalFOV);
     setSize(settings.width, settings.height);
     pixelCount = settings.width * settings.height;
@@ -117,9 +117,9 @@ void ChromaRenderer::startRender()
 {
     start();
 }
-void ChromaRenderer::startRender(RendererSettings& settings)
+void ChromaRenderer::startRender(RendererSettings& psettings)
 {
-    setSettings(settings);
+    setSettings(psettings);
     start();
 }
 void ChromaRenderer::start()
@@ -162,7 +162,7 @@ void ChromaRenderer::start()
     state = State::RENDERING;
     running = true;
 }
-void ChromaRenderer::stopRender(bool block)
+void ChromaRenderer::stopRender(bool /*block*/)
 {
     threadPool.clearTaskQueue();
     running = false;

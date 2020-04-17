@@ -84,7 +84,7 @@ int BVH::flattenBvh(BvhNode* node, int& offset)
     offset++;
     if (node->isLeaf)
     {
-        lroot[myOffset].nPrimitives = node->endID - node->startID;
+        lroot[myOffset].nPrimitives = static_cast<uint8_t>(node->endID - node->startID);
         lroot[myOffset].primitivesOffset = node->startID;
     }
     else
@@ -493,7 +493,7 @@ BvhNode* BVH::buildNode(int depth,
     }
 #endif
 
-    node->axis = minCostDim;
+    node->axis = static_cast<uint8_t>(minCostDim);
     node->bbox = trianglesbbox;
     node->startID = startID;
     node->endID = endID;
@@ -542,7 +542,7 @@ BvhNode* BVH::buildnode(int depth, std::vector<BVHPrimitiveInfo>& primitive, int
     // splitMidpoint(primitive, trianglesbbox, startID, endID, splitindex, splitdim);
     // splitMedian(primitive, trianglesbbox, startID, endID, splitindex, splitdim);
 
-    node->axis = splitdim;
+    node->axis = static_cast<uint8_t>(splitdim);
     node->bbox = trianglesbbox;
     node->startID = startID;
     node->endID = endID;

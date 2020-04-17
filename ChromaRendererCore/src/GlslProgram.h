@@ -58,13 +58,8 @@ class GLSLProgram
     string getExtension(const char* fileName);
 
     // Make these private in order to make the object non-copyable
-    GLSLProgram(const GLSLProgram& other)
-    {
-    }
-    GLSLProgram& operator=(const GLSLProgram& other)
-    {
-        return *this;
-    }
+    GLSLProgram(const GLSLProgram& other) = delete;
+    GLSLProgram& operator=(const GLSLProgram& other) = delete;
 
   public:
     GLSLProgram();

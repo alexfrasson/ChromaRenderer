@@ -26,7 +26,7 @@ class myStream : public Assimp::LogStream
         // empty
     }
     // Write womethink using your own functionality
-    void write(const char* message)
+    void write(const char* /*message*/)
     {
         // std::cout << message;
     }

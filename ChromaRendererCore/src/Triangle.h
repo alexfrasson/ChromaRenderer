@@ -26,6 +26,7 @@ class Triangle
     Triangle() : vdata(NULL), ndata(NULL)
     {
     }
+
     ~Triangle()
     {
     }
@@ -50,9 +51,9 @@ class Triangle
         if (u < 0.0f || u > 1.0f)
             return false;
         const glm::vec3 qvec = glm::cross(tvec, edge0);
-        float v = glm::dot(r.direction, qvec) * invDet;
+        float vv = glm::dot(r.direction, qvec) * invDet;
         // The intersection lies outside of the triangle
-        if (v < 0.0f || u + v > 1.0f)
+        if (vv < 0.0f || u + vv > 1.0f)
             return false;
         float t = glm::dot(edge1, qvec) * invDet;
         // Ray intersection
@@ -75,16 +76,17 @@ class Triangle
         // float beta = glm::dot(glm::cross((*v0 - *v2), (hitPoint - *v2)), triangle->tn)*div;
         // float gama = glm::dot(glm::cross((f2[i].v[1] - f2[i].v[0]), (point-f2[i].v[0])), f2[i].tn)*div;
         // float gama = 1.0f - (alpha + beta);
-        float gama = 1.0f - (u + v);
+        float gama = 1.0f - (u + vv);
         // Calcula normal do ponto
         // glm::vec3 hitNormal = alpha * (*n0) + beta * (*n1) + gama * (*n2);
-        intersection.n = u * (*getNormal(1)) + v * (*getNormal(2)) + gama * (*getNormal(0));
+        intersection.n = u * (*getNormal(1)) + vv * (*getNormal(2)) + gama * (*getNormal(0));
         intersection.n = glm::normalize(intersection.n);
 
         intersection.material = material;
 
         return true;
     }
+    
     void precomputeStuff()
     {
         // Calcula normal do plano
@@ -95,12 +97,12 @@ class Triangle
         // edgesMollerTrumbore[1] = *getVertex(2) - *getVertex(0);
     }
 
-    inline glm::vec3* getVertex(uint8_t i) const
+    inline glm::vec3* getVertex(size_t i) const
     {
         return &(*vdata)[v[i]];
     }
 
-    inline glm::vec3* getNormal(uint8_t i) const
+    inline glm::vec3* getNormal(size_t i) const
     {
         return &(*ndata)[n[i]];
     }

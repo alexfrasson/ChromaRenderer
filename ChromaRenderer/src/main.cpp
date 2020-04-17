@@ -39,8 +39,8 @@ void term_func()
 
 using namespace glm;
 
-GLFWwindow* window;
-const char* glsl_version;
+GLFWwindow* g_window;
+const char* g_glsl_version;
 
 ChromaRenderer* cr;
 
@@ -270,7 +270,7 @@ bool InitGLFW()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Required on Mac
 #else
     // GL 3.0 + GLSL 130
-    glsl_version = "#version 130";
+    g_glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
@@ -278,10 +278,10 @@ bool InitGLFW()
 #endif
 
     // Create window with graphics context
-    window = glfwCreateWindow(1920, 1080, "ChromaRenderer", NULL, NULL);
-    if (window == NULL)
+    g_window = glfwCreateWindow(1920, 1080, "ChromaRenderer", NULL, NULL);
+    if (g_window == NULL)
         return false;
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(g_window);
     // glfwSwapInterval(1); // Enable vsync
     glfwSwapInterval(0);
 
@@ -291,7 +291,7 @@ bool InitGLFW()
 
 void MainLoop()
 {
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(g_window))
     {
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -315,7 +315,7 @@ void MainLoop()
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            bool somethingChanged = ChromaGui::RenderGui(window, cr);
+            bool somethingChanged = ChromaGui::RenderGui(g_window, cr);
 
             cr->update();
 
@@ -330,16 +330,16 @@ void MainLoop()
         // Rendering
         ImGui::Render();
         int display_w, display_h;
-        glfwMakeContextCurrent(window);
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glfwMakeContextCurrent(g_window);
+        glfwGetFramebufferSize(g_window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwMakeContextCurrent(window);
-        glfwSwapBuffers(window);
+        glfwMakeContextCurrent(g_window);
+        glfwSwapBuffers(g_window);
     }
 }
 
@@ -356,7 +356,7 @@ int main(int, char**)
         return 1;
     }
 
-    InitializeImGui(window, glsl_version);
+    InitializeImGui(g_window, g_glsl_version);
 
     cr = new ChromaRenderer();
 
@@ -366,7 +366,7 @@ int main(int, char**)
 
     ImGuiCleanup();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(g_window);
     glfwTerminate();
 
     return 0;

@@ -435,7 +435,6 @@ HRESULT FileOpenDialog(std::string& path,
 
                                                 // convert from wide char to narrow char array
                                                 char ch[1024];
-                                                char DefChar = ' ';
                                                 WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, ch, 1024, NULL, NULL);
 
                                                 // A std:string  using the char* constructor.
