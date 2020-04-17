@@ -10,10 +10,10 @@ Scene::~Scene(void)
     clear();
 }
 
-long Scene::triangleCount()
+size_t Scene::triangleCount()
 {
-    long tc = 0;
-    for (unsigned int i = 0; i < objects.size(); i++)
+    size_t tc = 0;
+    for (size_t i = 0; i < objects.size(); i++)
         tc += objects[i].f.size();
     return tc;
 }

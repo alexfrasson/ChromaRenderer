@@ -5,11 +5,12 @@ build --experimental_enable_runfiles
 build:debug --compilation_mode=dbg
 
 build:windows --cxxopt=/MD
-build:windows --cxxopt=/W2
+build:windows --cxxopt=/W3
 build:windows --cxxopt=/WX
 build:windows --cxxopt=/experimental:external
 build:windows --cxxopt=/external:Ithird_party
 build:windows --cxxopt=/external:W0
+build:windows --per_file_copt=third_party/*@/W0
 build:windows --cxxopt=/std:c++17
 
 build:linux --client_env=CC=/usr/bin/gcc-8

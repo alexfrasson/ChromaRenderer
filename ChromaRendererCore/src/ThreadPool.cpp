@@ -69,7 +69,7 @@ void ThreadPool::addWorker()
 {
     if (capacity == workers.size())
         return;
-    int i = workers.size();
+    size_t i = workers.size();
     workers.emplace_back(
         std::tuple<bool, bool, std::thread>(false, false, std::thread([this, i] {
                                                 std::cout << "Worker " << i << " starting." << std::endl;
@@ -146,7 +146,7 @@ unsigned int ThreadPool::getCapacity()
 {
     return capacity;
 }
-unsigned int ThreadPool::getNumberWorkers()
+size_t ThreadPool::getNumberWorkers()
 {
     return workers.size();
 }

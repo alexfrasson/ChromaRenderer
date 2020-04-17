@@ -136,7 +136,7 @@ bool BVH::build(std::vector<Object>& o)
         primitive.emplace_back(bb, (int)i);
     }
 
-    root = buildnode(0, primitive, 0, primitive.size());
+    root = buildnode(0, primitive, 0, (int)primitive.size());
 
     tris.reserve(primitive.size());
     for (size_t i = 0; i < primitive.size(); i++)
@@ -205,7 +205,7 @@ bool BVH::build(std::vector<Mesh*>& m)
         primitive.emplace_back(bb, (int)i);
     }
 
-    root = buildnode(0, primitive, 0, primitive.size());
+    root = buildnode(0, primitive, 0, (int)primitive.size());
 
     // tris.reserve(primitive.size());
     // for (size_t i = 0; i < primitive.size(); i++)
@@ -668,9 +668,9 @@ bool cmp(const BvhNodeToDo& a, const BvhNodeToDo& b)
     return a.tmin < b.tmin;
 }
 
-long BVH::sizeInBytes(void)
+size_t BVH::sizeInBytes(void)
 {
-    long size = sizeof(BVH);
+    size_t size = sizeof(BVH);
     size += sizeof(Face) * tris.size();
     size += sizeof(Triangle*) * triangles.size();
     size += sizeof(int) * id.size();

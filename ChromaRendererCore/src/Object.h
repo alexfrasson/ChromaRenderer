@@ -24,7 +24,7 @@ class Object
 
     Object();
 
-    long sizeInBytes();
+    size_t sizeInBytes();
 
     void genBoundingBox();
 };

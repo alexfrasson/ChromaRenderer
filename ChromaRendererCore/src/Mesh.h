@@ -24,14 +24,14 @@ class Mesh
     Mesh();
     void genBoundingBox();
 
-    long sizeInBytes();
+    size_t sizeInBytes();
 
     bool intersect(Ray& r, Intersection& intersection) const
     {
         bool hit = false;
         // Para cada triangulo
-        const unsigned int size = t.size();
-        for (unsigned int i = 0; i < size; i++)
+        const size_t size = t.size();
+        for (size_t i = 0; i < size; i++)
         {
             if (t[i].intersect(r, intersection))
                 hit = true;

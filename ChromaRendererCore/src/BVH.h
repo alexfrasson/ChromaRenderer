@@ -73,7 +73,7 @@ class BVH : public ISpacePartitioningStructure
     bool intersectF(const Ray& r, Intersection& intersection) const;
     uint32_t nIntersectedNodes(const Ray& r);
 
-    long sizeInBytes(void);
+    size_t sizeInBytes(void);
     void abort(void)
     {
     }

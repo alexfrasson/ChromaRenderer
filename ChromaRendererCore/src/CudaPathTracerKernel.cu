@@ -181,7 +181,7 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
             if (node->nPrimitives > 0)
             {
                 // Intersect primitives
-                for (int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                for (unsigned int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
                 {
                     if (intersectTriangle(&triangles[i], &r, &intersection))
                     {

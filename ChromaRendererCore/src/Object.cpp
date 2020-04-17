@@ -5,21 +5,21 @@ Object::Object()
 {
 }
 
-long Object::sizeInBytes()
+size_t Object::sizeInBytes()
 {
-    long size = sizeof(Object);
+    size_t size = sizeof(Object);
     size += sizeof(Face) * f.size();
     return size;
 }
 
 void Object::genBoundingBox()
 {
-    int size = f.size();
+    size_t size = f.size();
 
     // find boundaries
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        for (int j = 0; j < 3; j++)
+        for (size_t j = 0; j < 3; j++)
         {
             if (f[i].v[j].x > boundingBox.max.x)
                 boundingBox.max.x = f[i].v[j].x;
