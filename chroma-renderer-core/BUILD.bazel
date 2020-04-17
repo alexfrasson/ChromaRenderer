@@ -1,0 +1,35 @@
+load("//third-party/cuda:cuda_library.bzl", "cuda_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "chroma-renderer-core",
+    srcs = glob(["src/*.cpp"]) + [":path-tracer-kernel"],
+    hdrs = glob(["src/*.h"]),
+    includes = ["src"],
+    linkstatic = True,
+    deps = [
+        "//third-party/assimp",
+        "//third-party/cuda-helpers",
+        "//third-party/glad",
+        "//third-party/glfw",
+        "//third-party/glm",
+        "//third-party/imgui",
+        "//third-party/halton",
+        "//third-party/stb:stb-image",
+        "@cuda//:cuda_headers",
+        "@cuda//:cuda_runtime",
+    ],
+)
+
+cuda_library(
+    name = "path-tracer-kernel",
+    srcs = ["src/CudaPathTracerKernel.cu"],
+    hdrs = ["src/CudaPathTracerKernel.h"],
+    deps = ["//third-party/cuda-helpers"],
+)
+
+filegroup(
+    name = "shaders",
+    srcs = ["shaders/convergence.glsl"],
+)

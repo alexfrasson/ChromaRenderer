@@ -1,20 +1,20 @@
 workspace(name = "chromarenderer")
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-load("//third_party/cuda:cuda_configure.bzl", "cuda_configure")
+load("//third-party/cuda:cuda_configure.bzl", "cuda_configure")
 
 cuda_configure(name = "cuda")
 
 register_toolchains(
-    "//third_party/cuda/toolchain:cuda_linux_toolchain",
-    "//third_party/cuda/toolchain:cuda_windows_toolchain",
+    "//third-party/cuda/toolchain:cuda_linux_toolchain",
+    "//third-party/cuda/toolchain:cuda_windows_toolchain",
     # Target patterns are also permitted, so we could have also written:
     # "//bar_tools:all",
 )
 
 new_local_repository(
     name = "gtk",
-    build_file = "//third_party/gtk:BUILD.bazel",
+    build_file = "//third-party/gtk:BUILD.bazel",
     path = "/usr/",
 )
 

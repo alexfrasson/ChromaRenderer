@@ -1,0 +1,11 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "cuda-helpers",
+    hdrs = glob(["include/**/*.h"]),
+    includes = [
+        "include",
+        "include/cuda-helpers",
+    ],
+    deps = ["@cuda//:cuda_headers"],
+)

@@ -1,8 +1,0 @@
-package(default_visibility = ["//visibility:public"])
-
-cc_library(
-    name = "glad",
-    srcs = glob(["src/**/*.c"]),
-    hdrs = glob(["include/**/*.h"]),
-    includes = ["include"],
-)
