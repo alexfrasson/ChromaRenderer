@@ -10,7 +10,7 @@ build:windows --cxxopt=/WX
 build:windows --cxxopt=/experimental:external
 build:windows --cxxopt=/external:Ithird_party
 build:windows --cxxopt=/external:W0
-build:windows --per_file_copt=third_party/*@/W0
+build:windows --per_file_copt=third_party/.*@/W0
 build:windows --cxxopt=/std:c++17
 
 build:linux --client_env=CC=/usr/bin/gcc-8
@@ -18,6 +18,6 @@ build:linux --client_env=CXX=/usr/bin/g++-8
 build:linux --copt=-Werror
 build:linux --copt=-Wall
 build:linux --copt=-Wno-deprecated-declarations
-build:linux --per_file_copt=third_party/*@-w
+build:linux --per_file_copt=third_party/.*@-w
 build:linux --cxxopt=-std=c++17
 build:linux --cxxopt=-mavx
