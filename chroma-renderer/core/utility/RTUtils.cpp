@@ -1,8 +1,8 @@
 #include "chroma-renderer/core/utility/RTUtils.h"
 
-//#include "chroma-renderer/core/utility/Config.h"
-
 #include <algorithm>
+#include <immintrin.h>
+#include <pmmintrin.h>
 
 #define EPSILON 0.000001f
 
@@ -344,6 +344,8 @@ bool RTUtils::hitBoundingBox(const Ray& r, const BoundingBox& bb, float& tnear, 
 
     for (i = 0; i < NUMDIM; i++)
     {
+        outCandidate[i] = 0.0f;
+
         if (r.origin[i] < bb.min[i])
             outCandidate[i] = bb.max[i];
         else if (r.origin[i] > bb.max[i])
