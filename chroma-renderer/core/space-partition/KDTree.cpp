@@ -350,7 +350,8 @@ KDTNode* KDTree::presortedBuildNodeSah(int pdepth,
 
     Side splitPlaneSide;
     Plane splitPlane;
-    float splitPlaneCost = presortedEventFindBestPlane((int)triandflag.size(), events, nodebb, splitPlaneSide, splitPlane);
+    float splitPlaneCost =
+        presortedEventFindBestPlane((int)triandflag.size(), events, nodebb, splitPlaneSide, splitPlane);
 
     // Now that we know the best split is time to check if not splitting at all is better
     // If the cost of not splitting(making this node a leaf) is better, we just... don't split

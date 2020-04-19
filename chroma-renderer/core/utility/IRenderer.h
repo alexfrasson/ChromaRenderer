@@ -1,8 +1,8 @@
 #pragma once
 
+#include "chroma-renderer/core/scene/Scene.h"
 #include "chroma-renderer/core/types/Image.h"
 #include "chroma-renderer/core/types/RendererSettings.h"
-#include "chroma-renderer/core/scene/Scene.h"
 
 #include <atomic>
 

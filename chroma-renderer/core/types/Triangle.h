@@ -86,7 +86,7 @@ class Triangle
 
         return true;
     }
-    
+
     void precomputeStuff()
     {
         // Calcula normal do plano

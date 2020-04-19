@@ -1,7 +1,7 @@
 #include "chroma-renderer/core/scene/Scene.h"
 
-#include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 #include "chroma-renderer/core/space-partition/BVH.h"
+#include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 //#include "chroma-renderer/core/space-partition/KDTree.h"
 
 //#include "chroma-renderer/core/scene/ModelImporter.h"

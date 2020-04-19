@@ -5,8 +5,8 @@
 #include "chroma-renderer/core/utility/RTUtils.h"
 
 #include <fstream>
-#include <iostream>
 #include <functional>
+#include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
