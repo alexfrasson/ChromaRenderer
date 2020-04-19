@@ -2,8 +2,8 @@
 #include "chroma-renderer/gui/ChromaGUIUtils.h"
 #include "chroma-renderer/gui/CommonFileDialogApp.h"
 
-#include <imgui/imgui.h>
-
+#include "third-party/imgui/src/imgui/imgui.h"
+#include "third-party/imgui/src/imgui/imgui_internal.h"
 #include "third-party/nfd/src/include/nfd.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -151,36 +151,31 @@ void ChromaGui::DockSpace()
     {
         ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
-    }
-    // else
-    //{
-    //	ShowDockingDisabledMessage();
-    //}
-    //
 
-    // if (ImGui::BeginMainMenuBar())
-    //{
-    //	if (ImGui::BeginMenu("Docking"))
-    //	{
-    //		// Disabling fullscreen would allow the window to be moved to the front of other windows,
-    //		// which we can't undo at the moment without finer window depth/z control.
-    //		//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-    //		if (ImGui::MenuItem("Flag: NoSplit", "", (opt_flags & ImGuiDockNodeFlags_NoSplit) != 0)) opt_flags ^=
-    // ImGuiDockNodeFlags_NoSplit; 		if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (opt_flags &
-    // ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) opt_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; if
-    //(ImGui::MenuItem("Flag: PassthruInEmptyNodes", "", (opt_flags & ImGuiDockNodeFlags_PassthruInEmptyNodes) != 0))
-    // opt_flags ^= ImGuiDockNodeFlags_PassthruInEmptyNodes; 		if (ImGui::MenuItem("Flag: RenderWindowBg", "",
-    // (opt_flags & ImGuiDockNodeFlags_RenderWindowBg) != 0))         opt_flags ^= ImGuiDockNodeFlags_RenderWindowBg;
-    // if (ImGui::MenuItem("Flag: PassthruDockspace (all 3 above)", "", (opt_flags &
-    // ImGuiDockNodeFlags_PassthruDockspace)
-    //== ImGuiDockNodeFlags_PassthruDockspace)) 			opt_flags = (opt_flags &
-    //~ImGuiDockNodeFlags_PassthruDockspace)
-    //|
-    //((opt_flags & ImGuiDockNodeFlags_PassthruDockspace) == ImGuiDockNodeFlags_PassthruDockspace) ? 0 :
-    // ImGuiDockNodeFlags_PassthruDockspace; 		ImGui::Separator(); 		ImGui::EndMenu();
-    //	}
-    //}
-    // ImGui::EndMainMenuBar();
+        static bool should_init_layout = true;
+        if (should_init_layout)
+        {
+            should_init_layout = false;
+
+            ImGui::DockBuilderRemoveNode(dockspace_id);
+            ImGui::DockBuilderAddNode(dockspace_id, opt_flags | ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
+
+            ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using
+                                                 // it here as we aren't docking anything into it.
+            ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.16f, NULL, &dock_main_id);
+            ImGuiID dock_id_right =
+                ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
+            ImGuiID dock_id_left_bottom =
+                ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Down, 0.20f, NULL, &dock_id_left);
+
+            ImGui::DockBuilderDockWindow("Settings", dock_id_left);
+            ImGui::DockBuilderDockWindow("Material Editor", dock_id_right);
+            ImGui::DockBuilderDockWindow("Viewport", dock_main_id);
+            ImGui::DockBuilderDockWindow("Debug", dock_id_left_bottom);
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+    }
 
     ImGui::End();
 }
@@ -188,9 +183,6 @@ void ChromaGui::DockSpace()
 bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
-
-    if (cr->scene.materials.empty())
-        return false;
 
     // ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_::ImGuiCond_Once);
     if (!ImGui::Begin("Material Editor"))
