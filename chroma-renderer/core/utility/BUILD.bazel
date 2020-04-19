@@ -1,0 +1,12 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "utility",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    deps = [
+        "//chroma-renderer/core/types",
+        "//third-party/glad",
+        "//third-party/glm",
+    ],
+)

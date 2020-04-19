@@ -1,0 +1,13 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "types",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob(["*.h"]),
+    deps = [
+        "//third-party/glad",
+        "//third-party/glm",
+        "//third-party/halton",
+        "//third-party/assimp"
+    ],
+)

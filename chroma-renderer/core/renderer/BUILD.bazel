@@ -1,0 +1,41 @@
+load("//third-party/cuda:cuda_library.bzl", "cuda_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "renderer",
+    srcs = glob(["*.cpp"]) + [":path-tracer-kernel"],
+    hdrs = glob(["*.h"]),
+    linkstatic = True,
+    deps = [
+        "//chroma-renderer/core/scene",
+        "//chroma-renderer/core/space-partition",
+        "//chroma-renderer/core/utility",
+        "//third-party/assimp",
+        "//third-party/cuda-helpers",
+        "//third-party/glad",
+        "//third-party/glfw",
+        "//third-party/glm",
+        "//third-party/halton",
+        "//third-party/imgui",
+        "//third-party/stb:stb-image",
+        "@cuda//:cuda_headers",
+        "@cuda//:cuda_runtime",
+    ],
+)
+
+cc_library(
+    name = "header",
+    hdrs = ["CudaPathTracerKernel.h"],
+    includes = ["."],
+)
+
+cuda_library(
+    name = "path-tracer-kernel",
+    srcs = ["CudaPathTracerKernel.cu"],
+    hdrs = ["CudaPathTracerKernel.h"],
+    deps = [
+        ":header",
+        "//third-party/cuda-helpers",
+    ],
+)

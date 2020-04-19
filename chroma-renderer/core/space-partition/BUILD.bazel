@@ -1,0 +1,19 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "space-partition",
+    srcs = [
+        "BVH.cpp",
+        "KDTree.cpp",
+    ],
+    hdrs = [
+        "BVH.h",
+        "IIntersectable.h",
+        "ISpacePartitioningStructure.h",
+        "KDTree.h",
+    ],
+    deps = [
+        "//chroma-renderer/core/types",
+        "//chroma-renderer/core/utility",
+    ],
+)

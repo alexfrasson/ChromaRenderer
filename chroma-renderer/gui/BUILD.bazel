@@ -1,0 +1,21 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "gui",
+    srcs = glob([
+        "*.cpp",
+        "*.h",
+    ]),
+    data = [
+        "//chroma-renderer/shaders",
+        "//chroma-renderer/resources/fonts",
+    ],
+    linkopts = select({
+        "//:on_linux": ["-lstdc++fs"],
+        "//:on_windows": [],
+    }),
+    deps = [
+        "//chroma-renderer/core/renderer",
+        "//third-party/nfd",
+    ],
+)

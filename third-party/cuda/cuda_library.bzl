@@ -100,6 +100,11 @@ def _cuda_library_impl(ctx):
         args.add("-x", "cu")
 
         args.add("-I", src.dirname)
+        # for hdrs in lib_hdrs:
+        #     args.add("--compiler-options", "-I{}".format(hdrs.dirname))
+        # args.add_all(lib_hdrs, before_each = "-include")
+        # args.add_all(lib_hdrs, before_each = "-I")
+        # args.add_all(lib_hdrs, before_each = "-isystem")
 
         for includes in deps_includes:
             args.add_all(includes, before_each = "-I")
