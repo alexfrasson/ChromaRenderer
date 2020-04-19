@@ -1,7 +1,7 @@
 #pragma once
 
-#include "chroma-renderer/core/types/Object.h"
 #include "chroma-renderer/core/types/Material.h"
+#include "chroma-renderer/core/types/Object.h"
 #include <glm/glm.hpp>
 #include <limits>
 

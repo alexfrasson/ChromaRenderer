@@ -7,8 +7,8 @@ cc_binary(
         "*.h",
     ]),
     data = [
-        "//chroma-renderer/shaders",
         "//chroma-renderer/resources/fonts",
+        "//chroma-renderer/shaders",
     ],
     linkopts = select({
         "//:on_linux": ["-lstdc++fs"],

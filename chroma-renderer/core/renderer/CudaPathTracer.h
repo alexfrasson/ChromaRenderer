@@ -1,11 +1,11 @@
 #pragma once
 
-#include "chroma-renderer/core/types/Camera.h"
-#include "chroma-renderer/core/types/Image.h"
-#include "chroma-renderer/core/types/RendererSettings.h"
 #include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
 #include "chroma-renderer/core/renderer/GlslProgram.h"
 #include "chroma-renderer/core/scene/Scene.h"
+#include "chroma-renderer/core/types/Camera.h"
+#include "chroma-renderer/core/types/Image.h"
+#include "chroma-renderer/core/types/RendererSettings.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 
 class CudaPathTracer

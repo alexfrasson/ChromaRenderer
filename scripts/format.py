@@ -20,7 +20,7 @@ subprocess.run(
 
 # Clang format
 extensions = [".cu", ".glsl", ".cpp", ".h"]
-folders = ["ChromaRenderer", "ChromaRendererCore"]
+folders = ["chroma-renderer"]
 
 files = []
 

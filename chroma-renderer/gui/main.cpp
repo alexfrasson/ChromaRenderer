@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-#include "chroma-renderer/gui/ChromaGui.h"
 #include "chroma-renderer/core/renderer/ChromaRenderer.h"
+#include "chroma-renderer/gui/ChromaGui.h"
 
 void term_func()
 {
@@ -43,7 +43,6 @@ GLFWwindow* g_window;
 const char* g_glsl_version;
 
 ChromaRenderer* cr;
-
 
 #ifndef WM_DPICHANGED
 #define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers
@@ -246,8 +245,6 @@ void ImGuiCleanup()
     ImGui::DestroyContext();
 }
 
-
-
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -287,7 +284,6 @@ bool InitGLFW()
 
     return true;
 }
-
 
 void MainLoop()
 {

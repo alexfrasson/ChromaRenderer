@@ -9,11 +9,11 @@
 #include "chroma-renderer/core/renderer/PathTracing.h"
 #include "chroma-renderer/core/renderer/RayCasting.h"
 #include "chroma-renderer/core/renderer/ThreadPool.h"
+#include "chroma-renderer/core/scene/Scene.h"
+#include "chroma-renderer/core/space-partition/KDTree.h"
 #include "chroma-renderer/core/types/Image.h"
 #include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/types/RendererSettings.h"
-#include "chroma-renderer/core/space-partition/KDTree.h"
-#include "chroma-renderer/core/scene/Scene.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 
 class ChromaRenderer

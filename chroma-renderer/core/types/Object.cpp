@@ -99,6 +99,5 @@ void Object::genBoundingBox()
 //     f[i].edgesMollerTrumbore[1] = f[i].v[2] - f[i].v[0];
 // }
 
-
 // boundingBox.genBoundingBox(m);
 // }

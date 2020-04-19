@@ -494,7 +494,11 @@ bool RTUtils::intersectShadowRay(const Ray& r, const float& lightDistance, const
     return hit;
 }
 
-void RTUtils::rayDirection(const Camera& /*camera*/, const int /*i*/, const int /*j*/, Ray* /*rays*/, const int /*numRays*/)
+void RTUtils::rayDirection(const Camera& /*camera*/,
+                           const int /*i*/,
+                           const int /*j*/,
+                           Ray* /*rays*/,
+                           const int /*numRays*/)
 {
     /*const int numDivs = 2;	//Number of subcells = numDivs^2
 
@@ -516,9 +520,9 @@ void RTUtils::rayDirection(const Camera& /*camera*/, const int /*i*/, const int 
 }
 
 bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vector<Face>& f, Intersection& intersection)
-{                       // Hit barycentric coordinates
+{                                                        // Hit barycentric coordinates
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
-    size_t hitIndex = 0;                               // Index of the closest triangle
+    size_t hitIndex = 0;                                 // Index of the closest triangle
     bool hit = false;
     // para cada triangulo
     const size_t size = f.size();
@@ -543,7 +547,7 @@ bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vecto
 bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r, const std::vector<Face*>& f, Intersection& intersection)
 {
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
-    size_t hitIndex = 0;                               // Index of the closest triangle
+    size_t hitIndex = 0;                                 // Index of the closest triangle
     bool hit = false;
     // para cada triangulo
     const size_t size = f.size();
@@ -571,7 +575,7 @@ bool RTUtils::intersectRayTrianglesMollerTrumbore(const Ray& r,
                                                   Intersection& intersection)
 {
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
-    size_t hitIndex = 0;                               // Index of the closest triangle
+    size_t hitIndex = 0;                                 // Index of the closest triangle
     bool hit = false;
     // para cada triangulo
     for (unsigned int i = 0; i < nFaces; i++)
@@ -705,9 +709,9 @@ bool RTUtils::intersectRayTriangleMollerTrumboreNOBACKFACECULLING(const Ray& r, 
     return false;
 }
 bool RTUtils::intersectRayObjectMollerTrumbore(const Ray& r, const Object& o, const Face** hitFace, float& hitDistance)
-{                              // Hit barycentric coordinates
+{                                                        // Hit barycentric coordinates
     float hitT = std::numeric_limits<float>::infinity(); // Distance of closest hit
-    size_t hitIndex = 0;                               // Index of the closest triangle
+    size_t hitIndex = 0;                                 // Index of the closest triangle
     bool hit = false;
     // para cada triangulo
     const size_t size = o.f.size();

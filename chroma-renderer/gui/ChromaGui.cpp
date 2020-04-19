@@ -307,7 +307,14 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
         ImGui::Text("Current %.2f ms (%.1f FPS)", ImGui::GetIO().DeltaTime * 1000.0f, 1.0f / ImGui::GetIO().DeltaTime);
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        ImGui::PlotLines("", &frameTimes[0], (int)frameTimes.size(), currentFrameTimeIndex, "", 0.0f, 150.0f, ImVec2(0, 75));
+        ImGui::PlotLines("",
+                         &frameTimes[0],
+                         (int)frameTimes.size(),
+                         currentFrameTimeIndex,
+                         "",
+                         0.0f,
+                         150.0f,
+                         ImVec2(0, 75));
         ImGui::PopItemWidth();
 
         // Settings

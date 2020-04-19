@@ -1,7 +1,7 @@
 #pragma once
 
-#include "chroma-renderer/core/types/Ray.h"
 #include "chroma-renderer/core/types/BoundingBox.h"
+#include "chroma-renderer/core/types/Ray.h"
 
 #include <glm/glm.hpp>
 #include <vector>
