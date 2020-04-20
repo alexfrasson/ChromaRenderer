@@ -1,6 +1,7 @@
+"""Custom rule that uses nvcc to compile cuda source files."""
+
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("@bazel_tools//tools/cpp:cc_flags_supplier_lib.bzl", "build_cc_flags")
-load("@rules_cc//cc:action_names.bzl", "CC_FLAGS_MAKE_VARIABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
+load("@rules_cc//cc:action_names.bzl", "C_COMPILE_ACTION_NAME")
 
 def _get_headers(deps):
     headers = []
