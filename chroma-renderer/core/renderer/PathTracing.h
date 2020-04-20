@@ -1,6 +1,8 @@
 #pragma once
 
-#include "chroma-renderer/core/utility/IRenderer.h"
+#include "chroma-renderer/core/renderer/IRenderer.h"
+
+#include <atomic>
 
 class PathTracing
 {
