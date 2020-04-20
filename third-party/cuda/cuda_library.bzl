@@ -99,6 +99,7 @@ def _cuda_library_impl(ctx):
 
         args.add("-x", "cu")
 
+        args.add("-I", ".")
         args.add("-I", src.dirname)
         # for hdrs in lib_hdrs:
         #     args.add("--compiler-options", "-I{}".format(hdrs.dirname))
