@@ -5,8 +5,6 @@
 #include "chroma-renderer/core/types/Image.h"
 #include "chroma-renderer/core/renderer/RendererSettings.h"
 
-#include <atomic>
-
 struct Interval
 {
     int fromWidth, fromHeight;

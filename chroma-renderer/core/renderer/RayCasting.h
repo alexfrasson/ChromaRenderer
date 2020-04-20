@@ -1,7 +1,9 @@
 #pragma once
 
 #include "chroma-renderer/core/types/Color.h"
-#include "chroma-renderer/core/utility/IRenderer.h"
+#include "chroma-renderer/core/renderer/IRenderer.h"
+
+#include <atomic>
 
 class RayCasting : public IRenderer
 {
