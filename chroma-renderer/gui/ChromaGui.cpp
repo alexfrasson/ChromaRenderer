@@ -1,6 +1,5 @@
 #include "chroma-renderer/gui/ChromaGui.h"
 #include "chroma-renderer/gui/ChromaGUIUtils.h"
-#include "chroma-renderer/gui/CommonFileDialogApp.h"
 
 #include "third-party/imgui/src/imgui/imgui.h"
 #include "third-party/imgui/src/imgui/imgui_internal.h"
