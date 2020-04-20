@@ -4,8 +4,6 @@
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 #include "chroma-renderer/core/types/Ray.h"
 
-#include <glm/glm.hpp>
-
 #include <vector>
 
 struct Plane

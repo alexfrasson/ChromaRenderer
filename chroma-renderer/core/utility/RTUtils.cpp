@@ -1,5 +1,7 @@
 #include "chroma-renderer/core/utility/RTUtils.h"
 
+#include <glm/geometric.hpp>
+
 #include <algorithm>
 #include <immintrin.h>
 #include <pmmintrin.h>
@@ -366,7 +368,7 @@ bool RTUtils::hitBoundingBox(const Ray& r, const BoundingBox& bb, float& tnear, 
         if (r.direction[i] != 0.f)
             outT[i] = (outCandidate[i] - r.origin[i]) / r.direction[i];
         else
-            outT[i] = FLT_MAX;
+            outT[i] = std::numeric_limits<float>::max();
         // outT[i] = -1.f;
     }
 

@@ -2,8 +2,6 @@
 #include "chroma-renderer/core/utility/RTUtils.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 
-#include <glm/gtx/string_cast.hpp>
-
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
@@ -1052,7 +1050,7 @@ bool KDTree::intersect(const Ray& r, Intersection& intersection) const
     int todoPos = -1;
 
     bool hit = false;
-    intersection.distance = FLT_MAX;
+    intersection.distance = std::numeric_limits<float>::max();
     Intersection _intersection;
     const KDTNode* n = root;
 

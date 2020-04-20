@@ -927,7 +927,7 @@ bool BVH::intersectF(const Ray& r, Intersection& intersection) const
     int todoPos = -1;
 
     bool hit = false;
-    intersection.distance = FLT_MAX;
+    intersection.distance = std::numeric_limits<float>::max();
     const BvhNode* n = root;
     glm::vec3 invRayDir = 1.f / r.direction;
 

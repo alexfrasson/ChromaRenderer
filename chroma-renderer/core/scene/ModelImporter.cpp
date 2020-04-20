@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/version.h>
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 #include <cmath>
 #include <iostream>

@@ -3,7 +3,7 @@
 #include "chroma-renderer/core/types/Face.h"
 #include "chroma-renderer/core/types/Material.h"
 
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 #include <limits>
 
