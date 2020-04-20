@@ -1,9 +1,9 @@
 #pragma once
 
+#include "chroma-renderer/core/renderer/RendererSettings.h"
 #include "chroma-renderer/core/scene/Scene.h"
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 #include "chroma-renderer/core/types/Image.h"
-#include "chroma-renderer/core/renderer/RendererSettings.h"
 
 struct Interval
 {

@@ -12,8 +12,9 @@
         }                                                                                                           \
     }
 
-#include <cfloat>
 #include <cuda-helpers/helper_math.h>
+
+#include <cfloat>
 #include <stdint.h>
 
 #if defined(__CUDACC__) // NVCC

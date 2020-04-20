@@ -1,10 +1,12 @@
 #include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
-#include <cfloat>
+
 #include <cuda-helpers\helper_math.h>
 #include <cuda_runtime.h>
 #include <curand.h>
 #include <curand_kernel.h>
 #include <device_launch_parameters.h>
+
+#include <cfloat>
 #include <iostream>
 
 __global__ void writeAccuBufferToTextureKernel(float4* accuBuffer,

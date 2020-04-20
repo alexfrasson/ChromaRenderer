@@ -2,6 +2,7 @@
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 
 #include <halton.hpp>
+
 #include <random>
 
 unsigned my_rand(void)

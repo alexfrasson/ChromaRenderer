@@ -9,21 +9,20 @@ Shader class from glslcookbook 4.0
 #endif
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
+#include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
-using std::string;
-using std::vector;
-#include <map>
 
-#include <glm/glm.hpp>
 using glm::mat3;
 using glm::mat4;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
-
-#include <stdexcept>
+using std::string;
+using std::vector;
 
 class GLSLProgramException : public std::runtime_error
 {

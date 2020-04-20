@@ -1,7 +1,8 @@
 #include "chroma-renderer/core/scene/Camera.h"
 
-#include <cmath>
 #include <halton.hpp>
+
+#include <cmath>
 #include <iostream>
 #include <random>
 
