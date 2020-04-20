@@ -1,15 +1,6 @@
 #include "chroma-renderer/core/scene/Scene.h"
 
-#include "chroma-renderer/core/space-partition/BVH.h"
-#include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
-//#include "chroma-renderer/core/space-partition/KDTree.h"
-
-//#include "chroma-renderer/core/scene/ModelImporter.h"
-
-Scene::Scene(void) : sps(NULL)
-{
-}
-Scene::~Scene(void)
+Scene::~Scene()
 {
     clear();
 }
@@ -21,67 +12,16 @@ size_t Scene::triangleCount()
         tc += objects[i].f.size();
     return tc;
 }
-void Scene::LoadMesh(std::string /*file*/)
-{
-    /*Object o;
-    ModelImporter::import(file, o);
-    o.genBoundingBox();
-
-    objects.push_back( o );*/
-}
-
-void Scene::addObject(Object /*o*/)
-{
-    /*ready = false;
-    objects.push_back( o );
-    sps->build(objects);
-    camera.fit(getBoundingBox());
-    ready = true;*/
-}
-void Scene::addObject(Object /*o*/, std::function<void(void)> /*cb*/)
-{
-    /*ready = false;
-    objects.push_back(o);
-    sps->build(objects);
-    camera.fit(getBoundingBox());
-    ready = true;
-
-    cb();*/
-}
-
-void Scene::addMesh(Mesh* m)
-{
-    ready = false;
-    clear();
-    meshes.push_back(m);
-    sps = new BVH();
-    sps->build(meshes);
-    // camera.fit(getBoundingBox());
-    // Sponza
-    /*camera.eye.x += 100;
-    camera.eye.z -= 250;
-
-    camera.eye = getBoundingBox().getCenter();
-    camera.eye.z -= 100;
-
-    camera.computeUVW();*/
-    // Sponza
-    ready = true;
-}
-void Scene::addMesh(Mesh* m, std::function<void(void)> cb)
-{
-    addMesh(m);
-    cb();
-}
 
 void Scene::clear()
 {
     objects.clear();
     for (size_t i = 0; i < meshes.size(); i++)
+    {
         delete meshes[i];
+    }
     meshes.clear();
     materials.clear();
-    delete sps;
 }
 
 BoundingBox Scene::getBoundingBox()

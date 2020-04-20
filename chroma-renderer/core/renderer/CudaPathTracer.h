@@ -2,11 +2,12 @@
 
 #include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
 #include "chroma-renderer/core/renderer/GlslProgram.h"
-#include "chroma-renderer/core/scene/Scene.h"
+#include "chroma-renderer/core/types/Material.h"
 #include "chroma-renderer/core/types/Camera.h"
 #include "chroma-renderer/core/types/Image.h"
 #include "chroma-renderer/core/types/RendererSettings.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
+#include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 
 class CudaPathTracer
 {
@@ -18,10 +19,10 @@ class CudaPathTracer
 
     CudaPathTracer();
     ~CudaPathTracer();
-    void init(Scene& scene);
+    void init(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
     void init(float* hdriEnvData, int hdriEnvWidth, int hdriEnvHeight);
     void init(Image& img, Camera& cam);
-    void uploadMaterials(Scene& scene);
+    void uploadMaterials(const std::vector<Material>& materials);
     void renderThread(bool& abort);
     void render();
     void setSettings(RendererSettings& settings);

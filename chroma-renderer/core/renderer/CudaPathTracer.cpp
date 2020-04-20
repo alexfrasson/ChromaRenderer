@@ -69,51 +69,53 @@ CudaCamera CameraToCudaCamera(Camera cam)
     cudaCam.eye.z = cam.eye.z;
     return cudaCam;
 }
+
 // Merge every mesh into one single CudaTriangle array
-vector<CudaTriangle> SceneToCudaTriangles(Scene& scene)
-{
-    vector<CudaTriangle> cudaTriangles;
-    cudaTriangles.reserve(scene.triangleCount());
+// vector<CudaTriangle> SceneToCudaTriangles(Scene& scene)
+// {
+//     vector<CudaTriangle> cudaTriangles;
+//     cudaTriangles.reserve(scene.triangleCount());
 
-    for (Mesh* m : scene.meshes)
-    {
-        for (Triangle t : m->t)
-        {
-            CudaTriangle ct;
+//     for (Mesh* m : scene.meshes)
+//     {
+//         for (Triangle t : m->t)
+//         {
+//             CudaTriangle ct;
 
-            // Copy vertices and normals
-            for (int i = 0; i < 3; i++)
-            {
-                ct.v[i].x = t.getVertex(i)->x;
-                ct.v[i].y = t.getVertex(i)->y;
-                ct.v[i].z = t.getVertex(i)->z;
+//             // Copy vertices and normals
+//             for (int i = 0; i < 3; i++)
+//             {
+//                 ct.v[i].x = t.getVertex(i)->x;
+//                 ct.v[i].y = t.getVertex(i)->y;
+//                 ct.v[i].z = t.getVertex(i)->z;
 
-                ct.n[i].x = t.getNormal(i)->x;
-                ct.n[i].y = t.getNormal(i)->y;
-                ct.n[i].z = t.getNormal(i)->z;
-            }
+//                 ct.n[i].x = t.getNormal(i)->x;
+//                 ct.n[i].y = t.getNormal(i)->y;
+//                 ct.n[i].z = t.getNormal(i)->z;
+//             }
 
-            // Find material index
-            for (size_t i = 0; i < scene.materials.size(); i++)
-            {
-                if (t.material == &scene.materials[i])
-                {
-                    ct.material = (int)i;
-                    break;
-                }
-            }
+//             // Find material index
+//             for (size_t i = 0; i < scene.materials.size(); i++)
+//             {
+//                 if (t.material == &scene.materials[i])
+//                 {
+//                     ct.material = (int)i;
+//                     break;
+//                 }
+//             }
 
-            cudaTriangles.push_back(ct);
-        }
-    }
+//             cudaTriangles.push_back(ct);
+//         }
+//     }
 
-    return cudaTriangles;
-}
-vector<CudaMaterial> SceneToCudaMaterials(Scene& scene)
+//     return cudaTriangles;
+// }
+
+vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& materials)
 {
     vector<CudaMaterial> cudaMaterials;
 
-    for (Material m : scene.materials)
+    for (const auto& m : materials)
     {
         CudaMaterial cm;
         cm.kd.x = m.kd.r;
@@ -130,10 +132,10 @@ vector<CudaMaterial> SceneToCudaMaterials(Scene& scene)
 
     return cudaMaterials;
 }
-vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(Scene& scene)
+vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioningStructure* sps)
 {
     // Lets assume this is a bvh :)
-    BVH* bvh = (BVH*)scene.sps;
+    const BVH* bvh = (const BVH*)sps;
 
     vector<CudaLinearBvhNode> cudaLinearBVH;
     cudaLinearBVH.reserve(bvh->nNodes);
@@ -156,10 +158,10 @@ vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(Scene& scene)
 
     return cudaLinearBVH;
 }
-vector<CudaTriangle> SceneToCudaTrianglesBVH(Scene& scene)
+vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials)
 {
     // Lets assume this is a bvh :)
-    BVH* bvh = (BVH*)scene.sps;
+    const BVH* bvh = (const BVH*)sps;
 
     vector<CudaTriangle> cudaTriangles;
     cudaTriangles.reserve(bvh->triangles.size());
@@ -181,9 +183,9 @@ vector<CudaTriangle> SceneToCudaTrianglesBVH(Scene& scene)
         }
 
         // Find material index
-        for (size_t i = 0; i < scene.materials.size(); i++)
+        for (size_t i = 0; i < materials.size(); i++)
         {
-            if (t->material == &scene.materials[i])
+            if (t->material == &materials[i])
             {
                 ct.material = (int)i;
                 break;
@@ -424,7 +426,7 @@ void CudaPathTracer::init(float* hdriEnvData, int hdriEnvWidth, int hdriEnvHeigh
     cudaErrorCheck(cudaCreateTextureObject(&enviromentSettings.texObj, &resDesc, &texDesc, NULL));
 }
 
-void CudaPathTracer::init(Scene& scene)
+void CudaPathTracer::init(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials)
 {
     cout << endl << "CUDA PATH TRACER" << endl;
 
@@ -443,7 +445,7 @@ void CudaPathTracer::init(Scene& scene)
     cudaErrorCheck(cudaMemcpy(dev_cudaTriangles, &cudaTriangles[0], cudaTriangles.size() * sizeof(CudaTriangle),
     cudaMemcpyHostToDevice));*/
 
-    vector<CudaTriangle> cudaTrianglesBVH = SceneToCudaTrianglesBVH(scene);
+    vector<CudaTriangle> cudaTrianglesBVH = SceneToCudaTrianglesBVH(sps, materials);
     nCudaTrianglesBVH = (int)cudaTrianglesBVH.size();
     cout << "Triangles BVH: " << cudaTrianglesBVH.size() << endl;
     cout << "Triangles BVH size: " << (cudaTrianglesBVH.size() * sizeof(CudaTriangle)) / (1024) << "KB" << endl;
@@ -456,7 +458,7 @@ void CudaPathTracer::init(Scene& scene)
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    vector<CudaLinearBvhNode> cudaLinearBVH = SceneToCudaLinearBvhNode(scene);
+    vector<CudaLinearBvhNode> cudaLinearBVH = SceneToCudaLinearBvhNode(sps);
     nCudaLinearBVHNodes = (int)cudaLinearBVH.size();
     cout << "CudaLinearBVHNodes: " << cudaLinearBVH.size() << endl;
     cout << "CudaLinearBVHNodes size: " << (cudaLinearBVH.size() * sizeof(CudaLinearBvhNode)) / (1024) << "KB" << endl;
@@ -469,7 +471,7 @@ void CudaPathTracer::init(Scene& scene)
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(scene);
+    vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(materials);
     nCudaMaterials = (int)cudaMaterials.size();
     cout << "Materials: " << cudaMaterials.size() << endl;
     cout << "Materials size: " << (cudaMaterials.size() * sizeof(CudaMaterial)) / (1024) << "KB" << endl;
@@ -536,9 +538,9 @@ void CudaPathTracer::init(Image& img, Camera& cam)
     iteration = 0;
 }
 
-void CudaPathTracer::uploadMaterials(Scene& scene)
+void CudaPathTracer::uploadMaterials(const std::vector<Material>& materials)
 {
-    vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(scene);
+    vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(materials);
     nCudaMaterials = (uint32_t)cudaMaterials.size();
     if (dev_cudaMaterials == nullptr)
         cudaErrorCheck(cudaMalloc((void**)&dev_cudaMaterials, cudaMaterials.size() * sizeof(CudaMaterial)));

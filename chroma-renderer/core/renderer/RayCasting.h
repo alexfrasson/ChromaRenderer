@@ -19,7 +19,7 @@ class RayCasting : public IRenderer
     {
         donePixelCount = 0;
     }
-    void trace(Scene& scene, Image& img, RendererSettings& settings, Interval interval, bool& abort);
+    void trace(ISpacePartitioningStructure* sps, Scene& scene, Image& img, RendererSettings& settings, Interval interval, bool& abort);
     Color calcColor(Intersection& is);
     float getProgress();
     bool isRunning();
