@@ -69,6 +69,7 @@ void ChromaRenderer::genTasks()
             case ChromaRenderer::RAYCAST:
                 threadPool.enqueue(std::bind(&RayCasting::trace,
                                              std::ref(renderer),
+                                             sps.get(),
                                              std::ref(scene),
                                              std::ref(image),
                                              std::ref(settings),
@@ -78,6 +79,7 @@ void ChromaRenderer::genTasks()
             case ChromaRenderer::PATHTRACE:
                 threadPool.enqueue(std::bind(&PathTracing::trace,
                                              std::ref(pathtracing),
+                                             sps.get(),
                                              std::ref(scene),
                                              std::ref(image),
                                              interval,
@@ -316,9 +318,9 @@ void ChromaRenderer::importEnviromentMap(std::string filename)
 void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
 {
     state = State::PROCESSINGSCENE;
-    scene.sps = new BVH();
-    scene.sps->build(scene.meshes);
-    cudaPathTracer.init(scene);
+    sps = std::make_unique<BVH>();
+    sps->build(scene.meshes);
+    cudaPathTracer.init(sps.get(), scene.materials);
 
     settings.width = scene.camera.width;
     settings.height = scene.camera.height;
@@ -331,34 +333,37 @@ void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
     state = State::IDLE;
     onLoad();
 }
-void ChromaRenderer::cbSceneLoadedm(Mesh* m)
-{
-    std::cout << "Mesh   total size " << m->sizeInBytes() / 1024 << "KB" << std::endl;
-    std::cout << "    Triangles     " << (sizeof(Triangle) * m->t.size()) / 1024 << "KB"
-              << "   #" << m->t.size() << std::endl;
-    std::cout << "    Vertices      " << (sizeof(glm::vec3) * m->v.size()) / 1024 << "KB"
-              << "   #" << m->v.size() << std::endl;
-    std::cout << "    Normals       " << (sizeof(glm::vec3) * m->n.size()) / 1024 << "KB"
-              << "   #" << m->n.size() << std::endl;
 
-    scene.clear();
-    threadPool.enqueue(std::bind(
-        static_cast<void (Scene::*)(Mesh*, std::function<void(void)>)>(&Scene::addMesh),
-        std::ref(scene),
-        m,
-        static_cast<std::function<void(void)>>(std::bind(&ChromaRenderer::cbSceneProcessed, std::ref(*this)))));
-    state = State::PROCESSINGSCENE;
-}
-void ChromaRenderer::cbSceneLoaded(Object o)
-{
-    scene.clear();
-    threadPool.enqueue(std::bind(
-        static_cast<void (Scene::*)(Object, std::function<void(void)>)>(&Scene::addObject),
-        std::ref(scene),
-        o,
-        static_cast<std::function<void(void)>>(std::bind(&ChromaRenderer::cbSceneProcessed, std::ref(*this)))));
-    state = State::PROCESSINGSCENE;
-}
+// void ChromaRenderer::cbSceneLoadedm(Mesh* m)
+// {
+//     std::cout << "Mesh   total size " << m->sizeInBytes() / 1024 << "KB" << std::endl;
+//     std::cout << "    Triangles     " << (sizeof(Triangle) * m->t.size()) / 1024 << "KB"
+//               << "   #" << m->t.size() << std::endl;
+//     std::cout << "    Vertices      " << (sizeof(glm::vec3) * m->v.size()) / 1024 << "KB"
+//               << "   #" << m->v.size() << std::endl;
+//     std::cout << "    Normals       " << (sizeof(glm::vec3) * m->n.size()) / 1024 << "KB"
+//               << "   #" << m->n.size() << std::endl;
+
+//     scene.clear();
+//     threadPool.enqueue(std::bind(
+//         static_cast<void (Scene::*)(Mesh*, std::function<void(void)>)>(&Scene::addMesh),
+//         std::ref(scene),
+//         m,
+//         static_cast<std::function<void(void)>>(std::bind(&ChromaRenderer::cbSceneProcessed, std::ref(*this)))));
+//     state = State::PROCESSINGSCENE;
+// }
+
+// void ChromaRenderer::cbSceneLoaded(Object o)
+// {
+//     scene.clear();
+//     threadPool.enqueue(std::bind(
+//         static_cast<void (Scene::*)(Object, std::function<void(void)>)>(&Scene::addObject),
+//         std::ref(scene),
+//         o,
+//         static_cast<std::function<void(void)>>(std::bind(&ChromaRenderer::cbSceneProcessed, std::ref(*this)))));
+//     state = State::PROCESSINGSCENE;
+// }
+
 void ChromaRenderer::cbSceneProcessed()
 {
     state = State::IDLE;

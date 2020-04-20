@@ -51,7 +51,7 @@ PathTracing::PathTracing()
 {
     halton_dim_num_set(2);
 }
-void PathTracing::trace(Scene& scene, Image& img, Interval interval, bool& abort)
+void PathTracing::trace(ISpacePartitioningStructure* sps, Scene& scene, Image& img, Interval interval, bool& abort)
 {
     /*std::vector<Ray> rays;
     rays.reserve(settings.samplesperpixel);
@@ -96,7 +96,7 @@ void PathTracing::trace(Scene& scene, Image& img, Interval interval, bool& abort
             {
                 Ray ray;
                 scene.camera.randomRayDirection(i, j, ray);
-                sampledColor += tracePath(ray, scene, 0);
+                sampledColor += tracePath(ray, sps, scene, 0);
             }
 
             sampledColor /= static_cast<float>(targetSamplesPerPixel);
@@ -111,7 +111,7 @@ void PathTracing::setSettings(RendererSettings& settings)
     // enviromentLight = settings.enviromentLight;
     targetSamplesPerPixel = settings.samplesperpixel;
 }
-Color PathTracing::tracePath(Ray& r, Scene& scene, uint32_t depth)
+Color PathTracing::tracePath(Ray& r, ISpacePartitioningStructure* sps, Scene& scene, uint32_t depth)
 {
     // if (depth == maxDepth)
     //     return 0.0f;  // Bounced enough times.
@@ -149,7 +149,7 @@ Color PathTracing::tracePath(Ray& r, Scene& scene, uint32_t depth)
 
     // if (r.hitSomething == false)
     Intersection is;
-    if (!scene.sps->intersect(r, is)) // Nothing was hit.
+    if (!sps->intersect(r, is)) // Nothing was hit.
     {
         if (enviromentLight)
             return Color(0.85f);
@@ -171,7 +171,7 @@ Color PathTracing::tracePath(Ray& r, Scene& scene, uint32_t depth)
     // Color BRDF = 2 * m.reflectance * cos_theta;
     // Color reflected = TracePath(newRay, depth + 1);
     Color BRDF = is.material->kd * 2.0f * cos_theta;
-    Color reflected = tracePath(newRay, scene, depth + 1);
+    Color reflected = tracePath(newRay, sps, scene, depth + 1);
 
     // Apply the Rendering Equation here.
     return emittance + (reflected * BRDF);

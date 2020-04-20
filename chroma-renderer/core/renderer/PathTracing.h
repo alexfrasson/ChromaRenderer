@@ -20,8 +20,8 @@ class PathTracing
         donePixelCount = 0;
     }
     PathTracing();
-    void trace(Scene& scene, Image& img, Interval interval, bool& abort);
-    Color tracePath(Ray& r, Scene& scene, uint32_t depth);
+    void trace(ISpacePartitioningStructure* sps, Scene& scene, Image& img, Interval interval, bool& abort);
+    Color tracePath(Ray& r, ISpacePartitioningStructure* sps, Scene& scene, uint32_t depth);
     float calcColor(Intersection& is);
     float getProgress();
     bool isRunning();

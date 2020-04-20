@@ -1,10 +1,10 @@
 #include "chroma-renderer/core/renderer/RayCasting.h"
-#include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 
 RayCasting::RayCasting() : pixelCount(0), donePixelCount(0)
 {
 }
-void RayCasting::trace(Scene& scene, Image& img, RendererSettings& settings, Interval interval, bool& abort)
+
+void RayCasting::trace(ISpacePartitioningStructure* sps, Scene& scene, Image& img, RendererSettings& settings, Interval interval, bool& abort)
 {
     std::vector<Ray> rays;
     rays.reserve(settings.samplesperpixel);
@@ -28,7 +28,7 @@ void RayCasting::trace(Scene& scene, Image& img, RendererSettings& settings, Int
                 intersection.n = glm::vec3();
                 intersection.p = glm::vec3();
 
-                if (scene.sps->intersect(rays[k], intersection))
+                if (sps->intersect(rays[k], intersection))
                     diffuseColor += calcColor(intersection);
                 else
                     diffuseColor += 0.1f; // Background
@@ -41,6 +41,7 @@ void RayCasting::trace(Scene& scene, Image& img, RendererSettings& settings, Int
         donePixelCount += interval.toHeight - interval.fromHeight;
     }
 }
+
 Color RayCasting::calcColor(Intersection& is)
 {
     Ray lightRay;
@@ -58,10 +59,12 @@ Color RayCasting::calcColor(Intersection& is)
 
     return is.material->kd * diffuseColorIntensity;
 }
+
 float RayCasting::getProgress()
 {
     return (donePixelCount * invPixelCount);
 }
+
 bool RayCasting::isRunning()
 {
     if (running)

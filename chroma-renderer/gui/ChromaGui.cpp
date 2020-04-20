@@ -481,7 +481,7 @@ bool ChromaGui::RenderGui(GLFWwindow* window, ChromaRenderer* cr)
 
     if (MaterialsWindow(cr))
     {
-        cr->cudaPathTracer.uploadMaterials(cr->scene);
+        cr->cudaPathTracer.uploadMaterials(cr->scene.materials);
         somethingChanged = true;
     }
 

@@ -1,20 +1,20 @@
 #pragma once
 
-#include <atomic>
-#include <functional>
-#include <string>
-#include <thread>
-
 #include "chroma-renderer/core/renderer/CudaPathTracer.h"
 #include "chroma-renderer/core/renderer/PathTracing.h"
 #include "chroma-renderer/core/renderer/RayCasting.h"
 #include "chroma-renderer/core/renderer/ThreadPool.h"
 #include "chroma-renderer/core/scene/Scene.h"
-#include "chroma-renderer/core/space-partition/KDTree.h"
 #include "chroma-renderer/core/types/Image.h"
 #include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/types/RendererSettings.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
+#include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
+
+#include <atomic>
+#include <functional>
+#include <string>
+#include <thread>
 
 class ChromaRenderer
 {
@@ -43,6 +43,8 @@ class ChromaRenderer
     RayCasting renderer;
     PathTracing pathtracing;
     CudaPathTracer cudaPathTracer;
+
+    std::unique_ptr<ISpacePartitioningStructure> sps;
 
     Stopwatch stopwatch;
 
