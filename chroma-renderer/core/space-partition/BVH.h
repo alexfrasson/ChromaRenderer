@@ -1,10 +1,11 @@
 #pragma once
 
+#include "chroma-renderer/core/scene/Object.h"
 #include "chroma-renderer/core/space-partition/IIntersectable.h"
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 #include "chroma-renderer/core/types/Mesh.h"
-#include "chroma-renderer/core/types/Object.h"
 #include "chroma-renderer/core/types/Ray.h"
+
 #include <vector>
 
 struct BvhNode

@@ -4,7 +4,12 @@ RayCasting::RayCasting() : pixelCount(0), donePixelCount(0)
 {
 }
 
-void RayCasting::trace(ISpacePartitioningStructure* sps, Scene& scene, Image& img, RendererSettings& settings, Interval interval, bool& abort)
+void RayCasting::trace(ISpacePartitioningStructure* sps,
+                       Scene& scene,
+                       Image& img,
+                       RendererSettings& settings,
+                       Interval interval,
+                       bool& abort)
 {
     std::vector<Ray> rays;
     rays.reserve(settings.samplesperpixel);

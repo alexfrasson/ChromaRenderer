@@ -1,4 +1,4 @@
-#include "chroma-renderer/core/renderer/GlslProgram.h"
+#include "chroma-renderer/core/utility/GlslProgram.h"
 
 #include <fstream>
 #include <map>

@@ -1,4 +1,4 @@
-#include "chroma-renderer/core/types/RendererSettings.h"
+#include "chroma-renderer/core/renderer/RendererSettings.h"
 
 #include <algorithm>
 #include <thread>

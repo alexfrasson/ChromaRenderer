@@ -1,4 +1,4 @@
-#include "chroma-renderer/core/renderer/Benchmark.h"
+#include "chroma-renderer/core/utility/Benchmark.h"
 
 #include <iostream>
 

@@ -1,4 +1,4 @@
-#include "chroma-renderer/core/types/Object.h"
+#include "chroma-renderer/core/scene/Object.h"
 
 Object::Object()
 {
