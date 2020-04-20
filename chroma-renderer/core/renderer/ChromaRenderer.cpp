@@ -4,12 +4,12 @@
 #include "chroma-renderer/core/utility/Config.h"
 #include "chroma-renderer/core/utility/RTUtils.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <fstream>
 #include <functional>
 #include <iostream>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #define TILESIZE 64
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "chroma-renderer/core/types/Color.h"
-//#include "chroma-renderer/core/CudaUtils.h"
+
 #include <glad/glad.h>
 
 class Image

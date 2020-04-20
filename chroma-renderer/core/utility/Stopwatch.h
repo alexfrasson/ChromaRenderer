@@ -1,7 +1,8 @@
 #pragma once
 
-#include <chrono>
 #include <glad/glad.h>
+
+#include <chrono>
 
 class Stopwatch
 {

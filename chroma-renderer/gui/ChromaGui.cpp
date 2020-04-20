@@ -1,10 +1,9 @@
 #include "chroma-renderer/gui/ChromaGui.h"
 #include "chroma-renderer/gui/ChromaGUIUtils.h"
 
-#include "third-party/imgui/src/imgui/imgui.h"
-#include "third-party/imgui/src/imgui/imgui_internal.h"
-#include "third-party/nfd/src/include/nfd.h"
-
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+#include <nfd.h>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 

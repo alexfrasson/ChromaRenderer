@@ -4,6 +4,7 @@
 #include "chroma-renderer/core/types/Ray.h"
 
 #include <glm/glm.hpp>
+
 #include <vector>
 
 // tan(FOV/2) = (screenSize/2) / screenPlaneDistance

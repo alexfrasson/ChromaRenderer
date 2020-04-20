@@ -2,12 +2,11 @@
 
 #include <fstream>
 #include <map>
+#include <sstream>
+#include <sys/stat.h>
+
 using std::ifstream;
 using std::ios;
-
-#include <sstream>
-
-#include <sys/stat.h>
 
 namespace GLSLShaderInfo
 {

@@ -1,14 +1,14 @@
 #include "chroma-renderer/core/scene/ModelImporter.h"
 
-#include <cmath>
-#include <glm/glm.hpp>
-#include <iostream>
-
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/Importer.hpp> //OO version Header!
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/version.h>
+#include <glm/glm.hpp>
+
+#include <cmath>
+#include <iostream>
 
 // Example stream
 class myStream : public Assimp::LogStream

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+
 #include <limits>
 
 struct BoundingBox

@@ -2,9 +2,10 @@
 #include "chroma-renderer/core/utility/RTUtils.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 
+#include <glm/gtx/string_cast.hpp>
+
 #include <algorithm>
 #include <fstream>
-#include <glm/gtx/string_cast.hpp>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
