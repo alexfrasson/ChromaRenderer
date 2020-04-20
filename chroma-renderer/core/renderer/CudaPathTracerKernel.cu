@@ -1,4 +1,4 @@
-#include <CudaPathTracerKernel.h>
+#include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
 
 #include <cfloat>
 #include <cuda-helpers/helper_cuda.h>
