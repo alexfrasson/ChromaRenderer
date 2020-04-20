@@ -1,4 +1,4 @@
-#include "chroma-renderer/core/types/Camera.h"
+#include "chroma-renderer/core/scene/Camera.h"
 
 #include <cmath>
 #include <halton.hpp>

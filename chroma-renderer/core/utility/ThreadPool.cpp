@@ -1,4 +1,4 @@
-#include "chroma-renderer/core/renderer/ThreadPool.h"
+#include "chroma-renderer/core/utility/ThreadPool.h"
 
 #include <iostream>
 

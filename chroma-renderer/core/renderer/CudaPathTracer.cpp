@@ -158,7 +158,8 @@ vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioningStruc
 
     return cudaLinearBVH;
 }
-vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials)
+vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps,
+                                             const std::vector<Material>& materials)
 {
     // Lets assume this is a bvh :)
     const BVH* bvh = (const BVH*)sps;

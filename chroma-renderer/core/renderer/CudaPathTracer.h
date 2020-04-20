@@ -1,13 +1,13 @@
 #pragma once
 
 #include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
-#include "chroma-renderer/core/renderer/GlslProgram.h"
-#include "chroma-renderer/core/types/Material.h"
-#include "chroma-renderer/core/types/Camera.h"
-#include "chroma-renderer/core/types/Image.h"
-#include "chroma-renderer/core/types/RendererSettings.h"
-#include "chroma-renderer/core/utility/Stopwatch.h"
+#include "chroma-renderer/core/utility/GlslProgram.h"
+#include "chroma-renderer/core/scene/Camera.h"
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
+#include "chroma-renderer/core/types/Image.h"
+#include "chroma-renderer/core/types/Material.h"
+#include "chroma-renderer/core/renderer/RendererSettings.h"
+#include "chroma-renderer/core/utility/Stopwatch.h"
 
 class CudaPathTracer
 {

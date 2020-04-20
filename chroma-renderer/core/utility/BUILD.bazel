@@ -5,6 +5,7 @@ cc_library(
     srcs = glob(["*.cpp"]),
     hdrs = glob(["*.h"]),
     deps = [
+        "//chroma-renderer/core/scene",
         "//chroma-renderer/core/types",
         "//third-party/glad",
         "//third-party/glm",

@@ -1,13 +1,14 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <vector>
-//#include "chroma-renderer/core/ChromaRenderer/IIntersectable.h"
 #include "chroma-renderer/core/types/BoundingBox.h"
 #include "chroma-renderer/core/types/Intersection.h"
 #include "chroma-renderer/core/types/Material.h"
 #include "chroma-renderer/core/types/Ray.h"
 #include "chroma-renderer/core/types/Triangle.h"
+
+#include <glm/glm.hpp>
+
+#include <vector>
 
 class Mesh
 //: public IIntersectable

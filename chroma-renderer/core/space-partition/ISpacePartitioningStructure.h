@@ -1,11 +1,12 @@
 #pragma once
 
+#include "chroma-renderer/core/scene/Object.h"
 #include "chroma-renderer/core/space-partition/IIntersectable.h"
 #include "chroma-renderer/core/types/Mesh.h"
-#include "chroma-renderer/core/types/Object.h"
 #include "chroma-renderer/core/types/Ray.h"
 
 #include <glm/glm.hpp>
+
 #include <vector>
 
 struct Intersection;

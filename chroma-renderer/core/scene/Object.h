@@ -1,17 +1,11 @@
 #pragma once
 
 #include "chroma-renderer/core/types/BoundingBox.h"
-#include <glm/vec3.hpp>
-#include <vector>
+#include "chroma-renderer/core/types/Face.h"
 
-class Face
-{
-  public:
-    glm::vec3 v[3];
-    glm::vec3 n[3];
-    glm::vec3 tn;
-    glm::vec3 edgesMollerTrumbore[2];
-};
+#include <glm/vec3.hpp>
+
+#include <vector>
 
 class Object
 {

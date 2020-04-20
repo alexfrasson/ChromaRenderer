@@ -3,8 +3,10 @@
 #include "chroma-renderer/core/types/Intersection.h"
 #include "chroma-renderer/core/types/Material.h"
 #include "chroma-renderer/core/types/Ray.h"
+
 #include <glm/glm.hpp>
-//#include <ChromaRenderer/IIntersectable.h>
+
+#include <vector>
 
 #define EPSILON 0.000001f
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "chroma-renderer/core/types/Camera.h"
+#include "chroma-renderer/core/scene/Camera.h"
+#include "chroma-renderer/core/scene/Object.h"
 #include "chroma-renderer/core/types/Material.h"
 #include "chroma-renderer/core/types/Mesh.h"
-#include "chroma-renderer/core/types/Object.h"
 
 #include <functional>
 #include <string>

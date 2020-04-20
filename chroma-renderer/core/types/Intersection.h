@@ -1,8 +1,10 @@
 #pragma once
 
+#include "chroma-renderer/core/types/Face.h"
 #include "chroma-renderer/core/types/Material.h"
-#include "chroma-renderer/core/types/Object.h"
+
 #include <glm/glm.hpp>
+
 #include <limits>
 
 struct Intersection
