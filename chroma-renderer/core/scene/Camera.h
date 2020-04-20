@@ -3,8 +3,9 @@
 #include "chroma-renderer/core/types/BoundingBox.h"
 #include "chroma-renderer/core/types/Ray.h"
 
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
+#include <cmath>
 #include <vector>
 
 // tan(FOV/2) = (screenSize/2) / screenPlaneDistance

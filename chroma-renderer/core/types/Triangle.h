@@ -4,7 +4,8 @@
 #include "chroma-renderer/core/types/Material.h"
 #include "chroma-renderer/core/types/Ray.h"
 
-#include <glm/glm.hpp>
+#include <glm/geometric.hpp>
+#include <glm/vec3.hpp>
 
 #include <vector>
 

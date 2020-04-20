@@ -6,7 +6,7 @@
 #include "chroma-renderer/core/types/Ray.h"
 #include "chroma-renderer/core/types/Triangle.h"
 
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 #include <vector>
 

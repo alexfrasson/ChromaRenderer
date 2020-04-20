@@ -5,8 +5,6 @@
 #include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/types/Ray.h"
 
-#include <glm/glm.hpp>
-
 #include <vector>
 
 struct Intersection;
