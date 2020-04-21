@@ -1,6 +1,7 @@
 workspace(name = "chromarenderer")
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//third-party/cuda:cuda_configure.bzl", "cuda_configure")
 
 cuda_configure(name = "cuda")
@@ -28,3 +29,12 @@ git_repository(
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
+
+http_archive(
+    name = "assimp",
+    build_file = "//third-party/assimp:BUILD.bazel",
+    sha256 = "60080d8ab4daaab309f65b3cffd99f19eb1af8d05623fff469b9b652818e286e",
+    strip_prefix = "assimp-4.0.1",
+    urls = ["https://github.com/assimp/assimp/archive/v4.0.1.tar.gz"],
+    workspace_file = "//third-party/assimp:WORKSPACE",
+)
