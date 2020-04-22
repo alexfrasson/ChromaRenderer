@@ -33,8 +33,8 @@ bazel_skylib_workspace()
 http_archive(
     name = "assimp",
     build_file = "//third-party/assimp:BUILD.bazel",
-    sha256 = "60080d8ab4daaab309f65b3cffd99f19eb1af8d05623fff469b9b652818e286e",
-    strip_prefix = "assimp-4.0.1",
-    urls = ["https://github.com/assimp/assimp/archive/v4.0.1.tar.gz"],
+    sha256 = "11310ec1f2ad2cd46b95ba88faca8f7aaa1efe9aa12605c55e3de2b977b3dbfc",
+    strip_prefix = "assimp-5.0.1",
+    urls = ["https://github.com/assimp/assimp/archive/v5.0.1.tar.gz"],
     workspace_file = "//third-party/assimp:WORKSPACE",
 )
