@@ -1,8 +1,11 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@//third-party/build_defs:expand_template.bzl", "expand_template")
 
 DEFINES = [
     "ASSIMP_BUILD_NO_C4D_IMPORTER",
+    "ASSIMP_BUILD_NO_X3D_IMPORTER",
+    "ASSIMP_BUILD_NO_X3D_EXPORTER",
 ]
 
 # This is pretty awful, but assimp uses some ridiculous relative paths in its
@@ -63,13 +66,19 @@ cc_library(
     includes = ["code"],
 )
 
+copy_file(
+    name = "zconf_header",
+    src = "contrib/zlib/zconf.h.included",
+    out = "zconf.h",
+)
+
 cc_library(
     name = "contrib_includes",
     hdrs = glob([
         "contrib/**/*.h",
         "contrib/**/*.hpp",
-    ]),
-    strip_include_prefix = "",
+    ]) + [":zconf_header"],
+    includes = ["."],
 )
 
 cc_library(
@@ -81,6 +90,7 @@ cc_library(
         "contrib/openddlparser/include/**/*.h",
         "contrib/openddlparser/include/**/*.hpp",
     ]),
+    defines = ["OPENDDL_STATIC_LIBARY"],
     strip_include_prefix = "contrib/openddlparser/include",
     alwayslink = True,
 )
@@ -121,7 +131,7 @@ cc_library(
         "contrib/unzip/*.c",
         "contrib/zlib/*.h",
         "contrib/zlib/*.c",
-    ]),
+    ]) + [":zconf_header"],
     alwayslink = True,
 )
 
@@ -208,6 +218,7 @@ cc_library(
         "code/AssimpCExport.cpp",
         "code/Exporter.cpp",
     ],
+    defines = DEFINES,
     deps = [
         ":code_includes",
         ":includes",
@@ -342,7 +353,7 @@ cc_library(
         ":terragen_importer",
         ":3d_importer",
         ":x_importer",
-        ":x3d_importer",
+        #":x3d_importer",
         ":gltf_importer",
         ":3mf_importer",
         ":mmd_importer",
@@ -878,6 +889,7 @@ cc_library(
     hdrs = ALL_HDRS,
     deps = [
         ":code_includes",
+        ":contrib_includes",
         ":includes",
     ],
     alwayslink = True,
@@ -962,6 +974,7 @@ cc_library(
     hdrs = ALL_HDRS,
     deps = [
         ":code_includes",
+        ":contrib_includes",
         ":includes",
     ],
     alwayslink = True,
@@ -1101,6 +1114,7 @@ cc_library(
     hdrs = ALL_HDRS,
     deps = [
         ":code_includes",
+        ":contrib_includes",
         ":includes",
     ],
     alwayslink = True,
