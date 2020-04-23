@@ -1,7 +1,6 @@
 #include "chroma-renderer/core/scene/Camera.h"
 
 #include <glm/geometric.hpp>
-#include <halton.hpp>
 
 #include <cmath>
 #include <iostream>
