@@ -7,9 +7,9 @@ cc_library(
     srcs = glob(["*.cpp"]),
     hdrs = glob(["*.h"]),
     deps = [
-        "@assimp//:assimp",
         "//third-party/glad",
         "//third-party/glm",
         "//third-party/halton",
+        "@assimp",
     ],
 )

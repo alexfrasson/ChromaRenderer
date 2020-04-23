@@ -9,7 +9,7 @@ cc_library(
     includes = ["src"],
     deps = [
         "//third-party/glad",
-        "//third-party/glfw",
         "//third-party/glm",
+        "@glfw",
     ],
 )

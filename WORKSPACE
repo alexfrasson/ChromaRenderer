@@ -38,3 +38,12 @@ http_archive(
     urls = ["https://github.com/assimp/assimp/archive/v5.0.1.tar.gz"],
     workspace_file = "//third-party/assimp:WORKSPACE",
 )
+
+http_archive(
+    name = "glfw",
+    build_file = "//third-party/glfw:BUILD.bazel",
+    sha256 = "98768e12e615fbe9f3386f5bbfeb91b5a3b45a8c4c77159cef06b1f6ff749537",
+    strip_prefix = "glfw-3.3.2",
+    urls = ["https://github.com/glfw/glfw/archive/3.3.2.tar.gz"],
+    workspace_file = "//third-party/glfw:WORKSPACE",
+)

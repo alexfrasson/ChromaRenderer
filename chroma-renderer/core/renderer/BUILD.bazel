@@ -14,7 +14,6 @@ cc_library(
         "//chroma-renderer/core/utility",
         "//third-party/cuda-helpers",
         "//third-party/glad",
-        "//third-party/glfw",
         "//third-party/glm",
         "//third-party/halton",
         "//third-party/imgui",
@@ -22,6 +21,7 @@ cc_library(
         "@assimp",
         "@cuda//:cuda_headers",
         "@cuda//:cuda_runtime",
+        "@glfw",
     ],
 )
 
