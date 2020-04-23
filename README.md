@@ -1,14 +1,10 @@
-# Chroma Renderer
-
-![CI](https://github.com/alexfrasson/ChromaRenderer/workflows/CI/badge.svg?branch=master)
+# Chroma Renderer  ![CI](https://github.com/alexfrasson/ChromaRenderer/workflows/CI/badge.svg?branch=master)
 
 Naive path tracing renderer written during my time in college. Far from a good example of clean code, design patterns or C++ development in general.
 
 It is currently being refactored in the hope of learning more about multi-platform projects and writing Bazel rules.
 
-## Building
-
-### Required system installed dependencies
+## Required system installed dependencies
 - [Bazel 3.0](https://docs.bazel.build/versions/master/install.html) or [Bazelisk](https://github.com/bazelbuild/bazelisk/releases)
 - Cuda 10.2 (older releases may also work)
   - Environment variable **CUDA_PATH** must be set. Examples:
@@ -24,8 +20,8 @@ On Ubuntu 18.04:
 - g++-8
 - libgtk-3-dev
 
----
+## Building
 
-Simply run the following command from within the workspace. It should fetch all dependencies, build, and run the application. Choose the correct conmfiguration based on your OS.
+Simply run the following command from within the workspace. It should fetch all dependencies, build, and run the application. Choose the correct configuration based on your OS.
 
 `bazel run --config=[windows|linux] //chroma-renderer/gui`
