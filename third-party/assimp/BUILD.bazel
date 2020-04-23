@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@//third-party/build_defs:expand_template.bzl", "expand_template")
+load("@//third-party/expand_template:expand_template.bzl", "expand_template")
 
 EXCLUDED_IMPORTERS = [
     #"ASSIMP_BUILD_NO_COLLADA_IMPORTER",
