@@ -9,7 +9,6 @@ cc_library(
     deps = [
         "//third-party/glad",
         "//third-party/glm",
-        "//third-party/halton",
         "@assimp",
     ],
 )

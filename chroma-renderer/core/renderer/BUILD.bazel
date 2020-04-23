@@ -15,7 +15,6 @@ cc_library(
         "//third-party/cuda-helpers",
         "//third-party/glad",
         "//third-party/glm",
-        "//third-party/halton",
         "//third-party/imgui",
         "//third-party/stb:stb-image",
         "@assimp",

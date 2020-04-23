@@ -1,8 +1,6 @@
 #include "chroma-renderer/core/renderer/PathTracing.h"
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 
-#include <halton.hpp>
-
 #include <random>
 
 unsigned my_rand(void)
@@ -50,7 +48,7 @@ glm::vec3 pick_random_point_in_semisphere(glm::vec3 const& v)
 PathTracing::PathTracing()
     : pixelCount(0), donePixelCount(0), maxDepth(5), targetSamplesPerPixel(100), enviromentLight(true)
 {
-    halton_dim_num_set(2);
+    //halton_dim_num_set(2);
 }
 void PathTracing::trace(ISpacePartitioningStructure* sps, Scene& scene, Image& img, Interval interval, bool& abort)
 {
