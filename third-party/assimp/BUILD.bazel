@@ -2,8 +2,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@//third-party/build_defs:expand_template.bzl", "expand_template")
 
-package(default_visibility = ["//visibility:public"])
-
 EXCLUDED_IMPORTERS = [
     #"ASSIMP_BUILD_NO_COLLADA_IMPORTER",
     #"ASSIMP_BUILD_NO_OBJ_IMPORTER",
@@ -76,6 +74,7 @@ EXCLUDED_EXPORTERS = [
 
 cc_library(
     name = "assimp",
+    visibility = ["//visibility:public"],
     deps = [
         ":capi",
         ":collada_importer",
