@@ -43,7 +43,7 @@ void ChromaGui::MainMenu(GLFWwindow* /*window*/, ChromaRenderer* cr)
                     path.clear();
 
                     nfdchar_t* outPath = NULL;
-                    nfdresult_t result = NFD_OpenDialog("obj,fbx,dae,blend", NULL, &outPath);
+                    nfdresult_t result = NFD_OpenDialog("obj,dae,gltf", NULL, &outPath);
                     if (result == NFD_OKAY)
                     {
                         path = std::string(outPath);
