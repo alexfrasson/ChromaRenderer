@@ -1,6 +1,5 @@
 build --compilation_mode=opt
 build --spawn_strategy=local
-build --experimental_enable_runfiles
 
 build:debug --compilation_mode=dbg
 
@@ -13,6 +12,7 @@ build:windows --per_file_copt=chroma-renderer/.*@/W4
 build:windows --per_file_copt=third-party/.*@/W0
 build:windows --per_file_copt=external/.*@/W0
 build:windows --cxxopt=/std:c++17
+build:windows --experimental_enable_runfiles
 
 build:linux --client_env=CC=/usr/bin/gcc-8
 build:linux --client_env=CXX=/usr/bin/g++-8

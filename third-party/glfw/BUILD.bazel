@@ -1,13 +1,12 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-package(default_visibility = ["//visibility:public"])
-
 alias(
     name = "glfw",
     actual = select({
         ":on_linux": ":glfw_x11",
         ":on_windows": ":glfw_win32",
     }),
+    visibility = ["//visibility:public"],
 )
 
 config_setting(
@@ -24,6 +23,10 @@ config_setting(
     ],
 )
 
+########################################################################################################################
+# common
+########################################################################################################################
+
 cc_library(
     name = "public_headers",
     hdrs = [
@@ -33,14 +36,11 @@ cc_library(
     includes = ["include"],
 )
 
-DEFINES = select({
-    ":on_linux": ["_GLFW_X11"],
-    ":on_windows": ["_GLFW_WIN32"],
-})
-
 COMMON_HDRS = [
     "src/internal.h",
     "src/mappings.h",
+    "src/egl_context.h",
+    "src/osmesa_context.h",
 ]
 
 COMMON_SRCS = [
@@ -50,6 +50,8 @@ COMMON_SRCS = [
     "src/monitor.c",
     "src/vulkan.c",
     "src/window.c",
+    "src/egl_context.c",
+    "src/osmesa_context.c",
 ]
 
 ########################################################################################################################
@@ -59,9 +61,7 @@ COMMON_SRCS = [
 cc_library(
     name = "glfw_x11",
     srcs = [
-        "src/egl_context.c",
         "src/glx_context.c",
-        "src/osmesa_context.c",
         "src/posix_thread.c",
         "src/posix_time.c",
         "src/x11_init.c",
@@ -71,16 +71,14 @@ cc_library(
         "src/linux_joystick.c",
     ] + COMMON_SRCS,
     hdrs = [
-        "src/egl_context.h",
         "src/glx_context.h",
-        "src/osmesa_context.h",
         "src/posix_thread.h",
         "src/posix_time.h",
         "src/x11_platform.h",
         "src/xkb_unicode.h",
         "src/linux_joystick.h",
     ] + COMMON_HDRS,
-    defines = DEFINES,
+    defines = ["_GLFW_X11"],
     linkopts = ["-lX11 -ldl"],
     deps = [":public_headers"],
 )
@@ -92,8 +90,6 @@ cc_library(
 cc_library(
     name = "glfw_win32",
     srcs = [
-        "src/egl_context.c",
-        "src/osmesa_context.c",
         "src/wgl_context.c",
         "src/win32_init.c",
         "src/win32_joystick.c",
@@ -103,13 +99,11 @@ cc_library(
         "src/win32_window.c",
     ] + COMMON_SRCS,
     hdrs = [
-        "src/egl_context.h",
-        "src/osmesa_context.h",
         "src/wgl_context.h",
         "src/win32_joystick.h",
         "src/win32_platform.h",
     ] + COMMON_HDRS,
-    defines = DEFINES,
+    defines = ["_GLFW_WIN32"],
     linkopts = [
         "-DEFAULTLIB:gdi32.lib",
         "-DEFAULTLIB:ole32.lib",
