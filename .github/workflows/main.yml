@@ -23,8 +23,8 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-      with:
-        lfs: true
+      #with:
+      #  lfs: true
 
     # Runs a single command using the runners shell
     - name: Build
@@ -37,8 +37,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        lfs: true
+      #with:
+      #  lfs: true
 
     - name: Build
       shell: bash
