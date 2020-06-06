@@ -128,15 +128,6 @@ struct CudaLinearBvhNode
 extern "C" void setTextureFilterMode(bool bLinearFilter);
 extern "C" void bindTextureToArray(cudaArray* aarray);
 
-// void trace(cudaSurfaceObject_t surface, dim3 texDim, CudaCamera cam, CudaTriangle* triangles, unsigned int
-// nTriangles, CudaMaterial* materials, unsigned int nMaterials, unsigned int seed); void trace(cudaSurfaceObject_t
-// surface, dim3 texDim, CudaCamera cam, CudaTriangle* triangles, unsigned int nTriangles, CudaMaterial* materials,
-// unsigned int nMaterials, unsigned int seed, CudaLinearBvhNode* linearBVH); void trace(float4* accuBuffer, dim3
-// texDim, CudaCamera cam, CudaTriangle* triangles, unsigned int nTriangles, CudaMaterial* materials, unsigned int
-// nMaterials, unsigned int seed, CudaLinearBvhNode* linearBVH, bool enviromentLight); void trace(cudaStream_t &stream,
-// float4* accuBuffer, dim3 texDim, CudaCamera cam, CudaTriangle* triangles, unsigned int nTriangles, CudaMaterial*
-// materials, unsigned int nMaterials, unsigned int seed, CudaLinearBvhNode* linearBVH, CudaEnviromentSettings
-// enviromentSettings);
 extern "C" void trace(cudaStream_t& stream,
                       CudaPathIteration* pathIterationBuffer,
                       float4* accuBuffer,
