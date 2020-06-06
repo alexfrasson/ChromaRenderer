@@ -1,6 +1,7 @@
 #include "chroma-renderer/core/renderer/ChromaRenderer.h"
 #include "chroma-renderer/core/scene/ModelImporter.h"
 #include "chroma-renderer/core/space-partition/BVH.h"
+#include "chroma-renderer/core/types/environment_map.h"
 #include "chroma-renderer/core/utility/Config.h"
 #include "chroma-renderer/core/utility/RTUtils.h"
 
@@ -307,6 +308,7 @@ void ChromaRenderer::importScene(std::string filename, std::function<void()> onL
 void ChromaRenderer::setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels)
 {
     cudaPathTracer.setEnvMap(data, width, height, channels);
+    env_map.setData(data, width, height);
 }
 
 void ChromaRenderer::importEnviromentMap(std::string filename)
@@ -325,6 +327,7 @@ void ChromaRenderer::importEnviromentMap(std::string filename)
 
     stbi_image_free(data);
 }
+
 void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
 {
     state = State::PROCESSINGSCENE;

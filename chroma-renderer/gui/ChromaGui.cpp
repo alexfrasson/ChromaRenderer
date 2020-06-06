@@ -7,6 +7,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 
@@ -72,7 +73,7 @@ void ChromaGui::MainMenu(GLFWwindow* /*window*/, ChromaRenderer* cr)
                     path.clear();
 
                     nfdchar_t* outPath = NULL;
-                    nfdresult_t result = NFD_OpenDialog("hdr", NULL, &outPath);
+                    nfdresult_t result = NFD_OpenDialog("hdr,jpg,png", NULL, &outPath);
                     if (result == NFD_OKAY)
                     {
                         path = std::string(outPath);
@@ -169,6 +170,7 @@ void ChromaGui::DockSpace()
 
             ImGui::DockBuilderDockWindow("Settings", dock_id_left);
             ImGui::DockBuilderDockWindow("Material Editor", dock_id_right);
+            ImGui::DockBuilderDockWindow("EnvMapDebug", dock_main_id);
             ImGui::DockBuilderDockWindow("Viewport", dock_main_id);
             ImGui::DockBuilderDockWindow("Debug", dock_id_left_bottom);
             ImGui::DockBuilderFinish(dockspace_id);
@@ -413,8 +415,8 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
 
         const ImVec2 img_available_region = ImGui::GetContentRegionAvail();
         RendererSettings rs = cr->getSettings();
-        rs.width = static_cast<int>(img_available_region.x);
-        rs.height = static_cast<int>(img_available_region.y);
+        rs.width = std::max(static_cast<int>(img_available_region.x), 10);
+        rs.height = std::max(static_cast<int>(img_available_region.y), 10);
 
         if (rs != cr->getSettings())
         {
@@ -479,6 +481,15 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
     return somethingChanged;
 }
 
+void EnvMapDebug(ChromaRenderer* cr)
+{
+    ImGui::Begin("EnvMapDebug");
+
+    DrawImage(cr->env_map, true);
+
+    ImGui::End();
+}
+
 bool ChromaGui::RenderGui(GLFWwindow* window, ChromaRenderer* cr)
 {
     bool somethingChanged = false;
@@ -500,6 +511,8 @@ bool ChromaGui::RenderGui(GLFWwindow* window, ChromaRenderer* cr)
 
     if (SettingsWindow(cr))
         somethingChanged = true;
+
+    EnvMapDebug(cr);
 
     if (ViewportWindow(cr))
         somethingChanged = true;

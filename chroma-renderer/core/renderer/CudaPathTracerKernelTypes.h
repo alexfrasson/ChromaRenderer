@@ -1,21 +1,29 @@
 #pragma once
 
-#include <cuda_runtime.h>
-#include <glm/vec3.hpp>
-
 #include <cfloat>
+#include <cuda_runtime.h>
+#include <glm/gtc/constants.hpp>
+#include <glm/vec3.hpp>
 
 struct CudaPathIteration
 {
     glm::vec3 rayOrigin;
     glm::vec3 rayDir;
     glm::vec3 mask;
-    int bounce;
+    glm::vec3 color;
+    uint32_t bounce;
+    uint32_t samples;
 };
 
 struct CudaEnviromentSettings
 {
     cudaTextureObject_t texObj;
+    int cdf_size;
+    int pdf_size;
+    float* cdf{nullptr};
+    float* pdf{nullptr};
+    int width;
+    int height;
 };
 
 struct CudaCamera
@@ -55,6 +63,11 @@ struct CudaMaterial
     glm::vec3 kd;
     glm::vec3 ke;
     glm::vec3 transparent;
+
+    __device__ glm::vec3 f() const
+    {
+        return kd * glm::one_over_pi<float>();
+    }
 };
 
 struct CudaBoundingBox

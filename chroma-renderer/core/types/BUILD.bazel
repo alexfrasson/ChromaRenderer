@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -10,5 +10,14 @@ cc_library(
         "//third-party/glad",
         "//third-party/glm",
         "@assimp",
+    ],
+)
+
+cc_test(
+    name = "utility-test",
+    srcs = glob(["test/*.cpp"]),
+    deps = [
+        ":types",
+        "@googletest//:gtest_main",
     ],
 )
