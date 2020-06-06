@@ -90,6 +90,7 @@ cc_library(
     name = "common",
     srcs = glob(["code/Common/*.cpp"]),
     defines = EXCLUDED_IMPORTERS + EXCLUDED_EXPORTERS,
+    linkstatic = True,
     deps = [
         ":common_headers",
         ":irrxml",
@@ -141,6 +142,7 @@ cc_library(
     name = "capi",
     srcs = glob(["code/CApi/*.cpp"]),
     hdrs = glob(["code/CApi/*.h"]),
+    linkstatic = True,
     deps = [
         ":common_headers",
         ":public_headers",
