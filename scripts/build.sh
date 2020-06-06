@@ -34,4 +34,4 @@ echo "Building project..."
 
 export CC_CONFIGURE_DEBUG=1
 
-bazelisk build --config=linux --verbose_failures //chroma-renderer/gui
+bazelisk build --config=linux --verbose_failures //...

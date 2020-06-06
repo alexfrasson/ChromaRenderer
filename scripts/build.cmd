@@ -37,4 +37,4 @@ if NOT EXIST "%BAZELISK_PATH%\bazel.exe" (
 
 set CC_CONFIGURE_DEBUG=1
 
-bazel build --config=windows --verbose_failures //chroma-renderer/gui
+bazel build --config=windows --verbose_failures //...
