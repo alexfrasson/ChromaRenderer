@@ -282,7 +282,7 @@ void CudaPathTracer::copyFrameToTexture()
                                           0,
                                           0,
                                           dev_accuBuffer,
-                                          registeredImage.width * registeredImage.height * sizeof(float4),
+                                          registeredImage.width * registeredImage.height * sizeof(glm::vec4),
                                           cudaMemcpyDeviceToDevice,
                                           cpystream));
 
@@ -497,7 +497,7 @@ void CudaPathTracer::init(Image& img, Camera& cam)
     if (registeredImage.changed(img))
     {
         cudaErrorCheck(cudaFree(dev_accuBuffer));
-        cudaErrorCheck(cudaMalloc((void**)&dev_accuBuffer, img.getWidth() * img.getHeight() * sizeof(float4)));
+        cudaErrorCheck(cudaMalloc((void**)&dev_accuBuffer, img.getWidth() * img.getHeight() * sizeof(glm::vec4)));
 
         assert(dev_accuBuffer != nullptr);
 
@@ -524,7 +524,7 @@ void CudaPathTracer::init(Image& img, Camera& cam)
     }
 
     cudaErrorCheck(
-        cudaMemsetAsync(dev_accuBuffer, 0, registeredImage.width * registeredImage.height * sizeof(float4), stream));
+        cudaMemsetAsync(dev_accuBuffer, 0, registeredImage.width * registeredImage.height * sizeof(glm::vec4), stream));
     cudaErrorCheck(cudaMemsetAsync(dev_pathIterationBuffer,
                                    0,
                                    registeredImage.width * registeredImage.height * sizeof(CudaPathIteration),
@@ -561,7 +561,7 @@ void CudaPathTracer::setSettings(RendererSettings& settings)
 {
     targetSamplesPerPixel = settings.samplesperpixel;
     enviromentSettings.enviromentLightColor =
-        make_float3(settings.enviromentLightColor.x, settings.enviromentLightColor.y, settings.enviromentLightColor.z);
+        glm::vec3(settings.enviromentLightColor.x, settings.enviromentLightColor.y, settings.enviromentLightColor.z);
     enviromentSettings.enviromentLightIntensity = settings.enviromentLightIntensity;
     gammaCorrectionScale = settings.enviromentLightIntensity;
 }
