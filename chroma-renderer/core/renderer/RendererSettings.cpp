@@ -5,7 +5,7 @@
 
 RendererSettings::RendererSettings()
     : width(640), height(480), horizontalFOV(1.0), enviromentLightColor(0.8, 0.8, 0.8), enviromentLightIntensity(1),
-      nthreads(2), supersampling(true), samplesperpixel(1000), boundingboxtest(true), shadowray(false)
+      nthreads(2), supersampling(true), samplesperpixel(10000), boundingboxtest(true), shadowray(false)
 {
     nthreads = std::max(std::thread::hardware_concurrency(), 2u);
 }
