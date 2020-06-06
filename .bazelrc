@@ -25,3 +25,6 @@ build:linux --per_file_copt=third-party/.*@-w
 build:linux --per_file_copt=external/.*@-w
 build:linux --cxxopt=-std=c++17
 build:linux --cxxopt=-mavx
+
+test --test_output=errors
+test --test_arg=--gtest_color=yes
