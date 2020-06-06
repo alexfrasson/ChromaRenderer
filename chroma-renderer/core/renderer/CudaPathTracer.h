@@ -63,7 +63,7 @@ class CudaPathTracer
 
     cudaArray* envArray = 0;
 
-    float4* dev_accuBuffer = 0;
+    glm::vec4* dev_accuBuffer = 0;
     CudaPathIteration* dev_pathIterationBuffer = 0;
 
     Stopwatch stopwatch;

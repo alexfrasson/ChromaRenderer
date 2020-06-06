@@ -1,21 +1,24 @@
 #pragma once
 
-#define MAX_PATH_DEPTH 3
+#include <iostream>
 
-#define cudaErrorCheck(ans)                                                                                         \
-    {                                                                                                               \
-        if (ans != cudaSuccess)                                                                                     \
-        {                                                                                                           \
-            cerr << "CudaError: " << cudaGetErrorString(ans) << "(" << __FILE__ << "(" << __LINE__ << "))" << endl; \
-            exit(-1);                                                                                               \
-            return;                                                                                                 \
-        }                                                                                                           \
+#define cudaErrorCheck(ans)                                                                                     \
+    {                                                                                                           \
+        if (ans != cudaSuccess)                                                                                 \
+        {                                                                                                       \
+            std::cerr << "CudaError: " << cudaGetErrorString(ans) << "(" << __FILE__ << "(" << __LINE__ << "))" \
+                      << std::endl;                                                                             \
+            exit(-1);                                                                                           \
+            return;                                                                                             \
+        }                                                                                                       \
     }
 
-#include <cuda-helpers/helper_math.h>
+#include <cuda_runtime.h>
+
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <cfloat>
-#include <stdint.h>
 
 #if defined(__CUDACC__) // NVCC
 #define MY_ALIGN(n) __align__(n)
@@ -27,17 +30,19 @@
 #error "Please provide a definition for MY_ALIGN macro for your host compiler!"
 #endif
 
+#define MAX_PATH_DEPTH 3
+
 struct CudaPathIteration
 {
-    float3 rayOrigin;
-    float3 rayDir;
-    float3 mask;
+    glm::vec3 rayOrigin;
+    glm::vec3 rayDir;
+    glm::vec3 mask;
     int bounce;
 };
 
 struct CudaEnviromentSettings
 {
-    float3 enviromentLightColor;
+    glm::vec3 enviromentLightColor;
     float enviromentLightIntensity;
     cudaTextureObject_t texObj;
 };
@@ -47,14 +52,14 @@ struct CudaCamera
     int width;
     int height;
     float d;
-    float3 right, up, forward;
-    float3 eye;
+    glm::vec3 right, up, forward;
+    glm::vec3 eye;
 };
 
 struct CudaRay
 {
-    float3 origin;
-    float3 direction;
+    glm::vec3 origin;
+    glm::vec3 direction;
     float mint;
     float maxt;
 };
@@ -62,28 +67,28 @@ struct CudaRay
 struct CudaTriangle
 {
     int material;
-    float3 v[3];
-    float3 n[3];
+    glm::vec3 v[3];
+    glm::vec3 n[3];
 };
 
 struct CudaIntersection
 {
     float distance;
     int material;
-    float3 p;
-    float3 n;
+    glm::vec3 p;
+    glm::vec3 n;
 };
 
 struct CudaMaterial
 {
-    float3 kd;
-    float3 ke;
-    float3 transparent;
+    glm::vec3 kd;
+    glm::vec3 ke;
+    glm::vec3 transparent;
 };
 
 struct CudaBoundingBox
 {
-    float3 max, min;
+    glm::vec3 max, min;
     CudaBoundingBox()
     {
         max.x = -FLT_MAX;
@@ -94,18 +99,18 @@ struct CudaBoundingBox
         min.y = min.x;
         min.z = min.x;
     }
-    CudaBoundingBox(const float3& min, const float3& max)
+    CudaBoundingBox(const glm::vec3& min, const glm::vec3& max)
     {
         this->min = min;
         this->max = max;
     }
-    __host__ __device__ float3& operator[](const int& i)
+    __host__ __device__ glm::vec3& operator[](const int& i)
     {
         if (i == 0)
             return min;
         return max;
     }
-    __host__ __device__ const float3& operator[](const int& i) const
+    __host__ __device__ const glm::vec3& operator[](const int& i) const
     {
         if (i == 0)
             return min;
@@ -130,7 +135,7 @@ extern "C" void bindTextureToArray(cudaArray* aarray);
 
 extern "C" void trace(cudaStream_t& stream,
                       CudaPathIteration* pathIterationBuffer,
-                      float4* accuBuffer,
+                      glm::vec4* accuBuffer,
                       dim3 texDim,
                       CudaCamera cam,
                       CudaTriangle* triangles,

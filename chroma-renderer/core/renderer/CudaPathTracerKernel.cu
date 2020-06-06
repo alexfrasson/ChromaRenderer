@@ -1,24 +1,19 @@
 #include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
 
-#include <cuda-helpers/helper_cuda.h>
-#include <cuda-helpers/helper_math.h>
-#include <cuda_runtime.h>
-#include <curand.h>
 #include <curand_kernel.h>
-#include <device_launch_parameters.h>
 
-#include <cfloat>
-#include <iostream>
 #define _USE_MATH_DEFINES
 #include <math.h>
+
+#include <glm/geometric.hpp>
 
 #define THREAD_DIM 8
 #define EPSILON 0.000001f
 #define SAMPLES 1
 
-texture<float4, cudaTextureType2D, /*cudaReadModeNormalizedFloat*/ cudaReadModeElementType> accuTex;
+texture<glm::vec4, cudaTextureType2D, /*cudaReadModeNormalizedFloat*/ cudaReadModeElementType> accuTex;
 
-__device__ __inline__ float3 cosineSampleHemisphere(curandState* randState, float3 normal)
+__device__ __inline__ glm::vec3 cosineSampleHemisphere(curandState* randState, glm::vec3 normal)
 {
     // pick two random numbers
     float phi = 2 * M_PI * curand_uniform(randState);
@@ -26,13 +21,13 @@ __device__ __inline__ float3 cosineSampleHemisphere(curandState* randState, floa
     float r2s = sqrtf(r2);
 
     // compute orthonormal coordinate frame uvw with hitpoint as origin
-    float3 w = normalize(normal);
-    float3 u = cross((fabs(w.x) > .1 ? make_float3(0, 1, 0) : make_float3(1, 0, 0)), w);
-    u = normalize(u);
-    float3 v = cross(w, u);
+    glm::vec3 w = glm::normalize(normal);
+    glm::vec3 u = glm::cross((fabs(w.x) > .1 ? glm::vec3{0, 1, 0} : glm::vec3{1, 0, 0}), w);
+    u = glm::normalize(u);
+    glm::vec3 v = glm::cross(w, u);
 
     // compute cosine weighted random ray direction on hemisphere
-    return normalize(u * cosf(phi) * r2s + v * sinf(phi) * r2s + w * sqrtf(1 - r2));
+    return glm::normalize(u * cosf(phi) * r2s + v * sinf(phi) * r2s + w * sqrtf(1 - r2));
 }
 
 __device__ __inline__ CudaRay rayDirectionWithOffset(const int i, const int j, CudaCamera cam, curandState* randState)
@@ -66,10 +61,10 @@ extern "C" __host__ __device__ __inline__ CudaRay rayDirection(const int i, cons
 // Intersects ray with triangle v0v1v2
 __host__ __device__ __inline__ bool intersectTriangle(const CudaTriangle* tri, CudaRay* ray, CudaIntersection* is)
 {
-    const float3 edge0 = tri->v[1] - tri->v[0];
-    const float3 edge1 = tri->v[2] - tri->v[0];
-    const float3 pvec = cross(ray->direction, edge1);
-    const float det = dot(edge0, pvec);
+    const glm::vec3 edge0 = tri->v[1] - tri->v[0];
+    const glm::vec3 edge1 = tri->v[2] - tri->v[0];
+    const glm::vec3 pvec = glm::cross(ray->direction, edge1);
+    const float det = glm::dot(edge0, pvec);
 
     // If determinant is near zero, ray lies in plane of triangle
     // With backface culling
@@ -79,17 +74,17 @@ __host__ __device__ __inline__ bool intersectTriangle(const CudaTriangle* tri, C
         return false;
     bool backface = det < -EPSILON;
     const float invDet = 1.0f / det;
-    const float3 tvec = ray->origin - tri->v[0];
-    float u = dot(tvec, pvec) * invDet;
+    const glm::vec3 tvec = ray->origin - tri->v[0];
+    float u = glm::dot(tvec, pvec) * invDet;
     // The intersection lies outside of the triangle
     if (u < 0.0f || u > 1.0f)
         return false;
-    const float3 qvec = cross(tvec, edge0);
-    float v = dot(ray->direction, qvec) * invDet;
+    const glm::vec3 qvec = glm::cross(tvec, edge0);
+    float v = glm::dot(ray->direction, qvec) * invDet;
     // The intersection lies outside of the triangle
     if (v < 0.0f || u + v > 1.0f)
         return false;
-    float t = dot(edge1, qvec) * invDet;
+    float t = glm::dot(edge1, qvec) * invDet;
 
     // if (t < EPSILON)
     //	return false;
@@ -117,7 +112,7 @@ __host__ __device__ __inline__ bool intersectTriangle(const CudaTriangle* tri, C
     // glm::vec3 hitNormal = alpha * (*n0) + beta * (*n1) + gama * (*n2);
     // is->n = u * (tri->n[1] + v * tri->n[2] + gama * tri->n[0]);
     is->n = u * tri->n[1] + v * tri->n[2] + gama * tri->n[0];
-    is->n = (backface ? -1.0f : 1.0f) * normalize(is->n);
+    is->n = (backface ? -1.0f : 1.0f) * glm::normalize(is->n);
 
     is->material = tri->material;
 
@@ -129,7 +124,7 @@ __host__ __device__ __inline__ bool intersectTriangle(const CudaTriangle* tri, C
 // intersection algorithm." In ACM SIGGRAPH 2005 Courses, p. 9. ACM, 2005.
 __host__ __device__ __inline__ bool hitBoundingBoxSlab(const CudaBoundingBox& bb,
                                                        const CudaRay& r,
-                                                       const float3& invRayDir,
+                                                       const glm::vec3& invRayDir,
                                                        const bool* dirIsNeg,
                                                        float& tmin,
                                                        float& tmax)
@@ -164,7 +159,7 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
                                       CudaIntersection& intersection)
 {
     bool hit = false;
-    const float3 invRayDir = 1.f / r.direction;
+    const glm::vec3 invRayDir = 1.f / r.direction;
     const bool dirIsNeg[3] = {invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
 
     unsigned int todoOffset = 0;
@@ -221,7 +216,7 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
 }
 
 __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
-                            float4* accuBuffer,
+                            glm::vec4* accuBuffer,
                             const dim3 texDim,
                             const CudaCamera cam,
                             const CudaTriangle* triangles,
@@ -248,13 +243,13 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
 
     CudaPathIteration pathIteration = pathIterationBuffer[pos];
     CudaRay ray;
-    float3 color;
+    glm::vec3 color;
 
     // Begin path
     if (pathIteration.bounce == 0)
     {
         ray = rayDirectionWithOffset(x, y, cam, &randState);
-        pathIteration.mask = make_float3(1.0f);
+        pathIteration.mask = glm::vec3{1.0f, 1.0f, 1.0f};
     }
     else
     {
@@ -273,7 +268,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         float v = ray.direction.y * 0.5 + 0.5;
 
         float4 env = tex2D<float4>(enviromentSettings.texObj, u, 1.0f - v);
-        color = pathIteration.mask * make_float3(env.x, env.y, env.z);
+        color = pathIteration.mask * glm::vec3(env.x, env.y, env.z);
 
         // float4 env = tex2D<float4>(enviromentSettings.texObj, u, 1.0f - v) *
         // enviromentSettings.enviromentLightIntensity; color = pathIteration.mask * make_float3(pow(env.x, 1.0f
@@ -288,16 +283,16 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         if (materials[is.material].transparent.x < 1.0 || materials[is.material].transparent.y < 1.0 ||
             materials[is.material].transparent.z < 1.0)
         {
-            color = make_float3(0.0f);
+            color = glm::vec3{0.0f, 0.0f, 0.0f};
             // pathIteration.bounce--;
             ray.origin = is.p + ray.direction * 0.0001f;
         }
         else
         {
             // Intersection
-            float3 emittance;
-            float3 kd = materials[is.material].kd;
-            float3 ke = materials[is.material].ke;
+            glm::vec3 emittance;
+            glm::vec3 kd = materials[is.material].kd;
+            glm::vec3 ke = materials[is.material].ke;
 
             emittance = ke * kd;
 
@@ -305,9 +300,9 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
             ray.direction = cosineSampleHemisphere(&randState, is.n);
 
             // Compute the BRDF for this ray (assuming Lambertian reflection)
-            float cos_theta = dot(ray.direction, is.n);
+            float cos_theta = glm::dot(ray.direction, is.n);
 
-            float3 BRDF = kd * 2.0f * cos_theta;
+            glm::vec3 BRDF = kd * 2.0f * cos_theta;
 
             // Apply the Rendering Equation here.
             color = pathIteration.mask * emittance;
@@ -324,7 +319,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
             pathIteration.bounce = 0;
     }
 
-    accuBuffer[pos] += make_float4(color, 1.0f / (float)MAX_PATH_DEPTH);
+    accuBuffer[pos] += glm::vec4(color.x, color.y, color.z, 1.0f / (float)MAX_PATH_DEPTH);
     pathIterationBuffer[pos] = pathIteration;
 }
 
@@ -338,7 +333,7 @@ extern "C" void bindTextureToArray(cudaArray* aarray)
     // cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float4>();
     // cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
     cudaChannelFormatDesc channelDesc;
-    checkCudaErrors(cudaGetChannelDesc(&channelDesc, aarray));
+    cudaErrorCheck(cudaGetChannelDesc(&channelDesc, aarray));
 
     // set texture parameters
     accuTex.normalized = false;                   // access with normalized texture coordinates
@@ -346,12 +341,12 @@ extern "C" void bindTextureToArray(cudaArray* aarray)
     accuTex.addressMode[0] = cudaAddressModeWrap; // wrap texture coordinates
     accuTex.addressMode[1] = cudaAddressModeWrap;
 
-    checkCudaErrors(cudaBindTextureToArray(accuTex, aarray, channelDesc));
+    cudaErrorCheck(cudaBindTextureToArray(accuTex, aarray, channelDesc));
 }
 
 extern "C" void trace(cudaStream_t& stream,
                       CudaPathIteration* pathIterationBuffer,
-                      float4* accuBuffer,
+                      glm::vec4* accuBuffer,
                       dim3 texDim,
                       CudaCamera cam,
                       CudaTriangle* triangles,
