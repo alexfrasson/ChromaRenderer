@@ -16,7 +16,7 @@ cuda_configure = repository_rule(
     attrs = {
         "build_file": attr.label(
             allow_files = True,
-            default = Label("//third-party/cuda:BUILD.bazel"),
+            default = Label("//third-party/cuda:cuda.BUILD"),
         ),
     },
 )
