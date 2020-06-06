@@ -15,7 +15,7 @@ register_toolchains(
 
 new_local_repository(
     name = "gtk",
-    build_file = "//third-party/gtk:BUILD.bazel",
+    build_file = "//third-party/gtk:gtk.BUILD",
     path = "/usr/",
 )
 
@@ -32,7 +32,7 @@ bazel_skylib_workspace()
 
 http_archive(
     name = "assimp",
-    build_file = "//third-party/assimp:BUILD.bazel",
+    build_file = "//third-party/assimp:assimp.BUILD",
     sha256 = "11310ec1f2ad2cd46b95ba88faca8f7aaa1efe9aa12605c55e3de2b977b3dbfc",
     strip_prefix = "assimp-5.0.1",
     urls = ["https://github.com/assimp/assimp/archive/v5.0.1.tar.gz"],
@@ -41,7 +41,7 @@ http_archive(
 
 http_archive(
     name = "glfw",
-    build_file = "//third-party/glfw:BUILD.bazel",
+    build_file = "//third-party/glfw:glfw.BUILD",
     sha256 = "98768e12e615fbe9f3386f5bbfeb91b5a3b45a8c4c77159cef06b1f6ff749537",
     strip_prefix = "glfw-3.3.2",
     urls = ["https://github.com/glfw/glfw/archive/3.3.2.tar.gz"],
