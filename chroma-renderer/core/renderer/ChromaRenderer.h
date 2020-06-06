@@ -59,6 +59,7 @@ class ChromaRenderer
   public:
     Image renderer_target;
     Image final_target;
+    Image env_map;
     ThreadPool threadPool;
     ChromaRenderer();
     ~ChromaRenderer();

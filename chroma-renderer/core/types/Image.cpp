@@ -35,8 +35,8 @@ void Image::genOpenGLTexture()
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -121,7 +121,7 @@ void Image::setColor(unsigned int widthPixelPos,
 
     hasDataChanged = true;
 }
-void setData(const float* data, const uint32_t width, const uint32_t height, const unsigned short components = 4);
+
 void Image::setColor(unsigned int widthPixelPos, unsigned int heightPixelPos, const Color& color)
 {
     if (widthPixelPos >= width || heightPixelPos >= height || buffer == NULL)

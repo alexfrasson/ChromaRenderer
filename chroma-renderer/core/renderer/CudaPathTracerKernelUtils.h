@@ -2,29 +2,185 @@
 
 #include "chroma-renderer/core/renderer/CudaPathTracerKernelTypes.h"
 
-#include <glm/geometric.hpp>
-#include <glm/gtc/constants.hpp>
-#include <glm/vec2.hpp>
+#include <glm/mat3x3.hpp>
 #include <glm/vec3.hpp>
 
 #include <cfloat>
 
 #define EPSILON 0.000001f
 
+__host__ __device__ int binarySearch(const float* cdf, const int cdf_size, const float rand_var)
+{
+    int start = 1;
+    int end = cdf_size;
+    int index = -1;
+    while (start < end)
+    {
+        index = static_cast<int>(floorf((start + end) / 2.0f));
+
+        if (rand_var >= cdf[index - 1] && rand_var <= cdf[index])
+        {
+            // index--;
+            break;
+        }
+
+        if (rand_var > cdf[index])
+        {
+            start = index + 1;
+        }
+        else
+        {
+            end = index - 1;
+        }
+    }
+    return index;
+}
+
+__device__ glm::mat3 basis(glm::vec3 normal)
+{
+    glm::vec3 binormal;
+    if (abs(normal.x) > abs(normal.z))
+    {
+        binormal = glm::vec3(-normal.y, normal.x, 0.0f);
+    }
+    else
+    {
+        binormal = glm::vec3(0.0f, -normal.z, normal.y);
+    }
+    binormal = glm::normalize(binormal);
+    const glm::vec3 tangent = glm::normalize(glm::cross(binormal, normal));
+    // return glm::normalize(dir.x * tangent + dir.y * binormal + dir.z * normal);
+    return glm::mat3{tangent, binormal, normal};
+}
+
+__device__ glm::vec3 toWorld(const glm::vec3 dir, const glm::vec3 normal)
+{
+    const glm::mat3 base = basis(normal);
+    return glm::normalize(base * dir);
+}
+
+__device__ glm::vec3 toLocal(const glm::vec3 dir, const glm::vec3 normal)
+{
+    const glm::mat3 base = glm::transpose(basis(normal));
+    return glm::normalize(base * dir);
+}
+
+struct SampleDirection
+{
+    glm::vec3 direction;
+    float pdf;
+};
+
+__device__ float sphericalTheta(const glm::vec3& unit_vector)
+{
+    return acosf(unit_vector.y);
+}
+
+__device__ float sphericalPhi(const glm::vec3& unit_vector)
+{
+    const float p = atan2f(unit_vector.z, unit_vector.x);
+    return (p < 0.0f) ? (p + 2.0f * glm::pi<float>()) : p;
+}
+
+__device__ bool sameHemisphere(const glm::vec3& n, const glm::vec3& a, const glm::vec3& b)
+{
+    return ((glm::dot(n, a) * glm::dot(n, b)) > 0.0f);
+}
+
+__device__ bool sameHemisphere(const glm::vec3& a, const glm::vec3& b)
+{
+    return (a.z * b.z > 0.0f);
+}
+
+__device__ float uniformSampleHemispherePdf(const glm::vec3& /*n*/, const glm::vec3& /*wo*/, const glm::vec3& /*wi*/)
+{
+    // if (!sameHemisphere(n, wo, wi))
+    // {
+    //     return 0.0f;
+    // }
+    return 1.0f / glm::two_pi<float>();
+}
+
+__device__ SampleDirection uniformSampleHemisphere(const float rand0,
+                                                   const float rand1,
+                                                   const glm::vec3& n,
+                                                   const glm::vec3& wo)
+{
+    // cos(theta) = rand0 = y
+    // cos^2(theta) + sin^2(theta) = 1 -> sin(theta) = srtf(1 - cos^2(theta))
+    const float sinTheta = sqrtf(1 - rand0 * rand0);
+    const float phi = glm::two_pi<float>() * rand1;
+    const float x = sinTheta * cosf(phi);
+    const float z = sinTheta * sinf(phi);
+    const glm::vec3 local_direction = glm::normalize(glm::vec3(x, z, rand0));
+    const glm::vec3 wi = toWorld(local_direction, n);
+    const float pdf = uniformSampleHemispherePdf(n, wo, wi);
+    return SampleDirection{wi, pdf};
+}
+
+__device__ float uniformSampleCosineWeightedHemispherePdf(const glm::vec3& n,
+                                                          const glm::vec3& wo,
+                                                          const glm::vec3& wi)
+{
+    if (!sameHemisphere(n, wo, wi))
+    {
+        return 0.0f;
+    }
+    // const float theta = sphericalPhi(unit_vector);
+    // return glm::one_over_pi<float>() * cosf(theta) * sinf(theta);
+    return abs(glm::dot(n, wi)) * glm::one_over_pi<float>();
+}
+
+__device__ SampleDirection uniformSampleCosineWeightedHemisphere(const float rand0,
+                                                                 const float rand1,
+                                                                 const glm::vec3& n,
+                                                                 const glm::vec3& wo)
+{
+    const float theta = asinf(sqrtf(rand0));
+    const float phi = 2.0f * glm::pi<float>() * rand1;
+    const float sinTheta = sinf(theta);
+    const float cosTheta = cosf(theta);
+    const float sinPhi = sinf(phi);
+    const float cosPhi = cosf(phi);
+    const float x = sinTheta * cosPhi;
+    const float y = sinTheta * sinPhi;
+    const float z = cosTheta;
+
+    // const float rand1_times_two_pi = glm::two_pi<float>() * rand1;
+    // const float rand0_sqrt = sqrtf(rand0);
+
+    // const float x = cosf(rand1_times_two_pi) * rand0_sqrt;
+    // const float y = sinf(rand1_times_two_pi) * rand0_sqrt;
+    // const float z = sqrtf(1.0f - rand0);
+
+    // xt = rand.x * 2 * PI; //expand to 0 to 2PI
+    // yt = sqrt(1.0 - rand.y);
+
+    // x = cos(xt) * yt;
+    // y = sqrt(rand.y);
+    // z = sin(xt) * yt;
+
+    const glm::vec3 local_direction = glm::normalize(glm::vec3(x, y, z));
+    const glm::vec3 wi = toWorld(local_direction, n);
+    const float pdf = uniformSampleCosineWeightedHemispherePdf(n, wo, wi);
+
+    // const float pdf = glm::one_over_pi<float>() * cosTheta * sinTheta;
+
+    // const float pdf = 1.0f;
+    return SampleDirection{wi, pdf};
+}
+
 __device__ glm::vec3 cosineSampleHemisphere(const glm::vec3 normal, const float rand0, const float rand1)
 {
-    float phi = 2 * glm::pi<float>() * rand0;
-    float r2 = rand1;
-    float r2s = sqrtf(r2);
+    const glm::vec3 w = glm::normalize(normal);
+    const glm::vec3 u = glm::normalize(glm::cross((fabs(w.x) > 0.1f ? glm::vec3{0, 1, 0} : glm::vec3{1, 0, 0}), w));
+    const glm::vec3 v = glm::cross(w, u);
 
-    // compute orthonormal coordinate frame uvw with hitpoint as origin
-    glm::vec3 w = glm::normalize(normal);
-    glm::vec3 u = glm::cross((fabs(w.x) > .1 ? glm::vec3{0, 1, 0} : glm::vec3{1, 0, 0}), w);
-    u = glm::normalize(u);
-    glm::vec3 v = glm::cross(w, u);
+    const float phi = 2 * glm::pi<float>() * rand0;
+    const float rand1_sqrt = sqrtf(rand1);
 
     // compute cosine weighted random ray direction on hemisphere
-    return glm::normalize(u * cosf(phi) * r2s + v * sinf(phi) * r2s + w * sqrtf(1 - r2));
+    return glm::normalize(u * cosf(phi) * rand1_sqrt + v * sinf(phi) * rand1_sqrt + w * sqrtf(1.0f - rand1));
 }
 
 __device__ CudaRay
@@ -34,32 +190,31 @@ rayDirectionWithOffset(const int i, const int j, const CudaCamera cam, const flo
     ray.mint = 0;
     ray.maxt = FLT_MAX;
     ray.origin = cam.eye;
-
-    ray.direction = normalize((float)(i + rand0 - cam.width * 0.5f) * cam.right +
-                              (float)(j + rand1 - cam.height * 0.5f) * cam.up + cam.d * cam.forward);
+    ray.direction = glm::normalize((float)(i + rand0 - cam.width * 0.5f) * cam.right +
+                                   (float)(j + rand1 - cam.height * 0.5f) * cam.up + cam.d * cam.forward);
     return ray;
 }
 
 // https://people.cs.clemson.edu/~dhouse/courses/405/notes/texture-maps.pdf
-__host__ __device__ glm::vec2 unitVectorToUv(const glm::vec3& unit_vector)
+__device__ glm::vec2 unitVectorToUv(const glm::vec3& unit_vector)
 {
-    const float theta = atan2(unit_vector.z, unit_vector.x);
-    const float phi = acos(unit_vector.y);
-    const float u = (theta + glm::pi<float>()) / glm::two_pi<float>();
-    const float v = phi * glm::one_over_pi<float>();
+    const float theta = sphericalTheta(unit_vector);
+    const float phi = sphericalPhi(unit_vector);
+    const float u = (phi + glm::pi<float>()) / glm::two_pi<float>();
+    const float v = theta * glm::one_over_pi<float>();
     return glm::vec2(u, v);
 }
 
 // https://people.cs.clemson.edu/~dhouse/courses/405/notes/texture-maps.pdf
 __host__ __device__ glm::vec3 uvToUnitVector(const glm::vec2& uv)
 {
-    const float theta = (2.0f * uv.x - 1.0f) * glm::pi<float>();
-    const float phi = uv.y * glm::pi<float>();
+    const float phi = (2.0f * uv.x - 1.0f) * glm::pi<float>();
+    const float theta = uv.y * glm::pi<float>();
     const float cosTheta = cosf(theta);
     const float sinTheta = sinf(theta);
     const float sinPhi = sinf(phi);
     const float cosPhi = cosf(phi);
-    return glm::vec3(cosTheta * sinPhi, cosPhi, sinTheta * sinPhi);
+    return glm::vec3(cosPhi * sinTheta, cosTheta, sinPhi * sinTheta);
 }
 
 // Computes ray direction given camera and pixel position
@@ -71,7 +226,7 @@ __host__ __device__ CudaRay rayDirection(const int i, const int j, const CudaCam
     ray.origin = cam.eye;
     ray.direction =
         (float)(i - cam.width / 2.0f) * cam.right + (float)(j - cam.height / 2.0f) * cam.up + cam.d * cam.forward;
-    ray.direction = normalize(ray.direction);
+    ray.direction = glm::normalize(ray.direction);
     return ray;
 }
 

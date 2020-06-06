@@ -85,19 +85,8 @@ vec3 accurateLinearToSRGB(vec3 linearCol)
 {
     vec3 sRGBLo = linearCol * 12.92;
     vec3 sRGBHi = (pow(abs(linearCol), vec3(1.0 / 2.4)) * 1.055) - 0.055;
-    vec3 sRGB; // = lessThanEqual(linearCol, vec3(0.0031308)) ? sRGBLo : sRGBHi;
-
-    for (int i = 0; i < linearCol.length(); ++i)
-    {
-        if (linearCol[i] <= 0.0031308)
-        {
-            sRGB[i] = sRGBLo[i];
-        }
-        else
-        {
-            sRGB[i] = sRGBHi[i];
-        }
-    }
+    // hlsl: float3 sRGB = ( linearCol <= 0.0031308) ? sRGBLo : sRGBHi ;
+    vec3 sRGB = mix(sRGBHi, sRGBLo, lessThanEqual(linearCol, vec3(0.0031308)));
     return sRGB;
 }
 
@@ -112,7 +101,7 @@ void main()
     const ivec2 texcoord = ivec2(gl_GlobalInvocationID.xy);
 
     const vec4 snap = imageLoad(srcImage, texcoord);
-    vec3 color = snap.xyz / snap.w;
+    vec3 color = snap.xyz;
 
     if (adjustExposure)
     {
