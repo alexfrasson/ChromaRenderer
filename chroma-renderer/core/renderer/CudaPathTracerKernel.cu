@@ -45,7 +45,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
     // Begin path
     if (pathIteration.bounce == 0)
     {
-        ray = rayDirectionWithOffset(x, y, cam, &randState);
+        ray = rayDirectionWithOffset(x, y, cam, curand_uniform(&randState), curand_uniform(&randState));
         pathIteration.mask = glm::vec3{1.0f, 1.0f, 1.0f};
     }
     else
@@ -94,7 +94,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
             emittance = ke * kd;
 
             ray.origin = is.p + is.n * 0.0001f;
-            ray.direction = cosineSampleHemisphere(&randState, is.n);
+            ray.direction = cosineSampleHemisphere(is.n, curand_uniform(&randState), curand_uniform(&randState));
 
             // Compute the BRDF for this ray (assuming Lambertian reflection)
             float cos_theta = glm::dot(ray.direction, is.n);
