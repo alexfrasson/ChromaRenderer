@@ -40,7 +40,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
     const int pos = texDim.x * y + x;
     CudaPathIteration pathIteration = pathIterationBuffer[pos];
     CudaRay ray;
-    
+
     // Begin path
     if (pathIteration.bounce == 0)
     {
@@ -54,23 +54,17 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         ray.direction = pathIteration.rayDir;
         ray.origin = pathIteration.rayOrigin;
     }
-    
+
     CudaIntersection intersection;
     glm::vec3 color;
+    float contribution = 1.0f / (float)MAX_PATH_DEPTH;
 
     // No intersection
     if (!intersectBVH(triangles, linearBVH, ray, intersection))
     {
-        float u = atan2(ray.direction.x, ray.direction.z) / (2 * M_PI) + 0.5;
-        float v = ray.direction.y * 0.5 + 0.5;
-
-        float4 env = tex2D<float4>(enviromentSettings.texObj, u, 1.0f - v);
+        const glm::vec2 uv = unitVectorToUv(ray.direction);
+        float4 env = tex2D<float4>(enviromentSettings.texObj, uv.x, uv.y);
         color = pathIteration.mask * glm::vec3(env.x, env.y, env.z);
-
-        // float4 env = tex2D<float4>(enviromentSettings.texObj, u, 1.0f - v) *
-        // enviromentSettings.enviromentLightIntensity; color = pathIteration.mask * make_float3(pow(env.x, 1.0f
-        // / 2.2f), pow(env.y, 1.0f / 2.2f), pow(env.z, 1.0f / 2.2f));
-
         // Restart from the camera.
         pathIteration.bounce = 0;
     }
@@ -82,6 +76,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
             materials[intersection.material].transparent.z < 1.0)
         {
             color = glm::vec3{0.0f, 0.0f, 0.0f};
+            contribution = 0.0f;
             // pathIteration.bounce--;
             ray.origin = intersection.p + ray.direction * 0.0001f;
         }
@@ -120,7 +115,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         }
     }
 
-    accuBuffer[pos] += glm::vec4(color.x, color.y, color.z, 1.0f / (float)MAX_PATH_DEPTH);
+    accuBuffer[pos] += glm::vec4(color.x, color.y, color.z, contribution);
     pathIterationBuffer[pos] = pathIteration;
 }
 
