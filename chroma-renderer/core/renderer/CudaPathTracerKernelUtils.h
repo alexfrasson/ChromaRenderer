@@ -2,18 +2,17 @@
 
 #include "chroma-renderer/core/renderer/CudaPathTracerKernelTypes.h"
 
-#include <curand_kernel.h>
 #include <glm/geometric.hpp>
 
 #include <cfloat>
 
 #define EPSILON 0.000001f
 
-__device__ glm::vec3 cosineSampleHemisphere(curandState* randState, glm::vec3 normal)
+__device__ glm::vec3 cosineSampleHemisphere(const glm::vec3 normal, const float rand0, const float rand1)
 {
     // pick two random numbers
-    float phi = 2 * M_PI * curand_uniform(randState);
-    float r2 = curand_uniform(randState);
+    float phi = 2 * M_PI * rand0;
+    float r2 = rand1;
     float r2s = sqrtf(r2);
 
     // compute orthonormal coordinate frame uvw with hitpoint as origin
@@ -26,18 +25,16 @@ __device__ glm::vec3 cosineSampleHemisphere(curandState* randState, glm::vec3 no
     return glm::normalize(u * cosf(phi) * r2s + v * sinf(phi) * r2s + w * sqrtf(1 - r2));
 }
 
-__device__ CudaRay rayDirectionWithOffset(const int i, const int j, CudaCamera cam, curandState* randState)
+__device__ CudaRay
+rayDirectionWithOffset(const int i, const int j, const CudaCamera cam, const float rand0, const float rand1)
 {
     CudaRay ray;
     ray.mint = 0;
     ray.maxt = FLT_MAX;
     ray.origin = cam.eye;
 
-    float random0 = curand_uniform(randState);
-    float random1 = curand_uniform(randState);
-
-    ray.direction = normalize((float)(i + random0 - cam.width * 0.5f) * cam.right +
-                              (float)(j + random1 - cam.height * 0.5f) * cam.up + cam.d * cam.forward);
+    ray.direction = normalize((float)(i + rand0 - cam.width * 0.5f) * cam.right +
+                              (float)(j + rand1 - cam.height * 0.5f) * cam.up + cam.d * cam.forward);
     return ray;
 }
 
@@ -119,11 +116,11 @@ __host__ __device__ bool intersectTriangle(const CudaTriangle* tri, CudaRay* ray
 // [WBMS05] Williams, Amy, Steve Barrus, R.Keith Morley, and Peter Shirley. "An efficient and robust ray-box
 // intersection algorithm." In ACM SIGGRAPH 2005 Courses, p. 9. ACM, 2005.
 __host__ __device__ bool hitBoundingBoxSlab(const CudaBoundingBox& bb,
-                                                       const CudaRay& r,
-                                                       const glm::vec3& invRayDir,
-                                                       const bool* dirIsNeg,
-                                                       float& tmin,
-                                                       float& tmax)
+                                            const CudaRay& r,
+                                            const glm::vec3& invRayDir,
+                                            const bool* dirIsNeg,
+                                            float& tmin,
+                                            float& tmax)
 {
     float min = (bb[dirIsNeg[0]].x - r.origin.x) * invRayDir.x;
     float max = (bb[1 - dirIsNeg[0]].x - r.origin.x) * invRayDir.x;
