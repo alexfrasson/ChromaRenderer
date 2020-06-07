@@ -3,6 +3,7 @@
 #include "chroma-renderer/core/renderer/CudaPathTracerKernelTypes.h"
 
 #include <glm/geometric.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <cfloat>
 
@@ -10,8 +11,7 @@
 
 __device__ glm::vec3 cosineSampleHemisphere(const glm::vec3 normal, const float rand0, const float rand1)
 {
-    // pick two random numbers
-    float phi = 2 * M_PI * rand0;
+    float phi = 2 * glm::pi<float>() * rand0;
     float r2 = rand1;
     float r2s = sqrtf(r2);
 
@@ -38,8 +38,8 @@ rayDirectionWithOffset(const int i, const int j, const CudaCamera cam, const flo
     return ray;
 }
 
-// Computes ray direction given camera object and pixel position
-__host__ __device__ CudaRay rayDirection(const int i, const int j, CudaCamera cam)
+// Computes ray direction given camera and pixel position
+__host__ __device__ CudaRay rayDirection(const int i, const int j, const CudaCamera cam)
 {
     CudaRay ray;
     ray.mint = 0;
@@ -51,11 +51,10 @@ __host__ __device__ CudaRay rayDirection(const int i, const int j, CudaCamera ca
     return ray;
 }
 
-// Intersects ray with triangle v0v1v2
-__host__ __device__ bool intersectTriangle(const CudaTriangle* tri, CudaRay* ray, CudaIntersection* is)
+__host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay* ray, CudaIntersection* intersection)
 {
-    const glm::vec3 edge0 = tri->v[1] - tri->v[0];
-    const glm::vec3 edge1 = tri->v[2] - tri->v[0];
+    const glm::vec3 edge0 = triangle->v[1] - triangle->v[0];
+    const glm::vec3 edge1 = triangle->v[2] - triangle->v[0];
     const glm::vec3 pvec = glm::cross(ray->direction, edge1);
     const float det = glm::dot(edge0, pvec);
 
@@ -64,95 +63,100 @@ __host__ __device__ bool intersectTriangle(const CudaTriangle* tri, CudaRay* ray
     // if (det < EPSILON)
     // Without backface culling
     if (det > -EPSILON && det < EPSILON)
+    {
         return false;
+    }
     bool backface = det < -EPSILON;
     const float invDet = 1.0f / det;
-    const glm::vec3 tvec = ray->origin - tri->v[0];
+    const glm::vec3 tvec = ray->origin - triangle->v[0];
     float u = glm::dot(tvec, pvec) * invDet;
     // The intersection lies outside of the triangle
     if (u < 0.0f || u > 1.0f)
+    {
         return false;
+    }
     const glm::vec3 qvec = glm::cross(tvec, edge0);
     float v = glm::dot(ray->direction, qvec) * invDet;
     // The intersection lies outside of the triangle
     if (v < 0.0f || u + v > 1.0f)
+    {
         return false;
+    }
     float t = glm::dot(edge1, qvec) * invDet;
 
     // if (t < EPSILON)
     //	return false;
     if (t > ray->maxt || t < ray->mint)
+    {
         return false;
+    }
 
-    // Ray intersection
     ray->maxt = t;
 
     // Fill intersection structure
-    is->distance = t;
-    // Calcula hitpoint
-    is->p = ray->origin + is->distance * ray->direction;
-    // Calcula as coordenadas baricentricas
-    // const glm::vec3* v0 = is.object->getVertex(is.face, 0);
-    // const glm::vec3* v1 = is.object->getVertex(is.face, 1);
-    // const glm::vec3* v2 = is.object->getVertex(is.face, 2);
-    // float div = 1.0f / glm::dot(glm::cross((*v1 - *v0), (*v2 - *v0)), triangle->tn);
-    // float alpha = glm::dot(glm::cross((*v2 - *v1), (hitPoint - *v1)), triangle->tn) * div;
-    // float beta = glm::dot(glm::cross((*v0 - *v2), (hitPoint - *v2)), triangle->tn)*div;
-    // float gama = glm::dot(glm::cross((f2[i].v[1] - f2[i].v[0]), (point-f2[i].v[0])), f2[i].tn)*div;
-    // float gama = 1.0f - (alpha + beta);
+    intersection->distance = t;
+    intersection->p = ray->origin + intersection->distance * ray->direction;
     float gama = 1.0f - (u + v);
-    // Calcula normal do ponto
-    // glm::vec3 hitNormal = alpha * (*n0) + beta * (*n1) + gama * (*n2);
-    // is->n = u * (tri->n[1] + v * tri->n[2] + gama * tri->n[0]);
-    is->n = u * tri->n[1] + v * tri->n[2] + gama * tri->n[0];
-    is->n = (backface ? -1.0f : 1.0f) * glm::normalize(is->n);
+    intersection->n = u * triangle->n[1] + v * triangle->n[2] + gama * triangle->n[0];
+    intersection->n = (backface ? -1.0f : 1.0f) * glm::normalize(intersection->n);
 
-    is->material = tri->material;
+    intersection->material = triangle->material;
 
     return true;
 }
 
-// This was taken from
 // [WBMS05] Williams, Amy, Steve Barrus, R.Keith Morley, and Peter Shirley. "An efficient and robust ray-box
 // intersection algorithm." In ACM SIGGRAPH 2005 Courses, p. 9. ACM, 2005.
 __host__ __device__ bool hitBoundingBoxSlab(const CudaBoundingBox& bb,
-                                            const CudaRay& r,
+                                            const CudaRay& ray,
                                             const glm::vec3& invRayDir,
                                             const bool* dirIsNeg,
                                             float& tmin,
                                             float& tmax)
 {
-    float min = (bb[dirIsNeg[0]].x - r.origin.x) * invRayDir.x;
-    float max = (bb[1 - dirIsNeg[0]].x - r.origin.x) * invRayDir.x;
-    float tymin = (bb[dirIsNeg[1]].y - r.origin.y) * invRayDir.y;
-    float tymax = (bb[1 - dirIsNeg[1]].y - r.origin.y) * invRayDir.y;
+    float min = (bb[dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
+    float max = (bb[1 - dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
+    float tymin = (bb[dirIsNeg[1]].y - ray.origin.y) * invRayDir.y;
+    float tymax = (bb[1 - dirIsNeg[1]].y - ray.origin.y) * invRayDir.y;
     if ((min > tymax) || (tymin > max))
+    {
         return false;
+    }
     if (tymin > min)
+    {
         min = tymin;
+    }
     if (tymax < max)
+    {
         max = tymax;
+    }
 
-    tymin = (bb[dirIsNeg[2]].z - r.origin.z) * invRayDir.z;
-    tymax = (bb[1 - dirIsNeg[2]].z - r.origin.z) * invRayDir.z;
+    tymin = (bb[dirIsNeg[2]].z - ray.origin.z) * invRayDir.z;
+    tymax = (bb[1 - dirIsNeg[2]].z - ray.origin.z) * invRayDir.z;
 
     if ((min > tymax) || (tymin > max))
+    {
         return false;
+    }
     if (tymin > min)
+    {
         min = tymin;
+    }
     if (tymax < max)
+    {
         max = tymax;
+    }
 
     return (min < tmax) && (max > tmin);
 }
 
 __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
                                       const CudaLinearBvhNode* linearBVH,
-                                      CudaRay& r,
+                                      CudaRay& ray,
                                       CudaIntersection& intersection)
 {
     bool hit = false;
-    const glm::vec3 invRayDir = 1.f / r.direction;
+    const glm::vec3 invRayDir = 1.f / ray.direction;
     const bool dirIsNeg[3] = {invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
 
     unsigned int todoOffset = 0;
@@ -165,7 +169,7 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
         const CudaLinearBvhNode* node = &linearBVH[nodeNum];
 
         // Intersect BVH node
-        if (hitBoundingBoxSlab(node->bbox, r, invRayDir, dirIsNeg, r.mint, r.maxt))
+        if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))
         {
             // Leaf node
             if (node->nPrimitives > 0)
@@ -173,13 +177,15 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
                 // Intersect primitives
                 for (unsigned int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
                 {
-                    if (intersectTriangle(&triangles[i], &r, &intersection))
+                    if (intersectTriangle(&triangles[i], &ray, &intersection))
                     {
                         hit = true;
                     }
                 }
                 if (todoOffset == 0)
+                {
                     break;
+                }
                 nodeNum = todo[--todoOffset];
             }
             // Internal node
@@ -200,7 +206,9 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
         else
         {
             if (todoOffset == 0)
+            {
                 break;
+            }
             nodeNum = todo[--todoOffset];
         }
     }

@@ -17,7 +17,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
                             const dim3 texDim,
                             const CudaCamera cam,
                             const CudaTriangle* triangles,
-                            int nTriangles,
+                            const unsigned int nTriangles,
                             const CudaMaterial* materials,
                             const unsigned int nMaterials,
                             const unsigned int seed,
@@ -27,21 +27,20 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
     const unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
     const unsigned int y = blockIdx.y * blockDim.y + threadIdx.y;
     if (x >= texDim.x || y >= texDim.y)
+    {
         return;
+    }
 
-    int pos = texDim.x * y + x;
-
-    // global threadId, see richiesams blogspot
-    int threadId =
+    const int threadId =
         (blockIdx.x + blockIdx.y * gridDim.x) * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
     // create random number generator and initialise with hashed frame number, see RichieSams blogspot
     curandState randState; // state of the random number generator, to prevent repetition
     curand_init(seed + threadId, 0, 0, &randState);
 
+    const int pos = texDim.x * y + x;
     CudaPathIteration pathIteration = pathIterationBuffer[pos];
     CudaRay ray;
-    glm::vec3 color;
-
+    
     // Begin path
     if (pathIteration.bounce == 0)
     {
@@ -55,11 +54,12 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         ray.direction = pathIteration.rayDir;
         ray.origin = pathIteration.rayOrigin;
     }
-
-    CudaIntersection is;
+    
+    CudaIntersection intersection;
+    glm::vec3 color;
 
     // No intersection
-    if (!intersectBVH(triangles, linearBVH, ray, is))
+    if (!intersectBVH(triangles, linearBVH, ray, intersection))
     {
         float u = atan2(ray.direction.x, ray.direction.z) / (2 * M_PI) + 0.5;
         float v = ray.direction.y * 0.5 + 0.5;
@@ -77,27 +77,29 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
     else
     {
         // Pick a random direction from here and keep going.
-        if (materials[is.material].transparent.x < 1.0 || materials[is.material].transparent.y < 1.0 ||
-            materials[is.material].transparent.z < 1.0)
+        if (materials[intersection.material].transparent.x < 1.0 ||
+            materials[intersection.material].transparent.y < 1.0 ||
+            materials[intersection.material].transparent.z < 1.0)
         {
             color = glm::vec3{0.0f, 0.0f, 0.0f};
             // pathIteration.bounce--;
-            ray.origin = is.p + ray.direction * 0.0001f;
+            ray.origin = intersection.p + ray.direction * 0.0001f;
         }
         else
         {
             // Intersection
             glm::vec3 emittance;
-            glm::vec3 kd = materials[is.material].kd;
-            glm::vec3 ke = materials[is.material].ke;
+            glm::vec3 kd = materials[intersection.material].kd;
+            glm::vec3 ke = materials[intersection.material].ke;
 
             emittance = ke * kd;
 
-            ray.origin = is.p + is.n * 0.0001f;
-            ray.direction = cosineSampleHemisphere(is.n, curand_uniform(&randState), curand_uniform(&randState));
+            ray.origin = intersection.p + intersection.n * 0.0001f;
+            ray.direction =
+                cosineSampleHemisphere(intersection.n, curand_uniform(&randState), curand_uniform(&randState));
 
             // Compute the BRDF for this ray (assuming Lambertian reflection)
-            float cos_theta = glm::dot(ray.direction, is.n);
+            float cos_theta = glm::dot(ray.direction, intersection.n);
 
             glm::vec3 BRDF = kd * 2.0f * cos_theta;
 
@@ -113,7 +115,9 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
 
         // Reached max depth. Restart from the camera.
         if (pathIteration.bounce == MAX_PATH_DEPTH)
+        {
             pathIteration.bounce = 0;
+        }
     }
 
     accuBuffer[pos] += glm::vec4(color.x, color.y, color.z, 1.0f / (float)MAX_PATH_DEPTH);
