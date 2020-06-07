@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//third-party/cuda:cuda_library.bzl", "cuda_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -26,6 +26,27 @@ cc_library(
 cuda_library(
     name = "path-tracer-kernel",
     srcs = ["CudaPathTracerKernel.cu"],
-    hdrs = ["CudaPathTracerKernel.h"],
+    hdrs = [
+        "CudaPathTracerKernel.h",
+        "CudaPathTracerKernelTypes.h",
+        "CudaPathTracerKernelUtils.h",
+    ],
     deps = ["//third-party/glm"],
+)
+
+cc_test(
+    name = "cuda-path-tracer-kernel-test",
+    srcs = [
+        "CudaPathTracerKernel.h",
+        "CudaPathTracerKernelTypes.h",
+        "CudaPathTracerKernelUtils.h",
+        "test/CudaPathTracerKernelUtils_test.cpp",
+    ],
+    deps = [
+        ":path-tracer-kernel",
+        "//third-party/glm",
+        "@cuda//:cuda_headers",
+        "@cuda//:cuda_runtime",
+        "@googletest//:gtest_main",
+    ],
 )
