@@ -4,6 +4,8 @@
 
 #include <glm/geometric.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 #include <cfloat>
 
@@ -36,6 +38,28 @@ rayDirectionWithOffset(const int i, const int j, const CudaCamera cam, const flo
     ray.direction = normalize((float)(i + rand0 - cam.width * 0.5f) * cam.right +
                               (float)(j + rand1 - cam.height * 0.5f) * cam.up + cam.d * cam.forward);
     return ray;
+}
+
+// https://people.cs.clemson.edu/~dhouse/courses/405/notes/texture-maps.pdf
+__host__ __device__ glm::vec2 unitVectorToUv(const glm::vec3& unit_vector)
+{
+    const float theta = atan2(unit_vector.z, unit_vector.x);
+    const float phi = acos(unit_vector.y);
+    const float u = (theta + glm::pi<float>()) / glm::two_pi<float>();
+    const float v = phi * glm::one_over_pi<float>();
+    return glm::vec2(u, v);
+}
+
+// https://people.cs.clemson.edu/~dhouse/courses/405/notes/texture-maps.pdf
+__host__ __device__ glm::vec3 uvToUnitVector(const glm::vec2& uv)
+{
+    const float theta = (2.0f * uv.x - 1.0f) * glm::pi<float>();
+    const float phi = uv.y * glm::pi<float>();
+    const float cosTheta = cosf(theta);
+    const float sinTheta = sinf(theta);
+    const float sinPhi = sinf(phi);
+    const float cosPhi = cosf(phi);
+    return glm::vec3(cosTheta * sinPhi, cosPhi, sinTheta * sinPhi);
 }
 
 // Computes ray direction given camera and pixel position
