@@ -42,7 +42,14 @@ void Image::genOpenGLTexture()
     // glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
     // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    if (colorComponents == 1)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, NULL);
+    }
+    else
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    }
 
     // Restore state
     glBindTexture(GL_TEXTURE_2D, last_texture);
@@ -65,7 +72,14 @@ void Image::readDataFromOpenGLTexture()
 
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
+    if (colorComponents == 1)
+    {
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
+    }
+    else
+    {
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
+    }
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -77,7 +91,14 @@ void Image::updateOpenGLTexture()
 
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, buffer);
+    if (colorComponents == 1)
+    {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED, GL_FLOAT, buffer);
+    }
+    else
+    {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, buffer);
+    }
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -100,7 +121,7 @@ void Image::setColor(unsigned int widthPixelPos,
 
     hasDataChanged = true;
 }
-
+void setData(const float* data, const uint32_t width, const uint32_t height, const unsigned short components = 4);
 void Image::setColor(unsigned int widthPixelPos, unsigned int heightPixelPos, const Color& color)
 {
     if (widthPixelPos >= width || heightPixelPos >= height || buffer == NULL)
@@ -135,15 +156,25 @@ void Image::clear()
 
 void Image::setSize(unsigned int _width, unsigned int _height)
 {
-    if (_width == this->width && _height == this->height)
+    if (_width == width && _height == height)
+    {
         return;
+    }
 
-    this->width = _width;
-    this->height = _height;
+    width = _width;
+    height = _height;
 
     createBuffer();
-
     genOpenGLTexture();
+}
+
+void Image::setData(const float* data, const uint32_t _width, const uint32_t _height, const unsigned short components)
+{
+    colorComponents = components;
+    setSize(_width, _height);
+    memcpy(buffer, data, colorComponents * width * height * 4);
+    genOpenGLTexture();
+    updateOpenGLTexture();
 }
 
 void Image::createBuffer()
