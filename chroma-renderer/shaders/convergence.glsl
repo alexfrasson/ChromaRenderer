@@ -4,19 +4,20 @@
 
 layout(local_size_x = 16, local_size_y = 16) in;
 
-// layout(binding = 0) uniform atomic_uint count;
-
-// layout(rgba32f) uniform image2D lastRenderedBuffer;
 layout(rgba32f) uniform image2D srcImage;
 layout(rgba32f) uniform image2D dstImage;
 
-// uniform bool readFromFboTex0;
-uniform float enviromentLightIntensity;
+uniform float apperture;
+uniform float shutterTime;
+uniform float iso;
+uniform bool tonemapping;
+uniform bool linearToSrbg;
+uniform bool adjustExposure;
 
-//
 // Neutral tonemapping (Hable/Hejl/Frostbite)
-// Input is linear RGB
-//
+// https://64.github.io/tonemapping/
+// http://filmicworlds.com/blog/filmic-tonemapping-operators/
+// http://filmicworlds.com/blog/minimal-color-grading-tools/
 vec3 NeutralCurve(vec3 x, float a, float b, float c, float d, float e, float f)
 {
     return ((x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f)) - e / f;
@@ -44,59 +45,91 @@ vec3 NeutralTonemap(vec3 x)
     return x;
 }
 
+// https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
+float computeEV100(float aperture, float shutterTime, float ISO)
+{
+    // EV number is defined as:
+    // 2^ EV_s = N^2 / t and EV_s = EV_100 + log2 (S /100)
+    // This gives
+    // EV_s = log2 (N^2 / t)
+    // EV_100 + log2 (S /100) = log2 (N^2 / t)
+    // EV_100 = log2 (N^2 / t) - log2 (S /100)
+    // EV_100 = log2 (N^2 / t . 100 / S)
+    return log2(sqrt(aperture) / shutterTime * 100.0 / ISO);
+}
+
+float computeEV100FromAvgLuminance(float avgLuminance)
+{
+    // We later use the middle gray at 12.7% in order to have
+    // a middle gray at 18% with a sqrt (2) room for specular highlights
+    // But here we deal with the spot meter measuring the middle gray
+    // which is fixed at 12.5 for matching standard camera
+    // constructor settings (i.e. calibration constant K = 12.5)
+    // Reference : http :// en. wikipedia . org / wiki / Film_speed
+    return log2(avgLuminance * 100.0 / 12.5);
+}
+
+float convertEV100ToExposure(float EV100)
+{
+    // Compute the maximum luminance possible with H_sbs sensitivity
+    // maxLum = 78 / ( S * q ) * N^2 / t
+    // = 78 / ( S * q ) * 2^ EV_100
+    // = 78 / (100 * 0.65) * 2^ EV_100
+    // = 1.2 * 2^ EV
+    // Reference : http :// en. wikipedia . org / wiki / Film_speed
+    float maxLuminance = 1.2 * pow(2.0, EV100);
+    return 1.0 / maxLuminance;
+}
+
+vec3 accurateLinearToSRGB(vec3 linearCol)
+{
+    vec3 sRGBLo = linearCol * 12.92;
+    vec3 sRGBHi = (pow(abs(linearCol), vec3(1.0 / 2.4)) * 1.055) - 0.055;
+    vec3 sRGB; // = lessThanEqual(linearCol, vec3(0.0031308)) ? sRGBLo : sRGBHi;
+
+    for (int i = 0; i < linearCol.length(); ++i)
+    {
+        if (linearCol[i] <= 0.0031308)
+        {
+            sRGB[i] = sRGBLo[i];
+        }
+        else
+        {
+            sRGB[i] = sRGBHi[i];
+        }
+    }
+    return sRGB;
+}
+
 void main()
 {
-    ivec2 size = imageSize(srcImage);
-
+    const ivec2 size = imageSize(srcImage);
     if (gl_GlobalInvocationID.x >= size.x || gl_GlobalInvocationID.y >= size.y)
+    {
         return;
+    }
 
-    ivec2 texcoord = ivec2(gl_GlobalInvocationID.xy);
+    const ivec2 texcoord = ivec2(gl_GlobalInvocationID.xy);
 
-    vec4 snap = imageLoad(srcImage, texcoord);
-    vec3 color = (snap.xyz / snap.w) * enviromentLightIntensity;
+    const vec4 snap = imageLoad(srcImage, texcoord);
+    vec3 color = snap.xyz / snap.w;
 
-    // color = pow(color.xyz, vec3(1.0 / 2.2));
+    if (adjustExposure)
+    {
+        const float EV100 = computeEV100(apperture, shutterTime, iso);
+        const float exposure = convertEV100ToExposure(EV100);
+        color *= exposure;
+    }
 
-    color = max(color, 0.0);
+    if (tonemapping)
+    {
+        color = NeutralTonemap(color);
+    }
 
-    color = NeutralTonemap(color);
+    if (linearToSrbg)
+    {
+        color = accurateLinearToSRGB(color);
+    }
 
     imageStore(dstImage, texcoord, vec4(color, 1.0));
-
-    // uint32_t inCount;
-    // uint32_t sampleCount;
-    // bool converged;
-
-    ////if (!unpackData(snap.a, inCount, sampleCount, converged))
-    ////	return;
-
-    // bool snapValid = unpackData(snap.a, inCount, sampleCount, converged);
-
-    // vec3 snapAvgColor = snap.rgb / sampleCount;
-
-    // vec4 c = imageLoad(lastRenderedBuffer, texcoord);
-
-    // if (!unpackData(c.a, inCount, sampleCount, converged) && !snapValid)
-    //	return;
-    //
-    // if (snapValid)
-    //{
-    //	vec3 currAvgColor = c.rgb / sampleCount;
-
-    //	float diff = length(currAvgColor - snapAvgColor);
-    //	converged = diff < convergenceThreshold;
-
-    //	#ifdef SHOW_HEATMAP
-    //	if (!converged)
-    //		atomicCounterIncrement(count);
-    //	#endif
-    //}
-
-    // vec4 outValue;
-    // outValue.a = packData(inCount, sampleCount, converged);
-    // outValue.rgb = c.rgb;
-
-    // imageStore(imgSnapshot, texcoord, outValue);
-    // imageStore(lastRenderedBuffer, texcoord, outValue);
 }
