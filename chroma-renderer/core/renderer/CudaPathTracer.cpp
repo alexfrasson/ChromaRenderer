@@ -253,7 +253,7 @@ std::vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioning
 }
 
 std::vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps,
-                                             const std::vector<Material>& materials)
+                                                  const std::vector<Material>& materials)
 {
     // Lets assume this is a bvh :)
     const BVH* bvh = (const BVH*)sps;
@@ -586,10 +586,6 @@ void CudaPathTracer::Impl::setMaterials(const std::vector<Material>& materials, 
 void CudaPathTracer::Impl::setSettings(const RendererSettings& settings)
 {
     targetSamplesPerPixel = settings.samplesperpixel;
-    enviromentSettings.enviromentLightColor =
-        glm::vec3(settings.enviromentLightColor.x, settings.enviromentLightColor.y, settings.enviromentLightColor.z);
-    enviromentSettings.enviromentLightIntensity = settings.enviromentLightIntensity;
-    gammaCorrectionScale = settings.enviromentLightIntensity;
 }
 
 void CudaPathTracer::Impl::copyFrameToTexture()

@@ -392,7 +392,7 @@ void ChromaRenderer::update()
             break;
         case ChromaRenderer::CUDAPATHTRACE:
             cudaPathTracer.render();
-            post_processor.process(renderer_target, final_target, true);
+            post_processor.process(scene.camera, renderer_target, final_target, true);
             if (cudaPathTracer.getProgress() >= 1.0f)
             {
                 running = false;
@@ -578,7 +578,8 @@ void ChromaRenderer::printStatistics()
         std::cout << std::endl
                   << "Samples\\pixel:   " << cudaPathTracer.getFinishedSamples() << std::endl
                   << "Samples\\s:       "
-                  << (((float)cudaPathTracer.getFinishedSamples() * renderer_target.getWidth() * renderer_target.getHeight()) /
+                  << (((float)cudaPathTracer.getFinishedSamples() * renderer_target.getWidth() *
+                       renderer_target.getHeight()) /
                       (stopwatch.elapsedMillis.count() / 1000.0)) /
                          1000.0f
                   << "K" << std::endl

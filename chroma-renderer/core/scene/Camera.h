@@ -31,6 +31,9 @@ class Camera
   public:
     float aspectRatio;
     float d;
+    float apperture = 16.0f;
+    float shutterTime = 2.0f;
+    float iso = 100.0f;
 
   public:
     Camera();

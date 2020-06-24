@@ -2,6 +2,7 @@
 
 #include "chroma-renderer/core/renderer/CudaPathTracer.h"
 #include "chroma-renderer/core/renderer/PathTracing.h"
+#include "chroma-renderer/core/renderer/PostProcessor.h"
 #include "chroma-renderer/core/renderer/RayCasting.h"
 #include "chroma-renderer/core/renderer/RendererSettings.h"
 #include "chroma-renderer/core/scene/Scene.h"
@@ -10,7 +11,6 @@
 #include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 #include "chroma-renderer/core/utility/ThreadPool.h"
-#include "chroma-renderer/core/renderer/PostProcessor.h"
 
 #include <atomic>
 #include <cstdint>

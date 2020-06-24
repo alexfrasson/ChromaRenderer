@@ -10,9 +10,6 @@ struct RendererSettings
 
     float horizontalFOV;
 
-    glm::vec3 enviromentLightColor;
-    float enviromentLightIntensity;
-
     unsigned int nthreads;
 
     bool supersampling;

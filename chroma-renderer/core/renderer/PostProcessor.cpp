@@ -18,13 +18,18 @@ PostProcessor::PostProcessor()
     }
 }
 
-void PostProcessor::process(const Image& src, const Image& dst, const bool sync)
+void PostProcessor::process(const Camera& cam, const Image& src, const Image& dst, const bool sync)
 {
     const std::int32_t src_image_unit = 0;
     const std::int32_t dst_image_unit = 1;
 
     computeShader.use();
-    computeShader.setUniform("enviromentLightIntensity", 1.0f);
+    computeShader.setUniform("apperture", cam.apperture);
+    computeShader.setUniform("shutterTime", cam.shutterTime);
+    computeShader.setUniform("iso", cam.iso);
+    computeShader.setUniform("tonemapping", tonemapping);
+    computeShader.setUniform("linearToSrbg", linearToSrbg);
+    computeShader.setUniform("adjustExposure", adjustExposure);
     computeShader.setUniform("srcImage", src_image_unit);
     computeShader.setUniform("dstImage", dst_image_unit);
 

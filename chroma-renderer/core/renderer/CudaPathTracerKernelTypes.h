@@ -15,8 +15,6 @@ struct CudaPathIteration
 
 struct CudaEnviromentSettings
 {
-    glm::vec3 enviromentLightColor;
-    float enviromentLightIntensity;
     cudaTextureObject_t texObj;
 };
 

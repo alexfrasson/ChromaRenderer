@@ -326,8 +326,12 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
                 somethingChanged = true;
             }
 
-            if (ImGui::ColorEdit3("Enviroment Ligh Color", &rs.enviromentLightColor.x))
-                somethingChanged = true;
+            ImGui::DragFloat("Apperture", &cr->scene.camera.apperture, 0.01f, 0.0001f, 1000.0f);
+            ImGui::DragFloat("Shutter time", &cr->scene.camera.shutterTime, 0.01f, 0.0001f, 1000.0f);
+            ImGui::DragFloat("ISO", &cr->scene.camera.iso, 1.0f, 1.0f, 6000.0f);
+            ImGui::Checkbox("Adjust exposure", &cr->post_processor.adjustExposure);
+            ImGui::Checkbox("Tonemapping", &cr->post_processor.tonemapping);
+            ImGui::Checkbox("Linear to sRGB", &cr->post_processor.linearToSrbg);
 
             ImGui::DragFloat("Movement Speed", &movementSpeed, 1.0f, 0.0f, 10000.0f);
 
