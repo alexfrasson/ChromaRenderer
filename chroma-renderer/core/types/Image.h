@@ -2,6 +2,7 @@
 
 #include "chroma-renderer/core/types/Color.h"
 
+#include <cstdint>
 #include <glad/glad.h>
 
 class Image
@@ -10,7 +11,7 @@ class Image
     float* buffer;
     unsigned int width;
     unsigned int height;
-    const unsigned short colorComponents = 4;
+    unsigned short colorComponents = 4;
     bool hasDataChanged;
 
   public:
@@ -28,6 +29,7 @@ class Image
     void setColor(unsigned int widthPixelPos, unsigned int heightPixelPos, const Color& color);
     void clear();
     void setSize(unsigned int width, unsigned int height);
+    void setData(const float* data, const uint32_t width, const uint32_t height, const unsigned short components = 4);
     float getAspectRatio() const
     {
         return (float)width / height;
