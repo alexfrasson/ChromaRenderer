@@ -20,7 +20,7 @@ class CudaPathTracer
     CudaPathTracer();
     ~CudaPathTracer();
     void init(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
-    void init(float* hdriEnvData, int hdriEnvWidth, int hdriEnvHeight);
+    void init(const float* hdriEnvData, const int hdriEnvWidth, const int hdriEnvHeight, const int channels);
     void init(Image& img, Camera& cam);
     void uploadMaterials(const std::vector<Material>& materials);
     void renderThread(bool& abort);

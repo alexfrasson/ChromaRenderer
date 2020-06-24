@@ -12,6 +12,7 @@
 #include "chroma-renderer/core/utility/ThreadPool.h"
 
 #include <atomic>
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <thread>
@@ -66,6 +67,7 @@ class ChromaRenderer
     void importScene(std::string filename);
     void importScene(std::string filename, std::function<void()> onLoad);
     void importEnviromentMap(std::string filename);
+    void setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels);
     void startRender();
     void startRender(RendererSettings& settings);
     void setSettings(RendererSettings& settings);

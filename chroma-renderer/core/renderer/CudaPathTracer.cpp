@@ -394,10 +394,13 @@ void CudaPathTracer::renderThread(bool& abort)
     }
 }
 
-void CudaPathTracer::init(float* hdriEnvData, int hdriEnvWidth, int hdriEnvHeight)
+void CudaPathTracer::init(const float* hdriEnvData, const int hdriEnvWidth, const int hdriEnvHeight, const int channels)
 {
+    cudaErrorCheck(cudaDestroyTextureObject(enviromentSettings.texObj));
+    SAFE_CUDA_FREE_ARRAY(envArray);
+
     // Load reference image from image (output)
-    unsigned int size = hdriEnvWidth * hdriEnvHeight * 3 * sizeof(float);
+    unsigned int size = hdriEnvWidth * hdriEnvHeight * channels * sizeof(float);
 
     // Allocate CUDA array in device memory
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
