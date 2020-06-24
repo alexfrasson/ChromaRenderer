@@ -360,12 +360,44 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
     return somethingChanged;
 }
 
-bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
+ImVec2 GetAvailableRegionForImage(const float aspect_ratio)
 {
-    bool somethingChanged = false;
+    const ImVec2 availableRegion = ImGui::GetContentRegionAvail();
+    const float windowAspectRatio = availableRegion.x / (float)availableRegion.y;
 
     float height;
     float width;
+
+    if (windowAspectRatio < aspect_ratio)
+    {
+        width = availableRegion.x - 2;
+        height = width * 1.0f / aspect_ratio;
+        ImGui::SetCursorPosY(ImGui::GetCursorPos().y + (availableRegion.y - height) / 2.0f);
+    }
+    else
+    {
+        height = availableRegion.y - 2;
+        width = height * aspect_ratio;
+        ImGui::SetCursorPosX(ImGui::GetCursorPos().x + (availableRegion.x - width) / 2.0f);
+    }
+
+    return ImVec2(width, height);
+}
+
+void DrawImage(const Image& img, const bool flip_vert = false)
+{
+    const ImVec2 img_region = GetAvailableRegionForImage(img.getAspectRatio());
+    ImGui::Image((ImTextureID)img.textureID,
+                 img_region,
+                 ImVec2(0.0f, flip_vert ? 0.0f : 1.0f),
+                 ImVec2(1.0f, flip_vert ? 1.0f : 0.0f),
+                 ImColor(255, 255, 255, 255),
+                 ImColor(255, 255, 255, 200));
+}
+
+bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
+{
+    bool somethingChanged = false;
 
     ImGui::Begin("Viewport");
     {
@@ -377,32 +409,18 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
                             std::to_string(cr->cudaPathTracer.targetSamplesPerPixel))
                                .c_str());
 
-        // float windowWidth = ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x * 2 -
-        // ImGui::GetStyle().ItemInnerSpacing.x; float windowWidth = ImGui::GetContentRegionAvailWidth();
+        const ImVec2 img_available_region = ImGui::GetContentRegionAvail();
+        RendererSettings rs = cr->getSettings();
+        rs.width = static_cast<int>(img_available_region.x);
+        rs.height = static_cast<int>(img_available_region.y);
 
-        ImVec2 availableRegion = ImGui::GetContentRegionAvail();
-
-        float windowAspectRatio = availableRegion.x / (float)availableRegion.y;
-
-        if (windowAspectRatio < cr->image.getAspectRatio())
+        if (rs != cr->getSettings())
         {
-            width = availableRegion.x - 2;
-            height = width * 1.0f / cr->image.getAspectRatio();
-            ImGui::SetCursorPosY(ImGui::GetCursorPos().y + (availableRegion.y - height) / 2.0f);
-        }
-        else
-        {
-            height = availableRegion.y - 2;
-            width = height * cr->image.getAspectRatio();
-            ImGui::SetCursorPosX(ImGui::GetCursorPos().x + (availableRegion.x - width) / 2.0f);
+            cr->setSettings(rs);
+            somethingChanged = true;
         }
 
-        ImGui::Image((ImTextureID)cr->image.textureID,
-                     ImVec2(width, height),
-                     ImVec2(0, 1),
-                     ImVec2(1, 0),
-                     ImColor(255, 255, 255, 255),
-                     ImColor(255, 255, 255, 200));
+        DrawImage(cr->image);
 
         if (cr->isRunning() && ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_None))
         {
@@ -452,14 +470,9 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
     }
     ImGui::End();
 
-    {
-        ImGui::Begin("Debug");
-
-        ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->image.getWidth(), (int)cr->image.getHeight());
-        ImGui::LabelText("Viewport", "Viewport (%d, %d)", (int)width, (int)height);
-
-        ImGui::End();
-    }
+    ImGui::Begin("Debug");
+    ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->image.getWidth(), (int)cr->image.getHeight());
+    ImGui::End();
 
     return somethingChanged;
 }
