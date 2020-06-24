@@ -300,18 +300,25 @@ void ChromaRenderer::importScene(std::string filename, std::function<void()> onL
         scene,
         static_cast<std::function<void()>>(std::bind(&ChromaRenderer::cbSceneLoadedScene, std::ref(*this), onLoad)));
 }
+
+void ChromaRenderer::setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels)
+{
+    cudaPathTracer.init(data, width, height, channels);
+}
+
 void ChromaRenderer::importEnviromentMap(std::string filename)
 {
+    const uint32_t requested_channels = 4;
     float* data = nullptr;
     int width, height, channels;
-    data = stbi_loadf(filename.c_str(), &width, &height, &channels, 4);
+    data = stbi_loadf(filename.c_str(), &width, &height, &channels, requested_channels);
 
     if (data == nullptr)
         std::cout << "Could not load hdri!" << std::endl;
 
     std::cout << "Width: " << width << " Height: " << height << " Channels: " << channels << std::endl;
 
-    cudaPathTracer.init(data, width, height);
+    setEnvMap(data, width, height, requested_channels);
 
     stbi_image_free(data);
 }
