@@ -37,7 +37,7 @@ class CudaPathTracer::Impl
     void init(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
     void init(const float* hdriEnvData, const int hdriEnvWidth, const int hdriEnvHeight, const int channels);
     void init(Image& img, Camera& cam);
-    void uploadMaterials(const std::vector<Material>& materials);
+    void uploadMaterials(const std::vector<Material>& materials, const bool& sync);
     void renderThread(bool& abort);
     void render();
     void setSettings(RendererSettings& settings);
@@ -116,7 +116,7 @@ void CudaPathTracer::init(Image& img, Camera& cam)
 
 void CudaPathTracer::uploadMaterials(const std::vector<Material>& materials)
 {
-    impl_->uploadMaterials(materials);
+    impl_->uploadMaterials(materials, true);
 }
 
 void CudaPathTracer::renderThread(bool& abort)
@@ -621,18 +621,7 @@ void CudaPathTracer::Impl::init(const ISpacePartitioningStructure* sps, const st
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(materials);
-    nCudaMaterials = (int)cudaMaterials.size();
-    std::cout << "Materials: " << cudaMaterials.size() << std::endl;
-    std::cout << "Materials size: " << (cudaMaterials.size() * sizeof(CudaMaterial)) / (1024) << "KB" << std::endl;
-    cudaErrorCheck(cudaMalloc((void**)&dev_cudaMaterials, cudaMaterials.size() * sizeof(CudaMaterial)));
-    // cudaErrorCheck(cudaMemcpy(dev_cudaMaterials, &cudaMaterials[0], cudaMaterials.size() * sizeof(CudaMaterial),
-    // cudaMemcpyHostToDevice));
-    cudaErrorCheck(cudaMemcpyAsync(dev_cudaMaterials,
-                                   &cudaMaterials[0],
-                                   cudaMaterials.size() * sizeof(CudaMaterial),
-                                   cudaMemcpyHostToDevice,
-                                   stream));
+    uploadMaterials(materials, false);
 
     cudaErrorCheck(cudaGetLastError());
     cudaErrorCheck(cudaStreamSynchronize(stream));
@@ -688,22 +677,23 @@ void CudaPathTracer::Impl::init(Image& img, Camera& cam)
     iteration = 0;
 }
 
-void CudaPathTracer::Impl::uploadMaterials(const std::vector<Material>& materials)
+void CudaPathTracer::Impl::uploadMaterials(const std::vector<Material>& materials, const bool& sync)
 {
-    vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(materials);
-    nCudaMaterials = (std::uint32_t)cudaMaterials.size();
-    if (dev_cudaMaterials == nullptr)
-        cudaErrorCheck(cudaMalloc((void**)&dev_cudaMaterials, cudaMaterials.size() * sizeof(CudaMaterial)));
-    // cudaErrorCheck(cudaMemcpy(dev_cudaMaterials, &cudaMaterials[0], cudaMaterials.size() * sizeof(CudaMaterial),
-    // cudaMemcpyHostToDevice));
-    cudaErrorCheck(cudaMemcpyAsync(dev_cudaMaterials,
-                                   &cudaMaterials[0],
-                                   cudaMaterials.size() * sizeof(CudaMaterial),
-                                   cudaMemcpyHostToDevice,
-                                   stream));
+    const std::vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(materials);
+    const std::size_t size_in_bytes = cudaMaterials.size() * sizeof(CudaMaterial);
+    nCudaMaterials = static_cast<std::uint32_t>(cudaMaterials.size());
 
-    cudaErrorCheck(cudaGetLastError());
-    cudaErrorCheck(cudaStreamSynchronize(stream));
+    if (dev_cudaMaterials == nullptr)
+    {
+        cudaErrorCheck(cudaMalloc((void**)&dev_cudaMaterials, size_in_bytes));
+    }
+    cudaErrorCheck(
+        cudaMemcpyAsync(dev_cudaMaterials, &cudaMaterials[0], size_in_bytes, cudaMemcpyHostToDevice, stream));
+
+    if (sync)
+    {
+        cudaErrorCheck(cudaStreamSynchronize(stream));
+    }
 }
 
 void CudaPathTracer::Impl::setSettings(RendererSettings& settings)
