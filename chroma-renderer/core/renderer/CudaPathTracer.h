@@ -6,9 +6,9 @@
 #include "chroma-renderer/core/types/Image.h"
 #include "chroma-renderer/core/types/Material.h"
 
-#include <vector>
-#include <memory>
 #include <cstdint>
+#include <memory>
+#include <vector>
 
 class CudaPathTracer
 {
@@ -20,19 +20,19 @@ class CudaPathTracer
     CudaPathTracer& operator=(const CudaPathTracer&) = delete;
     CudaPathTracer& operator=(CudaPathTracer&&) = delete;
 
-    void init(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
-    void init(const float* hdriEnvData, const int hdriEnvWidth, const int hdriEnvHeight, const int channels);
-    void init(Image& img, Camera& cam);
-    void uploadMaterials(const std::vector<Material>& materials);
-    void renderThread(bool& abort);
     void render();
-    void setSettings(RendererSettings& settings);
-    void copyFrameToTexture();
-    void dispatchComputeShader(bool sync);
-    float getProgress();
-    std::uint32_t getFinishedSamples();
-    std::uint32_t getTargetSamplesPerPixel();
-    float instantRaysPerSec();
+
+    void setSceneGeometry(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
+    void setEnvMap(const float* hdriEnvData, const int hdriEnvWidth, const int hdriEnvHeight, const int channels);
+    void setCamera(const Camera& cam);
+    void setSettings(const RendererSettings& settings);
+    void setMaterials(const std::vector<Material>& materials);
+    void setTargetImage(const Image& img);
+
+    float getProgress() const;
+    float getInstantRaysPerSec() const;
+    std::uint32_t getFinishedSamples() const;
+    std::uint32_t getTargetSamplesPerPixel() const;
 
   private:
     class Impl;

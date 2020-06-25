@@ -142,7 +142,8 @@ void ChromaRenderer::start()
         pathtracing.init();
         break;
     case ChromaRenderer::CUDAPATHTRACE:
-        cudaPathTracer.init(image, scene.camera);
+        cudaPathTracer.setTargetImage(image);
+        cudaPathTracer.setCamera(scene.camera);
         break;
     }
     // </Init>
@@ -303,7 +304,7 @@ void ChromaRenderer::importScene(std::string filename, std::function<void()> onL
 
 void ChromaRenderer::setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels)
 {
-    cudaPathTracer.init(data, width, height, channels);
+    cudaPathTracer.setEnvMap(data, width, height, channels);
 }
 
 void ChromaRenderer::importEnviromentMap(std::string filename)
@@ -327,7 +328,7 @@ void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
     state = State::PROCESSINGSCENE;
     sps = std::make_unique<BVH>();
     sps->build(scene.meshes);
-    cudaPathTracer.init(sps.get(), scene.materials);
+    cudaPathTracer.setSceneGeometry(sps.get(), scene.materials);
 
     settings.width = scene.camera.width;
     settings.height = scene.camera.height;
@@ -335,7 +336,8 @@ void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
 
     setSettings(settings);
 
-    cudaPathTracer.init(image, scene.camera);
+    cudaPathTracer.setTargetImage(image);
+    cudaPathTracer.setCamera(scene.camera);
 
     state = State::IDLE;
     onLoad();

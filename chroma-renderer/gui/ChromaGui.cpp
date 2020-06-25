@@ -328,8 +328,6 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
 
             if (ImGui::ColorEdit3("Enviroment Ligh Color", &rs.enviromentLightColor.x))
                 somethingChanged = true;
-            // if (ImGui::DragFloat("Enviroment Light Intenity", &rs.enviromentLightIntensity, 0.01f, 0.0f, 1000.0f))
-            //     cr->cudaPathTracer.gammaCorrectionScale = rs.enviromentLightIntensity;
 
             ImGui::DragFloat("Movement Speed", &movementSpeed, 1.0f, 0.0f, 10000.0f);
 
@@ -401,7 +399,7 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
 
     ImGui::Begin("Viewport");
     {
-        ImGui::Text("%.3f MRays/sec", cr->cudaPathTracer.instantRaysPerSec() * 0.000001f);
+        ImGui::Text("%.3f MRays/sec", cr->cudaPathTracer.getInstantRaysPerSec() * 0.000001f);
         ImGui::SameLine();
         ImGui::ProgressBar(cr->cudaPathTracer.getProgress(),
                            ImVec2(-1, 0),
@@ -492,7 +490,7 @@ bool ChromaGui::RenderGui(GLFWwindow* window, ChromaRenderer* cr)
 
     if (MaterialsWindow(cr))
     {
-        cr->cudaPathTracer.uploadMaterials(cr->scene.materials);
+        cr->cudaPathTracer.setMaterials(cr->scene.materials);
         somethingChanged = true;
     }
 
