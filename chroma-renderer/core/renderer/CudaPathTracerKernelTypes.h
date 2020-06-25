@@ -86,7 +86,7 @@ struct CudaBoundingBox
             return min;
         return max;
     }
-    
+
     __host__ __device__ const glm::vec3& operator[](const int& i) const
     {
         if (i == 0)
