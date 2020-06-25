@@ -21,6 +21,7 @@ build:linux --copt=-Wall
 build:linux --copt=-Wpedantic
 build:linux --copt=-Wextra
 build:linux --copt=-Wno-deprecated-declarations
+build:linux --copt=-fdiagnostics-color=always
 build:linux --per_file_copt=third-party/.*@-w
 build:linux --per_file_copt=external/.*@-w
 build:linux --cxxopt=-std=c++17

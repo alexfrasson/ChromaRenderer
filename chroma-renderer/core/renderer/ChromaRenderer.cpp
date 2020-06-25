@@ -411,7 +411,7 @@ bool ChromaRenderer::isRunning()
             running = pathtracing.donePixelCount < pixelCount;
             break;
         case ChromaRenderer::CUDAPATHTRACE:
-            running = cudaPathTracer.finishedSamplesPerPixel < cudaPathTracer.targetSamplesPerPixel;
+            running = cudaPathTracer.getFinishedSamples() < cudaPathTracer.getTargetSamplesPerPixel();
             break;
         default:
             running = false;
@@ -571,9 +571,9 @@ void ChromaRenderer::printStatistics()
     break;
     case ChromaRenderer::CUDAPATHTRACE:
         std::cout << std::endl
-                  << "Samples\\pixel:   " << cudaPathTracer.finishedSamplesPerPixel << std::endl
+                  << "Samples\\pixel:   " << cudaPathTracer.getFinishedSamples() << std::endl
                   << "Samples\\s:       "
-                  << (((float)cudaPathTracer.finishedSamplesPerPixel * image.getWidth() * image.getHeight()) /
+                  << (((float)cudaPathTracer.getFinishedSamples() * image.getWidth() * image.getHeight()) /
                       (stopwatch.elapsedMillis.count() / 1000.0)) /
                          1000.0f
                   << "K" << std::endl

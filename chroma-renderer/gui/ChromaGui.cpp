@@ -328,8 +328,8 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
 
             if (ImGui::ColorEdit3("Enviroment Ligh Color", &rs.enviromentLightColor.x))
                 somethingChanged = true;
-            if (ImGui::DragFloat("Enviroment Light Intenity", &rs.enviromentLightIntensity, 0.01f, 0.0f, 1000.0f))
-                cr->cudaPathTracer.gammaCorrectionScale = rs.enviromentLightIntensity;
+            // if (ImGui::DragFloat("Enviroment Light Intenity", &rs.enviromentLightIntensity, 0.01f, 0.0f, 1000.0f))
+            //     cr->cudaPathTracer.gammaCorrectionScale = rs.enviromentLightIntensity;
 
             ImGui::DragFloat("Movement Speed", &movementSpeed, 1.0f, 0.0f, 10000.0f);
 
@@ -405,8 +405,8 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
         ImGui::SameLine();
         ImGui::ProgressBar(cr->cudaPathTracer.getProgress(),
                            ImVec2(-1, 0),
-                           (std::to_string(cr->cudaPathTracer.finishedSamplesPerPixel) + std::string("/") +
-                            std::to_string(cr->cudaPathTracer.targetSamplesPerPixel))
+                           (std::to_string(cr->cudaPathTracer.getFinishedSamples()) + std::string("/") +
+                            std::to_string(cr->cudaPathTracer.getTargetSamplesPerPixel()))
                                .c_str());
 
         const ImVec2 img_available_region = ImGui::GetContentRegionAvail();
@@ -451,17 +451,17 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
 
                 if (ImGui::GetIO().MouseDelta.x != 0 || ImGui::GetIO().MouseDelta.y != 0)
                 {
-                    vec2 angle = vec2(ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y) *
-                                 ImGui::GetIO().DeltaTime * lookSens;
+                    glm::vec2 angle = glm::vec2(ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y) *
+                                      ImGui::GetIO().DeltaTime * lookSens;
 
-                    cr->scene.camera.forward = normalize(rotateY(cr->scene.camera.forward, -angle.x));
-                    cr->scene.camera.right = normalize(cross(cr->scene.camera.forward, vec3(0, -1, 0)));
-                    cr->scene.camera.up = -normalize(cross(cr->scene.camera.forward, cr->scene.camera.right));
+                    cr->scene.camera.forward = glm::normalize(rotateY(cr->scene.camera.forward, -angle.x));
+                    cr->scene.camera.right = glm::normalize(glm::cross(cr->scene.camera.forward, glm::vec3(0, -1, 0)));
+                    cr->scene.camera.up = -glm::normalize(glm::cross(cr->scene.camera.forward, cr->scene.camera.right));
 
                     cr->scene.camera.forward =
-                        normalize(rotate(cr->scene.camera.forward, angle.y, cr->scene.camera.right));
-                    cr->scene.camera.right = normalize(cross(cr->scene.camera.forward, vec3(0, 1, 0)));
-                    cr->scene.camera.up = -normalize(cross(cr->scene.camera.forward, cr->scene.camera.right));
+                        glm::normalize(glm::rotate(cr->scene.camera.forward, angle.y, cr->scene.camera.right));
+                    cr->scene.camera.right = glm::normalize(glm::cross(cr->scene.camera.forward, glm::vec3(0, 1, 0)));
+                    cr->scene.camera.up = -glm::normalize(glm::cross(cr->scene.camera.forward, cr->scene.camera.right));
 
                     somethingChanged = true;
                 }
