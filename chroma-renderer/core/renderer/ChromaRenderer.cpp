@@ -71,7 +71,7 @@ void ChromaRenderer::genTasks()
                                              std::ref(renderer),
                                              sps.get(),
                                              std::ref(scene),
-                                             std::ref(image),
+                                             std::ref(renderer_target),
                                              std::ref(settings),
                                              interval,
                                              std::placeholders::_1));
@@ -81,7 +81,7 @@ void ChromaRenderer::genTasks()
                                              std::ref(pathtracing),
                                              sps.get(),
                                              std::ref(scene),
-                                             std::ref(image),
+                                             std::ref(renderer_target),
                                              interval,
                                              std::placeholders::_1));
                 break;
@@ -96,7 +96,8 @@ void ChromaRenderer::genTasks()
 
 void ChromaRenderer::setSize(unsigned int width, unsigned int height)
 {
-    image.setSize(width, height);
+    renderer_target.setSize(width, height);
+    final_target.setSize(width, height);
     scene.camera.setSize(width, height);
     // scene.camera.computeUVW();
 }
@@ -131,7 +132,8 @@ void ChromaRenderer::start()
 
     // <Init>
     threadPool.clearTaskQueue();
-    image.clear();
+    renderer_target.clear();
+    final_target.clear();
 
     switch (rendererType)
     {
@@ -142,7 +144,7 @@ void ChromaRenderer::start()
         pathtracing.init();
         break;
     case ChromaRenderer::CUDAPATHTRACE:
-        cudaPathTracer.setTargetImage(image);
+        cudaPathTracer.setTargetImage(renderer_target);
         cudaPathTracer.setCamera(scene.camera);
         break;
     }
@@ -336,7 +338,7 @@ void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
 
     setSettings(settings);
 
-    cudaPathTracer.setTargetImage(image);
+    cudaPathTracer.setTargetImage(renderer_target);
     cudaPathTracer.setCamera(scene.camera);
 
     state = State::IDLE;
@@ -390,6 +392,7 @@ void ChromaRenderer::update()
             break;
         case ChromaRenderer::CUDAPATHTRACE:
             cudaPathTracer.render();
+            post_processor.process(renderer_target, final_target, true);
             if (cudaPathTracer.getProgress() >= 1.0f)
             {
                 running = false;
@@ -575,7 +578,7 @@ void ChromaRenderer::printStatistics()
         std::cout << std::endl
                   << "Samples\\pixel:   " << cudaPathTracer.getFinishedSamples() << std::endl
                   << "Samples\\s:       "
-                  << (((float)cudaPathTracer.getFinishedSamples() * image.getWidth() * image.getHeight()) /
+                  << (((float)cudaPathTracer.getFinishedSamples() * renderer_target.getWidth() * renderer_target.getHeight()) /
                       (stopwatch.elapsedMillis.count() / 1000.0)) /
                          1000.0f
                   << "K" << std::endl

@@ -7,7 +7,8 @@ layout(local_size_x = 16, local_size_y = 16) in;
 // layout(binding = 0) uniform atomic_uint count;
 
 // layout(rgba32f) uniform image2D lastRenderedBuffer;
-layout(rgba32f) uniform image2D imgSnapshot;
+layout(rgba32f) uniform image2D srcImage;
+layout(rgba32f) uniform image2D dstImage;
 
 // uniform bool readFromFboTex0;
 uniform float enviromentLightIntensity;
@@ -45,14 +46,14 @@ vec3 NeutralTonemap(vec3 x)
 
 void main()
 {
-    ivec2 size = imageSize(imgSnapshot);
+    ivec2 size = imageSize(srcImage);
 
     if (gl_GlobalInvocationID.x >= size.x || gl_GlobalInvocationID.y >= size.y)
         return;
 
     ivec2 texcoord = ivec2(gl_GlobalInvocationID.xy);
 
-    vec4 snap = imageLoad(imgSnapshot, texcoord);
+    vec4 snap = imageLoad(srcImage, texcoord);
     vec3 color = (snap.xyz / snap.w) * enviromentLightIntensity;
 
     // color = pow(color.xyz, vec3(1.0 / 2.2));
@@ -61,7 +62,7 @@ void main()
 
     color = NeutralTonemap(color);
 
-    imageStore(imgSnapshot, texcoord, vec4(color, 1.0));
+    imageStore(dstImage, texcoord, vec4(color, 1.0));
 
     // uint32_t inCount;
     // uint32_t sampleCount;
