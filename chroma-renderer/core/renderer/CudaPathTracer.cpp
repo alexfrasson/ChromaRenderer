@@ -1,7 +1,6 @@
 #include "chroma-renderer/core/renderer/CudaPathTracer.h"
 #include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
 #include "chroma-renderer/core/space-partition/BVH.h"
-#include "chroma-renderer/core/utility/GlslProgram.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 
 #include <cuda_gl_interop.h>
@@ -50,7 +49,6 @@ class CudaPathTracer::Impl
     float getInstantRaysPerSec() const;
 
     void copyFrameToTexture();
-    void dispatchComputeShader(const bool sync);
 
     struct RegisteredImage
     {
@@ -93,8 +91,6 @@ class CudaPathTracer::Impl
 
     Stopwatch stopwatch;
     std::chrono::milliseconds lastIterationElapsedMillis;
-
-    GLSLProgram* computeShader;
 };
 
 CudaPathTracer::CudaPathTracer() : impl_{std::make_unique<CudaPathTracer::Impl>()}
@@ -207,9 +203,9 @@ CudaCamera CameraToCudaCamera(Camera cam)
     return cudaCam;
 }
 
-vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& materials)
+std::vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& materials)
 {
-    vector<CudaMaterial> cudaMaterials;
+    std::vector<CudaMaterial> cudaMaterials;
 
     for (const auto& m : materials)
     {
@@ -229,12 +225,12 @@ vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& materials
     return cudaMaterials;
 }
 
-vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioningStructure* sps)
+std::vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioningStructure* sps)
 {
     // Lets assume this is a bvh :)
     const BVH* bvh = (const BVH*)sps;
 
-    vector<CudaLinearBvhNode> cudaLinearBVH;
+    std::vector<CudaLinearBvhNode> cudaLinearBVH;
     cudaLinearBVH.reserve(bvh->nNodes);
 
     for (unsigned int i = 0; i < bvh->nNodes; i++)
@@ -256,13 +252,13 @@ vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioningStruc
     return cudaLinearBVH;
 }
 
-vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps,
+std::vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps,
                                              const std::vector<Material>& materials)
 {
     // Lets assume this is a bvh :)
     const BVH* bvh = (const BVH*)sps;
 
-    vector<CudaTriangle> cudaTriangles;
+    std::vector<CudaTriangle> cudaTriangles;
     cudaTriangles.reserve(bvh->triangles.size());
 
     for (Triangle* t : bvh->triangles)
@@ -331,19 +327,6 @@ CudaPathTracer::Impl::Impl()
         printDevProp(devProp);
         std::cout << std::endl << std::endl;
     }
-
-    try
-    {
-        computeShader = new GLSLProgram();
-        computeShader->compileShader("./chroma-renderer/shaders/convergence.glsl", GLSLShader::COMPUTE);
-        computeShader->link();
-        computeShader->validate();
-        computeShader->printActiveAttribs();
-    }
-    catch (GLSLProgramException& e)
-    {
-        std::cerr << e.what() << std::endl;
-    }
 }
 
 CudaPathTracer::Impl::~Impl()
@@ -392,7 +375,6 @@ void CudaPathTracer::Impl::render()
                 lastIterationElapsedMillis = stopwatch.elapsedMillis;
                 stopwatch.start();
                 copyFrameToTexture();
-                dispatchComputeShader(false);
             }
             else
                 cudaErrorCheck(err);
@@ -433,7 +415,6 @@ void CudaPathTracer::Impl::render()
             cudaErrorCheck(cudaStreamSynchronize(stream));
 
             copyFrameToTexture();
-            dispatchComputeShader(true);
         }
     }
 }
@@ -496,7 +477,7 @@ void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* s
     std::cout << "Free memory: " << free / (1024 * 1024) << "MB" << std::endl;
     std::cout << "Total memory: " << total / (1024 * 1024) << "MB" << std::endl;
 
-    vector<CudaTriangle> cudaTrianglesBVH = SceneToCudaTrianglesBVH(sps, materials);
+    std::vector<CudaTriangle> cudaTrianglesBVH = SceneToCudaTrianglesBVH(sps, materials);
     nCudaTrianglesBVH = (int)cudaTrianglesBVH.size();
     std::cout << "Triangles BVH: " << cudaTrianglesBVH.size() << std::endl;
     std::cout << "Triangles BVH size: " << (cudaTrianglesBVH.size() * sizeof(CudaTriangle)) / (1024) << "KB"
@@ -508,7 +489,7 @@ void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* s
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    vector<CudaLinearBvhNode> cudaLinearBVH = SceneToCudaLinearBvhNode(sps);
+    std::vector<CudaLinearBvhNode> cudaLinearBVH = SceneToCudaLinearBvhNode(sps);
     nCudaLinearBVHNodes = (int)cudaLinearBVH.size();
     std::cout << "CudaLinearBVHNodes: " << cudaLinearBVH.size() << std::endl;
     std::cout << "CudaLinearBVHNodes size: " << (cudaLinearBVH.size() * sizeof(CudaLinearBvhNode)) / (1024) << "KB"
@@ -609,25 +590,6 @@ void CudaPathTracer::Impl::setSettings(const RendererSettings& settings)
         glm::vec3(settings.enviromentLightColor.x, settings.enviromentLightColor.y, settings.enviromentLightColor.z);
     enviromentSettings.enviromentLightIntensity = settings.enviromentLightIntensity;
     gammaCorrectionScale = settings.enviromentLightIntensity;
-}
-
-void CudaPathTracer::Impl::dispatchComputeShader(const bool sync)
-{
-    computeShader->use();
-    computeShader->setUniform("enviromentLightIntensity", gammaCorrectionScale);
-    computeShader->setUniform("imgSnapshot", 0);
-
-    glBindImageTexture(0, registeredImage.texID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
-    int nGroupsX = static_cast<int>(ceilf(registeredImage.width / 16.0f));
-    int nGroupsY = static_cast<int>(ceilf(registeredImage.height / 16.0f));
-
-    glDispatchCompute(nGroupsX, nGroupsY, 1);
-
-    if (sync)
-    {
-        glMemoryBarrier(GL_ALL_BARRIER_BITS);
-    }
 }
 
 void CudaPathTracer::Impl::copyFrameToTexture()

@@ -350,7 +350,7 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
 
         if (ImGui::Button("Save"))
         {
-            saveImage("image.bmp", &cr->image);
+            saveImage("image.bmp", &cr->final_target);
         }
     }
     ImGui::End();
@@ -418,7 +418,7 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
             somethingChanged = true;
         }
 
-        DrawImage(cr->image);
+        DrawImage(cr->final_target);
 
         if (cr->isRunning() && ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_None))
         {
@@ -469,7 +469,7 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
     ImGui::End();
 
     ImGui::Begin("Debug");
-    ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->image.getWidth(), (int)cr->image.getHeight());
+    ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->final_target.getWidth(), (int)cr->final_target.getHeight());
     ImGui::End();
 
     return somethingChanged;

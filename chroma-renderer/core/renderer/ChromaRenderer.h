@@ -10,6 +10,7 @@
 #include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 #include "chroma-renderer/core/utility/ThreadPool.h"
+#include "chroma-renderer/core/renderer/PostProcessor.h"
 
 #include <atomic>
 #include <cstdint>
@@ -35,8 +36,6 @@ class ChromaRenderer
         CUDAPATHTRACE
     };
 
-    // private:
-    // bool running;
     RendererType rendererType = RendererType::CUDAPATHTRACE;
     RendererSettings settings;
     Scene scene;
@@ -47,19 +46,19 @@ class ChromaRenderer
 
     std::unique_ptr<ISpacePartitioningStructure> sps;
 
+    PostProcessor post_processor;
     Stopwatch stopwatch;
 
-    // Progress
     bool running = false;
     float invPixelCount;
     int pixelCount;
-    // std::atomic<int> donePixelCount;
-    // Progress
+
     void genTasks();
     void start();
 
   public:
-    Image image;
+    Image renderer_target;
+    Image final_target;
     ThreadPool threadPool;
     ChromaRenderer();
     ~ChromaRenderer();
