@@ -1,8 +1,8 @@
 # Chroma Renderer  ![CI](https://github.com/alexfrasson/ChromaRenderer/workflows/CI/badge.svg?branch=master)
 
-Naive path tracing renderer written during my time in college. Far from a good example of clean code, design patterns or C++ development in general.
+Yet another path tracer. It was written during my time in college and it is slowly being refactored. Far from a good example of clean code, design patterns or C++ development in general.
 
-It is currently being refactored in the hope of learning more about multi-platform projects and writing Bazel rules.
+![alt text](chroma-renderer/samples/sample.jpg?raw=true)
 
 ## Required system installed dependencies
 - [Bazel 3.0](https://docs.bazel.build/versions/master/install.html) or [Bazelisk](https://github.com/bazelbuild/bazelisk/releases)
