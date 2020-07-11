@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "debug gui (windows)",
+        "preLaunchTask": "build gui (debug|windows)",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}\\bazel-bin\\chroma-renderer\\gui\\gui.exe",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}\\bazel-bin\\chroma-renderer\\gui\\gui.exe.runfiles\\chromarenderer\\",
+        "environment": [],
+        "externalConsole": false
+      }
+    ]
+  }

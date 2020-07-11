@@ -1,8 +1,6 @@
 build --compilation_mode=opt
 build --spawn_strategy=local
 
-build:debug --compilation_mode=dbg
-
 build:windows --cxxopt=/MD
 build:windows --cxxopt=/WX
 build:windows --cxxopt=/experimental:external
@@ -13,6 +11,10 @@ build:windows --per_file_copt=third-party/.*@/W0
 build:windows --per_file_copt=external/.*@/W0
 build:windows --cxxopt=/std:c++17
 build:windows --experimental_enable_runfiles
+
+build:windows_dbg --config=windows
+build:windows_dbg --compilation_mode=dbg
+build:windows_dbg --cxxopt=/MDd
 
 build:linux --client_env=CC=/usr/bin/gcc-8
 build:linux --client_env=CXX=/usr/bin/g++-8
@@ -26,6 +28,9 @@ build:linux --per_file_copt=third-party/.*@-w
 build:linux --per_file_copt=external/.*@-w
 build:linux --cxxopt=-std=c++17
 build:linux --cxxopt=-mavx
+
+build:linux_dbg --config=linux
+build:linux_dbg --compilation_mode=dbg
 
 test --test_output=errors
 test --test_arg=--gtest_color=yes
