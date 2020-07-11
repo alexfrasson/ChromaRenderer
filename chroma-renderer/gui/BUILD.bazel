@@ -18,6 +18,7 @@ cc_binary(
     }),
     deps = [
         "//chroma-renderer/core/renderer",
+        "//third-party/argparse",
         "//third-party/nfd",
     ],
 )

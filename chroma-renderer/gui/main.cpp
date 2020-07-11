@@ -2,12 +2,16 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <argparse.hpp>
 #include <glad/glad.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
+#include <filesystem>
 #include <iostream>
+
+namespace fs = std::filesystem;
 
 void term_func()
 {
@@ -38,7 +42,7 @@ void term_func()
 GLFWwindow* g_window;
 const char* g_glsl_version;
 
-ChromaRenderer* cr;
+std::unique_ptr<ChromaRenderer> cr;
 
 #ifndef WM_DPICHANGED
 #define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers
@@ -251,7 +255,7 @@ void MainLoop()
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            bool somethingChanged = ChromaGui::RenderGui(g_window, cr);
+            bool somethingChanged = ChromaGui::RenderGui(g_window, cr.get());
 
             cr->update();
 
@@ -279,12 +283,61 @@ void MainLoop()
     }
 }
 
-int main(int, char**)
+bool ValidateArgs(argparse::ArgumentParser& program)
+{
+    if (const auto& scene_file_path = program.present<std::string>("-s"))
+    {
+        if (!fs::exists(*scene_file_path))
+        {
+            std::cerr << "File '" << *scene_file_path << "' does not exist." << std::endl;
+            return false;
+        }
+    }
+
+    if (const auto& env_map_file_path = program.present<std::string>("-e"))
+    {
+        if (!fs::exists(*env_map_file_path))
+        {
+            std::cerr << "File '" << *env_map_file_path << "' does not exist." << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int main(const int argc, const char** argv)
 {
     std::set_terminate(term_func);
 
-    if (!InitGLFW())
+    argparse::ArgumentParser program("chroma-renderer");
+    program.add_argument("-r", "--render")
+        .help("Start rendering immediately.")
+        .default_value(false)
+        .implicit_value(true);
+    program.add_argument("-s", "--scene").help("Scene file path.");
+    program.add_argument("-e", "--env_map").help("Environemnt map file path.");
+
+    try
+    {
+        program.parse_args(argc, argv);
+    }
+    catch (const std::runtime_error& err)
+    {
+        std::cout << err.what() << std::endl;
+        std::cout << program;
+        exit(0);
+    }
+
+    if (!ValidateArgs(program))
+    {
         return 1;
+    }
+
+    if (!InitGLFW())
+    {
+        return 1;
+    }
 
     if (gladLoadGL() == 0)
     {
@@ -294,11 +347,26 @@ int main(int, char**)
 
     InitializeImGui(g_window, g_glsl_version);
 
-    cr = new ChromaRenderer();
+    cr = std::make_unique<ChromaRenderer>();
+
+    if (const auto& scene_file_path = program.present<std::string>("-s"))
+    {
+        cr->importScene(*scene_file_path);
+    }
+
+    if (const auto& env_map_file_path = program.present<std::string>("-e"))
+    {
+        cr->importEnviromentMap(*env_map_file_path);
+    }
+
+    if (program["-r"] == true)
+    {
+        cr->startRender();
+    }
 
     MainLoop();
 
-    delete cr;
+    cr.reset();
 
     ImGuiCleanup();
 
