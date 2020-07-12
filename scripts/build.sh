@@ -22,9 +22,8 @@ function install_cuda() {
 
 function install_buildifier()
 {
-    curl --location --fail "https://github.com/bazelbuild/buildtools/releases/download/3.3.0/buildifier" --output /tmp/buildifier
-    chmod +x /tmp/buildifier
-    alias buildifier=/tmp/buildifier
+    curl --location --fail "https://github.com/bazelbuild/buildtools/releases/download/3.3.0/buildifier" --output /usr/bin/buildifier
+    chmod +x /usr/bin/buildifier
 }
 
 function install_deps() {
