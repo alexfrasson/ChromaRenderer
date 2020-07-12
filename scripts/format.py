@@ -38,6 +38,11 @@ def handle_bazel_files(check_only):
 
 
 def handle_cpp_files(check_only):
+    proc_result = subprocess.run(
+        ["clang-format", "--version"], capture_output=True, check=True, text=True
+    )
+    print(proc_result.stdout)
+
     extensions = [".cu", ".glsl", ".cpp", ".h"]
     folders = ["chroma-renderer"]
 
