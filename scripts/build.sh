@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu
+
 function install_cuda() {
     echo "Downloading CUDA installer..."
     wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
@@ -31,6 +33,9 @@ echo
 echo "Building project..."
 
 export CC_CONFIGURE_DEBUG=1
+
+python3.7 ./scripts/format.py --check
+
 
 bazelisk build --config=linux --verbose_failures //...
 bazelisk test --config=linux --verbose_failures //...
