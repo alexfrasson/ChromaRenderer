@@ -34,15 +34,11 @@ def handle_bazel_files(check_only):
             check=True,
             text=True,
         )
+    print("buildifier OK")
     return True
 
 
 def handle_cpp_files(check_only):
-    proc_result = subprocess.run(
-        ["clang-format-10", "--version"], capture_output=True, check=True, text=True
-    )
-    print(proc_result.stdout)
-
     extensions = [".cu", ".glsl", ".cpp", ".h"]
     folders = ["chroma-renderer"]
 
@@ -96,6 +92,7 @@ def handle_cpp_files(check_only):
         for file in files_with_errors:
             print("  " + file)
         return False
+    print("clang-format OK")
     return True
 
 

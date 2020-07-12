@@ -5,7 +5,7 @@ on:
   #pull_request: {}
 
 jobs:
-  format:
+  formatting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,8 +17,8 @@ jobs:
         run: |
           ./scripts/formatting-checks.sh
 
-  windows:
-    needs: format
+  build-windows:
+    needs: formatting
     runs-on: windows-latest
 
     env:
@@ -32,8 +32,8 @@ jobs:
         run: |
           call ./scripts/build.cmd
 
-  ubuntu:
-    needs: format
+  build-ubuntu:
+    needs: formatting
     runs-on: ubuntu-latest
 
     steps:
