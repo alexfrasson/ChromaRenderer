@@ -25,3 +25,5 @@ On Ubuntu 18.04:
 Simply run the following command from within the workspace. It should fetch all dependencies, build, and run the application. Choose the correct configuration based on your OS.
 
 `bazel run --config=[windows|linux] //chroma-renderer/gui`
+
+An example scene and several unclipped environment maps can be found in `chroma-renderer/resources`.
