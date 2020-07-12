@@ -1,13 +1,10 @@
 #include "chroma-renderer/core/renderer/CudaPathTracerKernel.h"
 #include "chroma-renderer/core/renderer/CudaPathTracerKernelUtils.h"
 
+#include <cmath>
 #include <curand_kernel.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 #define THREAD_DIM 8
-
-texture<glm::vec4, cudaTextureType2D, /*cudaReadModeNormalizedFloat*/ cudaReadModeElementType> accuTex;
 
 __device__ void finishSample(const int pos, glm::vec4* accuBuffer, CudaPathIteration* pathIteration)
 {
@@ -135,8 +132,8 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
 
     const int threadId =
         (blockIdx.x + blockIdx.y * gridDim.x) * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
-    // create random number generator and initialise with hashed frame number, see RichieSams blogspot
-    curandState randState; // state of the random number generator, to prevent repetition
+
+    curandState randState;
     curand_init(seed + threadId, 0, 0, &randState);
 
     const int pos = texDim.x * y + x;
@@ -156,8 +153,6 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         ray.direction = pathIteration.rayDir;
         ray.origin = pathIteration.rayOrigin;
     }
-
-    glm::vec3 color = pathIteration.color;
 
     CudaIntersection intersection;
     if (!intersectBVH(triangles, linearBVH, ray, intersection))
@@ -185,8 +180,6 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
                                                                                   curand_uniform(&randState),
                                                                                   hitpointNormal,
                                                                                   wo);
-        // const SampleDirection brdf_sample =
-        //     uniformSampleHemisphere(curand_uniform(&randState), curand_uniform(&randState), hitpointNormal, wo);
 
         const float brdf_cos_theta = glm::dot(brdf_sample.direction, hitpointNormal);
         if (brdf_sample.pdf > 0.0f && brdf_cos_theta > 0.0f)
@@ -196,16 +189,13 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
             brdf_ray.maxt = FLT_MAX;
             brdf_ray.origin = hitpoint;
             brdf_ray.direction = brdf_sample.direction;
-
-            CudaIntersection env_intersection;
-            if (!intersectBVH(triangles, linearBVH, brdf_ray, env_intersection))
+            if (!intersectBVH(triangles, linearBVH, brdf_ray))
             {
                 const glm::vec2 uv = unitVectorToUv(brdf_sample.direction);
                 const float4 env = tex2D<float4>(enviromentSettings.texObj, uv.x, uv.y);
                 const glm::vec3 li{env.x, env.y, env.z};
                 const float env_pdf = envMapPdf(brdf_sample.direction, enviromentSettings);
                 const float brdf_weight = misPowerHeuristic(1.0f, brdf_sample.pdf, 1.0f, env_pdf);
-                // const float brdf_weight = 1.0f;
                 direct_light += (material.f() * li * brdf_cos_theta * brdf_weight) / brdf_sample.pdf;
             }
         }
@@ -222,26 +212,21 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
             env_ray.maxt = FLT_MAX;
             env_ray.origin = hitpoint;
             env_ray.direction = env_sample.direction;
-            CudaIntersection env_intersection;
-            if (!intersectBVH(triangles, linearBVH, env_ray, env_intersection))
+            if (!intersectBVH(triangles, linearBVH, env_ray))
             {
-                // const float brdf_pdf = uniformSampleHemispherePdf(hitpointNormal, wo, env_sample.direction);
                 const float brdf_pdf =
                     uniformSampleCosineWeightedHemispherePdf(hitpointNormal, wo, env_sample.direction);
                 const float env_weight = misPowerHeuristic(1.0f, env_sample.pdf, 1.0f, brdf_pdf);
-                // const float env_weight = 1.0f;
                 const float4 env = tex2D<float4>(enviromentSettings.texObj, env_sample.uv.x, env_sample.uv.y);
                 const glm::vec3 li{env.x, env.y, env.z};
                 direct_light += (material.f() * li * env_cos_theta * env_weight) / env_sample.pdf;
             }
         }
 
-        color += pathIteration.mask * direct_light;
-
+        pathIteration.color += pathIteration.mask * direct_light;
         pathIteration.mask *= (material.f() * brdf_cos_theta) / brdf_sample.pdf;
         pathIteration.rayDir = brdf_sample.direction;
         pathIteration.rayOrigin = hitpoint;
-        pathIteration.color = color;
         pathIteration.bounce++;
 
         if (pathIteration.bounce == MAX_PATH_DEPTH || brdf_sample.pdf <= 0.0f || brdf_cos_theta <= 0.0f)
@@ -256,27 +241,6 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
     }
 
     pathIterationBuffer[pos] = pathIteration;
-}
-
-extern "C" void setTextureFilterMode(bool bLinearFilter)
-{
-    accuTex.filterMode = bLinearFilter ? cudaFilterModeLinear : cudaFilterModePoint;
-}
-
-extern "C" void bindTextureToArray(cudaArray* aarray)
-{
-    // cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float4>();
-    // cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
-    cudaChannelFormatDesc channelDesc;
-    cudaErrorCheck(cudaGetChannelDesc(&channelDesc, aarray));
-
-    // set texture parameters
-    accuTex.normalized = false;                   // access with normalized texture coordinates
-    accuTex.filterMode = cudaFilterModePoint;     // linear interpolation
-    accuTex.addressMode[0] = cudaAddressModeWrap; // wrap texture coordinates
-    accuTex.addressMode[1] = cudaAddressModeWrap;
-
-    cudaErrorCheck(cudaBindTextureToArray(accuTex, aarray, channelDesc));
 }
 
 extern "C" void trace(cudaStream_t& stream,

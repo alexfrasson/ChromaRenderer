@@ -2,10 +2,10 @@
 
 #define _USE_MATH_DEFINES
 #include <algorithm>
-#include <math.h>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <math.h>
 
 double luma(double r, double g, double b)
 {
@@ -46,7 +46,6 @@ EnvironmentMap::EnvironmentMap(const float* data, const uint32_t width, const ui
         const double g = data_[i * color_components + 1];
         const double b = data_[i * color_components + 2];
 
-        // double l = luma(r, g, b) / sum;
         double l = luma(r, g, b);
 
         const double v = floorf((float)i / (float)width) / (float)height;

@@ -64,7 +64,6 @@ class CudaPathTracer::Impl
     int iteration = 0;
 
     std::uint32_t targetSamplesPerPixel;
-    std::uint32_t finishedSamplesPerPixel;
 
     float gammaCorrectionScale = 1.0f;
 
@@ -359,31 +358,29 @@ CudaPathTracer::Impl::~Impl()
 
 void CudaPathTracer::Impl::render()
 {
-    bool firstIteration = iteration == 0;
+    const bool firstIteration = iteration == 0;
 
+    cudaErrorCheck(cudaGetLastError());
+
+    if (firstIteration)
     {
-        cudaErrorCheck(cudaGetLastError());
+        cudaErrorCheck(cudaStreamSynchronize(stream));
+    }
+    else
+    {
+        cudaError err = cudaStreamQuery(stream);
 
-        if (firstIteration)
+        if (err == cudaErrorNotReady)
+            return;
+        else if (err == cudaSuccess)
         {
-            cudaErrorCheck(cudaStreamSynchronize(stream));
+            stopwatch.stop();
+            lastIterationElapsedMillis = stopwatch.elapsedMillis;
+            stopwatch.start();
+            copyFrameToTexture();
         }
         else
-        {
-            cudaError err = cudaStreamQuery(stream);
-
-            if (err == cudaErrorNotReady)
-                return;
-            else if (err == cudaSuccess)
-            {
-                stopwatch.stop();
-                lastIterationElapsedMillis = stopwatch.elapsedMillis;
-                stopwatch.start();
-                copyFrameToTexture();
-            }
-            else
-                cudaErrorCheck(err);
-        }
+            cudaErrorCheck(err);
     }
 
     // calculate a new seed for the random number generator, based on the framenumber
@@ -404,9 +401,6 @@ void CudaPathTracer::Impl::render()
 
     cudaErrorCheck(cudaGetLastError());
 
-    if (iteration % MAX_PATH_DEPTH == 0)
-        finishedSamplesPerPixel++;
-
     iteration++;
 
     if (firstIteration)
@@ -419,7 +413,6 @@ void CudaPathTracer::Impl::render()
 
 void CudaPathTracer::Impl::reset()
 {
-    finishedSamplesPerPixel = 0;
     iteration = 0;
 }
 
@@ -433,25 +426,18 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
     SAFE_CUDA_FREE(enviromentSettings.cdf);
     SAFE_CUDA_FREE(enviromentSettings.pdf);
 
-    // Load reference image from image (output)
     unsigned int size = hdriEnvWidth * hdriEnvHeight * channels * sizeof(float);
 
-    // Allocate CUDA array in device memory
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
 
     cudaErrorCheck(cudaMallocArray(&envArray, &channelDesc, hdriEnvWidth, hdriEnvHeight));
-
-    // Copy to device memory some data located at address h_data
-    // in host memory
     cudaErrorCheck(cudaMemcpyToArray(envArray, 0, 0, hdriEnvData, size, cudaMemcpyHostToDevice));
 
-    // Specify texture
     struct cudaResourceDesc resDesc;
     memset(&resDesc, 0, sizeof(resDesc));
     resDesc.resType = cudaResourceTypeArray;
     resDesc.res.array.array = envArray;
 
-    // Specify texture object parameters
     struct cudaTextureDesc texDesc;
     memset(&texDesc, 0, sizeof(texDesc));
     texDesc.addressMode[0] = cudaAddressModeWrap;
@@ -460,7 +446,6 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
     texDesc.readMode = cudaReadModeElementType;
     texDesc.normalizedCoords = 1;
 
-    // Create texture object
     cudaErrorCheck(cudaCreateTextureObject(&enviromentSettings.texObj, &resDesc, &texDesc, NULL));
 
     EnvironmentMap env_map{hdriEnvData, static_cast<uint32_t>(hdriEnvWidth), static_cast<uint32_t>(hdriEnvHeight)};
@@ -631,7 +616,7 @@ void CudaPathTracer::Impl::copyFrameToTexture()
 
 float CudaPathTracer::Impl::getProgress() const
 {
-    return ((float)finishedSamplesPerPixel / (float)targetSamplesPerPixel);
+    return ((float)iteration / (float)targetSamplesPerPixel);
 }
 
 float CudaPathTracer::Impl::getInstantRaysPerSec() const
@@ -641,7 +626,7 @@ float CudaPathTracer::Impl::getInstantRaysPerSec() const
 
 std::uint32_t CudaPathTracer::Impl::getFinishedSamples() const
 {
-    return finishedSamplesPerPixel;
+    return iteration;
 }
 
 std::uint32_t CudaPathTracer::Impl::getTargetSamplesPerPixel() const
