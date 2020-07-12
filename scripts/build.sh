@@ -28,6 +28,7 @@ function install_buildifier()
 
 function install_deps() {
     install_cuda
+    install_buildifier
 
     echo "Installing other dependencies..."
     sudo apt-get -y -qq install libgtk-3-dev >/dev/null
