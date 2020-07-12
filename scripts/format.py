@@ -56,8 +56,7 @@ def handle_cpp_files(check_only):
 
     for filename in files_to_format:
         if check_only:
-            proc_result = subprocess.run(
-                [
+            proc_result = subprocess.run([
                     "clang-format-10",
                     "--verbose",
                     "--style=file",
