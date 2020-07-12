@@ -52,7 +52,7 @@ def handle_cpp_files(check_only):
     files_with_errors = []
 
     for filename in files_to_format:
-        print("Running clang-format on {}".format(filename))
+        # print("Running clang-format on {}".format(filename))
         if check_only:
             proc_result = subprocess.run(
                 [
@@ -68,6 +68,7 @@ def handle_cpp_files(check_only):
                 text=True,
             )
             if proc_result.returncode != 0:
+                print(proc_result.stderr)
                 files_with_errors.append(filename)
 
         else:

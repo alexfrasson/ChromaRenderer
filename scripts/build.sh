@@ -38,11 +38,15 @@ function install_deps() {
 install_deps
 
 echo
+echo "Checking formatting..."
+
+python3.7 ./scripts/format.py --check
+
+echo
 echo "Building project..."
 
 export CC_CONFIGURE_DEBUG=1
 
-python3.7 ./scripts/format.py --check
 
 bazelisk build --config=linux --verbose_failures //...
 bazelisk test --config=linux --verbose_failures //...
