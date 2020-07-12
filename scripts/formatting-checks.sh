@@ -11,11 +11,16 @@ function install_clang_format() {
     sudo apt-get -y -qq install clang-format-10 >/dev/null
 }
 
+function install_black() {
+    pip install black
+}
+
 echo
 echo "Installing dependencies..."
 
 install_buildifier
 install_clang_format
+install_black
 
 echo
 echo "Running formatting checks..."
