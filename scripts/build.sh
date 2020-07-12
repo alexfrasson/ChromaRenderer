@@ -20,6 +20,12 @@ function install_cuda() {
     echo "CUDA_PATH set to '$CUDA_PATH'"
 }
 
+function install_buildifier()
+{
+    curl --location --fail "https://github.com/bazelbuild/buildtools/releases/download/3.3.0/buildifier" --output /tmp/buildifier
+    chmod +x /tmp/buildifier
+}
+
 function install_deps() {
     install_cuda
 
@@ -34,7 +40,7 @@ echo "Building project..."
 
 export CC_CONFIGURE_DEBUG=1
 
-python3.7 ./scripts/format.py --check
+./scripts/format.py --check
 
 bazelisk build --config=linux --verbose_failures //...
 bazelisk test --config=linux --verbose_failures //...
