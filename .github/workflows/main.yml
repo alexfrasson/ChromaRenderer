@@ -10,6 +10,20 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        #with:
+        #  lfs: true
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.7
+      - name: Formatting checks
+        shell: bash
+        run: |
+          ./scripts/formatting-checks.sh
+
   # This workflow contains a single job called "build"
   windows:
     # The type of runner that the job will run on
@@ -18,32 +32,29 @@ jobs:
     env:
       BAZEL_VC: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC
       BAZEL_VS: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
-      
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-      #with:
-      #  lfs: true
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
 
-    # Runs a single command using the runners shell
-    - name: Build
-      shell: cmd
-      run: |
-        call ./scripts/build.cmd
+        #with:
+        #  lfs: true
+      # Runs a single command using the runners shell
+      - name: Build
+        shell: cmd
+        run: |
+          call ./scripts/build.cmd
 
   ubuntu:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      #with:
-      #  lfs: true
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.7.7
+      - uses: actions/checkout@v2
 
-    - name: Build
-      shell: bash
-      run: |
-        ./scripts/build.sh
+        #with:
+        #  lfs: true
+      - name: Build
+        shell: bash
+        run: |
+          ./scripts/build.sh

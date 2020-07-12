@@ -20,27 +20,15 @@ function install_cuda() {
     echo "CUDA_PATH set to '$CUDA_PATH'"
 }
 
-function install_buildifier()
-{
-    sudo curl --location --fail "https://github.com/bazelbuild/buildtools/releases/download/3.3.0/buildifier" --output /usr/bin/buildifier
-    sudo chmod +x /usr/bin/buildifier
-}
-
 function install_deps() {
     install_cuda
     
     echo "Installing other dependencies..."
-    install_buildifier
     pip install black
     sudo apt-get -y -qq install libgtk-3-dev >/dev/null
 }
 
 install_deps
-
-echo
-echo "Checking formatting..."
-
-python3.7 ./scripts/format.py --check
 
 echo
 echo "Building project..."
