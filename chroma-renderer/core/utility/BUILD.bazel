@@ -5,9 +5,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "utility",
     srcs = glob(["*.cpp"]),
-    hdrs = 
-    glob(["*.h"]
-    ),
+    hdrs = glob(["*.h"]),
     deps = [
         "//chroma-renderer/core/scene",
         "//chroma-renderer/core/types",

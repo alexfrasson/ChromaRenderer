@@ -16,7 +16,8 @@ std::vector<float> ComputeCdf(const std::vector<double>& pdf)
     std::vector<float> cdf;
     cdf.reserve(pdf.size() + 1);
     cdf.push_back(0.0);
-    double sum = 0.0;
+    double sum = 0.0
+    ;
 
     for (const auto& value : pdf)
     {

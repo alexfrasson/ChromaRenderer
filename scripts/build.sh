@@ -22,7 +22,7 @@ function install_cuda() {
 
 function install_deps() {
     install_cuda
-    
+
     echo "Installing other dependencies..."
     sudo apt-get -y -qq install libgtk-3-dev >/dev/null
 }
@@ -33,7 +33,6 @@ echo
 echo "Building project..."
 
 export CC_CONFIGURE_DEBUG=1
-
 
 bazelisk build --config=linux --verbose_failures //...
 bazelisk test --config=linux --verbose_failures //...
