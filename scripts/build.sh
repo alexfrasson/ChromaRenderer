@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu
+
 function install_cuda() {
     echo "Downloading CUDA installer..."
     wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
