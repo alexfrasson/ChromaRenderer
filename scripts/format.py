@@ -15,7 +15,7 @@ def handle_bazel_files(check_only):
 
     repo_root_folder = result.stdout.rstrip("\n")
 
-    print("Running buildifier on {}".format(repo_root_folder))
+    print("\nRunning buildifier on {}".format(repo_root_folder))
 
     if check_only:
         proc_result = subprocess.run(
@@ -42,6 +42,8 @@ def handle_cpp_files(check_only):
     extensions = [".cu", ".glsl", ".cpp", ".h"]
     folders = ["chroma-renderer"]
 
+    print("Running clang-format on {}".format(", ".join(folders)))
+
     files_to_format = []
 
     for extension in extensions:
@@ -53,7 +55,6 @@ def handle_cpp_files(check_only):
     files_with_errors = []
 
     for filename in files_to_format:
-        # print("Running clang-format on {}".format(filename))
         if check_only:
             proc_result = subprocess.run(
                 [
@@ -96,15 +97,28 @@ def handle_cpp_files(check_only):
     return True
 
 
-def handle_python_files():
-    print("Running black on './scripts'")
+def handle_python_files(check_only):
+    print("\nRunning black on './scripts'")
 
-    subprocess.run(
-        ["python3.7", "-m", "black", "./scripts",],
-        capture_output=True,
-        check=True,
-        text=True,
-    )
+    if check_only:
+        proc_result = subprocess.run(
+            ["python3.7", "-m", "black", "--diff", "--check", "./scripts",],
+            capture_output=True,
+            text=True,
+        )
+        if proc_result.returncode != 0:
+            print("Formatting issues found in the following files:")
+            print(proc_result.stdout
+            )
+            return False
+    else:
+        subprocess.run(
+            ["python3.7", "-m", "black", "./scripts",],
+            capture_output=True,
+            check=True,
+            text=True,
+        )
+    print("black OK")
     return True
 
 
@@ -122,7 +136,7 @@ def main():
 
     status &= handle_bazel_files(args.check)
     status &= handle_cpp_files(args.check)
-    status &= handle_python_files()
+    status &= handle_python_files(args.check)
 
     return not status
 
