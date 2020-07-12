@@ -103,7 +103,7 @@ def handle_python_files():
     print("Running black on './scripts'")
 
     subprocess.run(
-        ["python3", "-m", "black", "./scripts",],
+        ["python3.7", "-m", "black", "./scripts",],
         capture_output=True,
         check=True,
         text=True,
