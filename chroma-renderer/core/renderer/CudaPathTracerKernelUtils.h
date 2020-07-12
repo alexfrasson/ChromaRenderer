@@ -20,7 +20,6 @@ __host__ __device__ int binarySearch(const float* cdf, const int cdf_size, const
 
         if (rand_var >= cdf[index - 1] && rand_var <= cdf[index])
         {
-            // index--;
             break;
         }
 
@@ -49,7 +48,6 @@ __device__ glm::mat3 basis(glm::vec3 normal)
     }
     binormal = glm::normalize(binormal);
     const glm::vec3 tangent = glm::normalize(glm::cross(binormal, normal));
-    // return glm::normalize(dir.x * tangent + dir.y * binormal + dir.z * normal);
     return glm::mat3{tangent, binormal, normal};
 }
 
@@ -92,12 +90,12 @@ __device__ bool sameHemisphere(const glm::vec3& a, const glm::vec3& b)
     return (a.z * b.z > 0.0f);
 }
 
-__device__ float uniformSampleHemispherePdf(const glm::vec3& /*n*/, const glm::vec3& /*wo*/, const glm::vec3& /*wi*/)
+__device__ float uniformSampleHemispherePdf(const glm::vec3& n, const glm::vec3& wo, const glm::vec3& wi)
 {
-    // if (!sameHemisphere(n, wo, wi))
-    // {
-    //     return 0.0f;
-    // }
+    if (!sameHemisphere(n, wo, wi))
+    {
+        return 0.0f;
+    }
     return 1.0f / glm::two_pi<float>();
 }
 
@@ -118,16 +116,12 @@ __device__ SampleDirection uniformSampleHemisphere(const float rand0,
     return SampleDirection{wi, pdf};
 }
 
-__device__ float uniformSampleCosineWeightedHemispherePdf(const glm::vec3& n,
-                                                          const glm::vec3& wo,
-                                                          const glm::vec3& wi)
+__device__ float uniformSampleCosineWeightedHemispherePdf(const glm::vec3& n, const glm::vec3& wo, const glm::vec3& wi)
 {
     if (!sameHemisphere(n, wo, wi))
     {
         return 0.0f;
     }
-    // const float theta = sphericalPhi(unit_vector);
-    // return glm::one_over_pi<float>() * cosf(theta) * sinf(theta);
     return abs(glm::dot(n, wi)) * glm::one_over_pi<float>();
 }
 
@@ -146,27 +140,10 @@ __device__ SampleDirection uniformSampleCosineWeightedHemisphere(const float ran
     const float y = sinTheta * sinPhi;
     const float z = cosTheta;
 
-    // const float rand1_times_two_pi = glm::two_pi<float>() * rand1;
-    // const float rand0_sqrt = sqrtf(rand0);
-
-    // const float x = cosf(rand1_times_two_pi) * rand0_sqrt;
-    // const float y = sinf(rand1_times_two_pi) * rand0_sqrt;
-    // const float z = sqrtf(1.0f - rand0);
-
-    // xt = rand.x * 2 * PI; //expand to 0 to 2PI
-    // yt = sqrt(1.0 - rand.y);
-
-    // x = cos(xt) * yt;
-    // y = sqrt(rand.y);
-    // z = sin(xt) * yt;
-
     const glm::vec3 local_direction = glm::normalize(glm::vec3(x, y, z));
     const glm::vec3 wi = toWorld(local_direction, n);
     const float pdf = uniformSampleCosineWeightedHemispherePdf(n, wo, wi);
 
-    // const float pdf = glm::one_over_pi<float>() * cosTheta * sinTheta;
-
-    // const float pdf = 1.0f;
     return SampleDirection{wi, pdf};
 }
 
@@ -179,7 +156,6 @@ __device__ glm::vec3 cosineSampleHemisphere(const glm::vec3 normal, const float 
     const float phi = 2 * glm::pi<float>() * rand0;
     const float rand1_sqrt = sqrtf(rand1);
 
-    // compute cosine weighted random ray direction on hemisphere
     return glm::normalize(u * cosf(phi) * rand1_sqrt + v * sinf(phi) * rand1_sqrt + w * sqrtf(1.0f - rand1));
 }
 
@@ -237,34 +213,24 @@ __host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay
     const glm::vec3 pvec = glm::cross(ray->direction, edge1);
     const float det = glm::dot(edge0, pvec);
 
-    // If determinant is near zero, ray lies in plane of triangle
-    // With backface culling
-    // if (det < EPSILON)
-    // Without backface culling
     if (det > -EPSILON && det < EPSILON)
     {
         return false;
     }
-    bool backface = det < -EPSILON;
     const float invDet = 1.0f / det;
     const glm::vec3 tvec = ray->origin - triangle->v[0];
-    float u = glm::dot(tvec, pvec) * invDet;
-    // The intersection lies outside of the triangle
+    const float u = glm::dot(tvec, pvec) * invDet;
     if (u < 0.0f || u > 1.0f)
     {
         return false;
     }
     const glm::vec3 qvec = glm::cross(tvec, edge0);
-    float v = glm::dot(ray->direction, qvec) * invDet;
-    // The intersection lies outside of the triangle
+    const float v = glm::dot(ray->direction, qvec) * invDet;
     if (v < 0.0f || u + v > 1.0f)
     {
         return false;
     }
-    float t = glm::dot(edge1, qvec) * invDet;
-
-    // if (t < EPSILON)
-    //	return false;
+    const float t = glm::dot(edge1, qvec) * invDet;
     if (t > ray->maxt || t < ray->mint)
     {
         return false;
@@ -272,15 +238,48 @@ __host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay
 
     ray->maxt = t;
 
-    // Fill intersection structure
     intersection->distance = t;
     intersection->p = ray->origin + intersection->distance * ray->direction;
     float gama = 1.0f - (u + v);
     intersection->n = u * triangle->n[1] + v * triangle->n[2] + gama * triangle->n[0];
+    const bool backface = det < -EPSILON;
     intersection->n = (backface ? -1.0f : 1.0f) * glm::normalize(intersection->n);
-
     intersection->material = triangle->material;
 
+    return true;
+}
+
+__host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay* ray)
+{
+    const glm::vec3 edge0 = triangle->v[1] - triangle->v[0];
+    const glm::vec3 edge1 = triangle->v[2] - triangle->v[0];
+    const glm::vec3 pvec = glm::cross(ray->direction, edge1);
+    const float det = glm::dot(edge0, pvec);
+
+    if (det > -EPSILON && det < EPSILON)
+    {
+        return false;
+    }
+    const float invDet = 1.0f / det;
+    const glm::vec3 tvec = ray->origin - triangle->v[0];
+    const float u = glm::dot(tvec, pvec) * invDet;
+    if (u < 0.0f || u > 1.0f)
+    {
+        return false;
+    }
+    const glm::vec3 qvec = glm::cross(tvec, edge0);
+    const float v = glm::dot(ray->direction, qvec) * invDet;
+    if (v < 0.0f || u + v > 1.0f)
+    {
+        return false;
+    }
+    const float t = glm::dot(edge1, qvec) * invDet;
+    if (t > ray->maxt || t < ray->mint)
+    {
+        return false;
+    }
+
+    ray->maxt = t;
     return true;
 }
 
@@ -393,4 +392,65 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
     }
 
     return hit;
+}
+
+__host__ __device__ bool intersectBVH(const CudaTriangle* triangles, const CudaLinearBvhNode* linearBVH, CudaRay& ray)
+{
+    const glm::vec3 invRayDir = 1.f / ray.direction;
+    const bool dirIsNeg[3] = {invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
+
+    unsigned int todoOffset = 0;
+    unsigned int nodeNum = 0;
+    unsigned int todo[64];
+
+    while (true)
+    {
+        const CudaLinearBvhNode* node = &linearBVH[nodeNum];
+
+        // Intersect BVH node
+        if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))
+        {
+            // Leaf node
+            if (node->nPrimitives > 0)
+            {
+                // Intersect primitives
+                for (unsigned int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                {
+                    if (intersectTriangle(&triangles[i], &ray))
+                    {
+                        return true;
+                    }
+                }
+                if (todoOffset == 0)
+                {
+                    break;
+                }
+                nodeNum = todo[--todoOffset];
+            }
+            // Internal node
+            else
+            {
+                if (dirIsNeg[node->axis])
+                {
+                    todo[todoOffset++] = nodeNum + 1;
+                    nodeNum = node->secondChildOffset;
+                }
+                else
+                {
+                    todo[todoOffset++] = node->secondChildOffset;
+                    nodeNum = nodeNum + 1;
+                }
+            }
+        }
+        else
+        {
+            if (todoOffset == 0)
+            {
+                break;
+            }
+            nodeNum = todo[--todoOffset];
+        }
+    }
+
+    return false;
 }
