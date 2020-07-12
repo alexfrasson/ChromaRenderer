@@ -40,6 +40,8 @@ jobs:
       #with:
       #  lfs: true
     - uses: actions/setup-python@v2
+      with:
+        python-version: 3.7.7
 
     - name: Build
       shell: bash
