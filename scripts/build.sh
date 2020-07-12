@@ -36,6 +36,5 @@ export CC_CONFIGURE_DEBUG=1
 
 python3.7 ./scripts/format.py --check
 
-
 bazelisk build --config=linux --verbose_failures //...
 bazelisk test --config=linux --verbose_failures //...
