@@ -14,8 +14,7 @@ void NormalizeCdf(std::vector<float>& cdf, const float value)
 std::vector<float> ComputeCdf(const std::vector<double>& pdf)
 {
     std::vector<float> cdf;
-    cdf.reserve(pdf.size() + 1)
-    ;
+    cdf.reserve(pdf.size() + 1);
     cdf.push_back(0.0);
     double sum = 0.0;
 

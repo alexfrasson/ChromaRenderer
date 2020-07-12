@@ -108,8 +108,7 @@ def handle_python_files(check_only):
         )
         if proc_result.returncode != 0:
             print("Formatting issues found in the following files:")
-            print(proc_result.stdout
-            )
+            print(proc_result.stdout)
             return False
     else:
         subprocess.run(
