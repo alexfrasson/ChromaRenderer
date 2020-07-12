@@ -39,7 +39,7 @@ def handle_bazel_files(check_only):
 
 def handle_cpp_files(check_only):
     proc_result = subprocess.run(
-        ["clang-format", "--version"], capture_output=True, check=True, text=True
+        ["clang-format-10", "--version"], capture_output=True, check=True, text=True
     )
     print(proc_result.stdout)
 
@@ -61,7 +61,7 @@ def handle_cpp_files(check_only):
         if check_only:
             proc_result = subprocess.run(
                 [
-                    "clang-format",
+                    "clang-format-10",
                     "--verbose",
                     "--style=file",
                     "--fallback-style=none",
@@ -79,7 +79,7 @@ def handle_cpp_files(check_only):
         else:
             subprocess.run(
                 [
-                    "clang-format",
+                    "clang-format-10",
                     "--verbose",
                     "--style=file",
                     "--fallback-style=none",
