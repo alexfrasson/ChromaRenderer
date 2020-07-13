@@ -46,7 +46,7 @@ class Camera
     void horizontalFOV(float hfov)
     {
         m_HorizontalFOV = hfov;
-        d = ((float)width / 2.0f) / tan(m_HorizontalFOV / 2.0f);
+        d = ((float)width / 2.0f) / tanf(m_HorizontalFOV / 2.0f);
     }
 
     void setSize(int w, int h);

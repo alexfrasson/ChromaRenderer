@@ -24,7 +24,7 @@ glm::vec3 pick_random_point_in_sphere()
         x3 = U_m1_p1();
         d2 = x1 * x1 + x2 * x2 + x3 * x3;
     } while (d2 > 1.0f);
-    float scale = 1.0f / sqrt(d2); // or use a fast InvSqrt for this
+    float scale = 1.0f / sqrtf(d2); // or use a fast InvSqrt for this
     return glm::vec3(x1 * scale, x2 * scale, x3 * scale);
 
     // double v[2];
@@ -194,7 +194,7 @@ float PathTracing::calcColor(Intersection& is)
 }
 float PathTracing::getProgress()
 {
-    return (donePixelCount * invPixelCount);
+    return ((float)donePixelCount * invPixelCount);
 }
 bool PathTracing::isRunning()
 {

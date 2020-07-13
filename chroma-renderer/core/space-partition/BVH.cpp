@@ -156,7 +156,7 @@ bool BVH::build(std::vector<Object>& o)
               << "    Total:       " << nNodes << std::endl
               << "Max depth:       " << maxDepth << std::endl
               << "Avg. tris/leaf:  " << (float)tris.size() / (float)nLeafs << std::endl
-              << "Building time:   " << stopwatch.elapsedMillis.count() / 1000.0 << "s" << std::endl
+              << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
               << "Done!" << std::endl;
 
     // std::cout << "NODESSSS: " << countPrim(lroot, 0) << std::endl;
@@ -228,7 +228,7 @@ bool BVH::build(std::vector<Mesh*>& m)
               << "    Total:       " << nNodes << std::endl
               << "Max depth:       " << maxDepth << std::endl
               << "Avg. tris/leaf:  " << (float)triangles.size() / (float)nLeafs << std::endl
-              << "Building time:   " << stopwatch.elapsedMillis.count() / 1000.0 << "s" << std::endl
+              << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
               << "Size:            " << sizeInBytes() / 1024 << "KB" << std::endl
               << "Done!" << std::endl;
 
@@ -907,7 +907,7 @@ bool BVH::intersectF(const Ray& r, Intersection& intersection, float& nNodeHitsN
         }
     }
 
-    nNodeHitsNormalized /= nNodes;
+    nNodeHitsNormalized /= (float)nNodes;
     // if (leafhit)
     //	nNodeHitsNormalized = 1.f;
     return hit;

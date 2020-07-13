@@ -22,6 +22,11 @@ build:linux --copt=-Werror
 build:linux --copt=-Wall
 build:linux --copt=-Wpedantic
 build:linux --copt=-Wextra
+build:linux --copt=-Wconversion
+build:linux --copt=-Wfloat-conversion
+#build:linux --copt=-Wfloat-equal
+build:linux --copt=-Wsign-compare
+build:linuc --copt=-Wshadow
 build:linux --copt=-Wno-deprecated-declarations
 build:linux --copt=-fdiagnostics-color=always
 build:linux --per_file_copt=third-party/.*@-w

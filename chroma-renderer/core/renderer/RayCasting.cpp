@@ -67,7 +67,7 @@ Color RayCasting::calcColor(Intersection& is)
 
 float RayCasting::getProgress()
 {
-    return (donePixelCount * invPixelCount);
+    return ((float)donePixelCount * invPixelCount);
 }
 
 bool RayCasting::isRunning()
