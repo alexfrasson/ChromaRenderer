@@ -494,7 +494,7 @@ bool ChromaGui::RenderGui(GLFWwindow* window, ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
-    currentFrameTimeIndex = (currentFrameTimeIndex + 1) % frameTimes.size();
+    currentFrameTimeIndex = (currentFrameTimeIndex + 1) % (int)frameTimes.size();
     frameTimes[currentFrameTimeIndex] = ImGui::GetIO().DeltaTime * 1000.0f;
 
     MainMenu(window, cr);

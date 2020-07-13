@@ -311,7 +311,7 @@ bool KDTree::build(std::vector<Object>& objects)
 
     printInfo();
 
-    std::cout << "Building time:   " << stopwatch.elapsedMillis.count() / 1000.0 << "s" << std::endl
+    std::cout << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
               << "Done!" << std::endl;
 
     return true;
@@ -915,7 +915,7 @@ float KDTree::sah(KDTNode* node)
 {
     if (node->isLeaf)
         // return (node->triangles.size() * KI);
-        return (node->leafPayload.nTris * KI);
+        return ((float)node->leafPayload.nTris * KI);
 
     return (KT + sah(node->interiorPayload.children[0]) + sah(node->interiorPayload.children[1]));
 }
@@ -991,12 +991,12 @@ float KDTree::cost(const float probabilityL,
     if (triangleCountL == 0 || triangleCountR == 0)
         bonus *= emptySpaceBonus;
 
-    return (KT + KI * (probabilityL * triangleCountL + probabilityR * triangleCountR)) * bonus;
+    return (KT + KI * (probabilityL * (float)triangleCountL + probabilityR * (float)triangleCountR)) * bonus;
 }
 float KDTree::cost(const int triangleCount)
 {
     // Leaf cost
-    return KI * triangleCount;
+    return KI * (float)triangleCount;
 }
 bool intersectLineSegmentPlaneD(const glm::dvec3& planeP,
                                 const glm::dvec3& planeN,

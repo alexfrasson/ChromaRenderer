@@ -40,8 +40,8 @@ void PostProcessor::process(const Camera& cam, const Image& src, const Image& ds
 
     CHECK_OPENGL_ERROR
 
-    int nGroupsX = static_cast<int>(ceilf(src.getWidth() / 16.0f));
-    int nGroupsY = static_cast<int>(ceilf(src.getHeight() / 16.0f));
+    int nGroupsX = static_cast<int>(ceilf((float)src.getWidth() / 16.0f));
+    int nGroupsY = static_cast<int>(ceilf((float)src.getHeight() / 16.0f));
 
     glDispatchCompute(nGroupsX, nGroupsY, 1);
 

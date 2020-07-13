@@ -53,12 +53,7 @@ class Color
         b /= rhs;
     }
 
-    Color operator/(float& f) const
-    {
-        return Color(r / f, g / f, b / f);
-    }
-
-    Color operator/(int f) const
+    Color operator/(const float& f) const
     {
         return Color(r / f, g / f, b / f);
     }

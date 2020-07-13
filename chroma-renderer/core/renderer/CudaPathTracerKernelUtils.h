@@ -16,7 +16,7 @@ __host__ __device__ int binarySearch(const float* cdf, const int cdf_size, const
     int index = -1;
     while (start < end)
     {
-        index = static_cast<int>(floorf((start + end) / 2.0f));
+        index = static_cast<int>(floorf(((float)start + (float)end) / 2.0f));
 
         if (rand_var >= cdf[index - 1] && rand_var <= cdf[index])
         {
@@ -38,7 +38,7 @@ __host__ __device__ int binarySearch(const float* cdf, const int cdf_size, const
 __device__ glm::mat3 basis(glm::vec3 normal)
 {
     glm::vec3 binormal;
-    if (abs(normal.x) > abs(normal.z))
+    if (std::abs(normal.x) > std::abs(normal.z))
     {
         binormal = glm::vec3(-normal.y, normal.x, 0.0f);
     }
@@ -122,7 +122,7 @@ __device__ float uniformSampleCosineWeightedHemispherePdf(const glm::vec3& n, co
     {
         return 0.0f;
     }
-    return abs(glm::dot(n, wi)) * glm::one_over_pi<float>();
+    return std::abs(glm::dot(n, wi)) * glm::one_over_pi<float>();
 }
 
 __device__ SampleDirection uniformSampleCosineWeightedHemisphere(const float rand0,
@@ -166,8 +166,8 @@ rayDirectionWithOffset(const int i, const int j, const CudaCamera cam, const flo
     ray.mint = 0;
     ray.maxt = FLT_MAX;
     ray.origin = cam.eye;
-    ray.direction = glm::normalize((float)(i + rand0 - cam.width * 0.5f) * cam.right +
-                                   (float)(j + rand1 - cam.height * 0.5f) * cam.up + cam.d * cam.forward);
+    ray.direction = glm::normalize(((float)i + rand0 - (float)cam.width * 0.5f) * cam.right +
+                                   ((float)j + rand1 - (float)cam.height * 0.5f) * cam.up + cam.d * cam.forward);
     return ray;
 }
 
@@ -200,8 +200,8 @@ __host__ __device__ CudaRay rayDirection(const int i, const int j, const CudaCam
     ray.mint = 0;
     ray.maxt = FLT_MAX;
     ray.origin = cam.eye;
-    ray.direction =
-        (float)(i - cam.width / 2.0f) * cam.right + (float)(j - cam.height / 2.0f) * cam.up + cam.d * cam.forward;
+    ray.direction = ((float)i - (float)cam.width / 2.0f) * cam.right + ((float)j - (float)cam.height / 2.0f) * cam.up +
+                    cam.d * cam.forward;
     ray.direction = glm::normalize(ray.direction);
     return ray;
 }

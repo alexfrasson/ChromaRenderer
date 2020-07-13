@@ -426,7 +426,7 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
     SAFE_CUDA_FREE(enviromentSettings.cdf);
     SAFE_CUDA_FREE(enviromentSettings.pdf);
 
-    unsigned int size = hdriEnvWidth * hdriEnvHeight * channels * sizeof(float);
+    unsigned long size = hdriEnvWidth * hdriEnvHeight * channels * sizeof(float);
 
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
 
@@ -621,7 +621,8 @@ float CudaPathTracer::Impl::getProgress() const
 
 float CudaPathTracer::Impl::getInstantRaysPerSec() const
 {
-    return (registeredImage.width * (float)registeredImage.height) / (lastIterationElapsedMillis.count() * 0.001f);
+    return ((float)registeredImage.width * (float)registeredImage.height) /
+           ((float)lastIterationElapsedMillis.count() * 0.001f);
 }
 
 std::uint32_t CudaPathTracer::Impl::getFinishedSamples() const

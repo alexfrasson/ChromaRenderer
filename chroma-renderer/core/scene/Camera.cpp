@@ -8,7 +8,7 @@
 
 Camera::Camera(void)
     : width(1017), height(720), eye(-3, 2, 10), up(0, 1, 0), right(1, 0, 0), forward(0, 0, 1), m_HorizontalFOV(1.0f),
-      aspectRatio(width / static_cast<float>(height)), d(((float)width / 2.0f) / tan(m_HorizontalFOV / 2.0f))
+      aspectRatio((float)width / static_cast<float>(height)), d(((float)width / 2.0f) / tanf(m_HorizontalFOV / 2.0f))
 {
     // computeUVW();
 
@@ -20,10 +20,10 @@ Camera::~Camera(void)
 
 void Camera::setSize(int pwidth, int pheight)
 {
-    aspectRatio = pwidth / static_cast<float>(pheight);
+    aspectRatio = (float)pwidth / static_cast<float>(pheight);
     width = pwidth;
     height = pheight;
-    d = ((float)pwidth / 2.0f) / tan(m_HorizontalFOV / 2.0f);
+    d = ((float)pwidth / 2.0f) / tanf(m_HorizontalFOV / 2.0f);
 }
 void Camera::lookAt(glm::vec3 target)
 {
@@ -51,7 +51,8 @@ void Camera::lookAt(glm::vec3 target)
 void Camera::rayDirection(const int i, const int j, Ray& ray) const
 {
     ray.origin = eye;
-    ray.direction = (float)(i - width / 2.0f) * right + (float)(j - height / 2.0f) * up - d * forward;
+    ray.direction =
+        (float)((float)i - (float)width / 2.0f) * right + (float)((float)j - (float)height / 2.0f) * up - d * forward;
     ray.direction = glm::normalize(ray.direction);
 }
 void Camera::randomRayDirection(const int i, const int j, Ray& ray) const
@@ -69,11 +70,11 @@ void Camera::randomRayDirection(const int i, const int j, Ray& ray) const
 
     std::mt19937_64 mersenne;
 
-    double random0 = (double)mersenne() / (double)mersenne.max();
-    double random1 = (double)mersenne() / (double)mersenne.max();
+    float random0 = (float)mersenne() / (float)mersenne.max();
+    float random1 = (float)mersenne() / (float)mersenne.max();
 
-    ray.direction = glm::normalize((float)(i + random0 - width * 0.5f) * right +
-                                   (float)(j + random1 - height * 0.5f) * up - d * forward);
+    ray.direction = glm::normalize((float)((float)i + random0 - (float)width * 0.5f) * right +
+                                   (float)((float)j + random1 - (float)height * 0.5f) * up - d * forward);
 
     // if (halton_step_get() > 2000)
     //	halton_step_set(0);
@@ -97,8 +98,8 @@ void Camera::rayDirection(const int i, const int j, std::vector<Ray>& rays) cons
             ray.direction = glm::normalize(ray.direction);
             rays.push_back(ray);*/
             rays.emplace_back(eye,
-                              glm::normalize((float)(i + l - width * 0.5f) * right +
-                                             (float)(j + k - height * 0.5f) * up - d * forward));
+                              glm::normalize((float)((float)i + l - (float)width * 0.5f) * right +
+                                             (float)((float)j + k - (float)height * 0.5f) * up - d * forward));
         }
     }
 }
@@ -117,8 +118,8 @@ void Camera::rayDirection(const int i, const int j, std::vector<Ray>& rays, cons
         for (float l = -0.5f; l < 0.49999f; l += step)
         {
             rays.emplace_back(eye,
-                              glm::normalize((float)(i + l - width * 0.5f) * right +
-                                             (float)(j + k - height * 0.5f) * up - d * forward));
+                              glm::normalize((float)((float)i + l - (float)width * 0.5f) * right +
+                                             (float)((float)j + k - (float)height * 0.5f) * up - d * forward));
             count++;
             if (count >= nRays)
                 return;
@@ -135,8 +136,8 @@ void Camera::fit(const BoundingBox& bb)
     // return;
 
     // !Not times two! The fov is actually times two :)
-    float verticalfov = atan2(height * .5f, d);
-    float horizontalfov = atan2(width * .5f, d);
+    float verticalfov = atan2f((float)height * 0.5f, d);
+    float horizontalfov = atan2f((float)width * 0.5f, d);
 
     glm::vec3 v[8];
     v[0] = bb.max;
@@ -159,7 +160,7 @@ void Camera::fit(const BoundingBox& bb)
         do
         {
             vectov = v[i] - eye;
-            angle = acos(glm::dot(forward, vectov));
+            angle = acosf(glm::dot(forward, vectov));
             // Back the eye
             eye += forward * step;
         } while (angle >= verticalfov || angle >= horizontalfov);
@@ -167,5 +168,5 @@ void Camera::fit(const BoundingBox& bb)
 }
 float Camera::fov()
 {
-    return 2 * atan2(height * .5f, d);
+    return 2 * atan2f((float)height * 0.5f, d);
 }

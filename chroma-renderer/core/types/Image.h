@@ -32,7 +32,7 @@ class Image
     void setData(const float* data, const uint32_t width, const uint32_t height, const unsigned short components = 4);
     float getAspectRatio() const
     {
-        return (float)width / height;
+        return (float)width / (float)height;
     }
     inline unsigned int mapPosToArray(int i, int j)
     {
