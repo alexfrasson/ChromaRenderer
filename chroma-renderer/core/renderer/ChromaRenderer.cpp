@@ -1,43 +1,172 @@
 #include "chroma-renderer/core/renderer/ChromaRenderer.h"
+#include "chroma-renderer/core/renderer/CudaPathTracer.h"
+#include "chroma-renderer/core/renderer/PathTracing.h"
+#include "chroma-renderer/core/renderer/PostProcessor.h"
+#include "chroma-renderer/core/renderer/RayCasting.h"
+#include "chroma-renderer/core/renderer/RendererSettings.h"
 #include "chroma-renderer/core/scene/ModelImporter.h"
+#include "chroma-renderer/core/scene/Scene.h"
 #include "chroma-renderer/core/space-partition/BVH.h"
+#include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
+#include "chroma-renderer/core/types/Image.h"
+#include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/types/environment_map.h"
 #include "chroma-renderer/core/utility/Config.h"
 #include "chroma-renderer/core/utility/RTUtils.h"
+#include "chroma-renderer/core/utility/Stopwatch.h"
+#include "chroma-renderer/core/utility/ThreadPool.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
+#include <atomic>
+#include <cstdint>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <stb_image.h>
+#include <string>
+#include <thread>
 
-#define TILESIZE 64
+class ChromaRenderer::Impl
+{
+  public:
+    Impl();
+    ~Impl();
 
-ChromaRenderer::ChromaRenderer() : state(State::IDLE)
+    State getState();
+    bool isRunning();
+    void stopRender();
+    void importScene(const std::string& filename);
+    void importEnviromentMap(const std::string& filename);
+    void startRender();
+    RendererSettings getSettings();
+    void setSettings(const RendererSettings& settings);
+    void setPostProcessingSettings(const ChromaRenderer::PostProcessingSettings& settings);
+    ChromaRenderer::PostProcessingSettings getPostProcessingSettings();
+    Scene& getScene();
+    Image& getTarget();
+    void update();
+    Progress getProgress();
+    void updateMaterials();
+
+  private:
+    enum RendererType
+    {
+        RAYCAST,
+        PATHTRACE,
+        CUDAPATHTRACE
+    };
+
+    void setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels);
+    void saveLog();
+    void setSize(unsigned int width, unsigned int height);
+    void genTasks();
+    bool isIdle();
+    void cbSceneLoadedScene();
+
+    RendererType rendererType = RendererType::CUDAPATHTRACE;
+    RendererSettings settings;
+    Scene scene;
+    State state;
+    RayCasting renderer;
+    PathTracing pathtracing;
+    CudaPathTracer cudaPathTracer;
+    PostProcessor post_processor;
+    Stopwatch stopwatch;
+    Image renderer_target;
+    Image final_target;
+    Image env_map;
+    ThreadPool threadPool;
+    bool running = false;
+    float invPixelCount;
+    int pixelCount;
+    std::unique_ptr<ISpacePartitioningStructure> sps;
+};
+
+ChromaRenderer::Impl::Impl() : state(State::IDLE)
 {
     setSettings(settings);
 }
-ChromaRenderer::~ChromaRenderer()
+
+ChromaRenderer::Impl::~Impl()
 {
-    // Need to stop all workers before releasing memory (especially the image object).
     threadPool.abort();
 }
-void ChromaRenderer::genTasks()
+
+void ChromaRenderer::Impl::updateMaterials()
+{
+    cudaPathTracer.setMaterials(scene.materials);
+}
+
+void ChromaRenderer::Impl::setPostProcessingSettings(const ChromaRenderer::PostProcessingSettings& settings)
+{
+    post_processor.adjustExposure = settings.adjust_exposure;
+    post_processor.linearToSrbg = settings.linear_to_srgb;
+    post_processor.tonemapping = settings.tonemapping;
+}
+
+ChromaRenderer::PostProcessingSettings ChromaRenderer::Impl::getPostProcessingSettings()
+{
+    ChromaRenderer::PostProcessingSettings settings;
+    settings.adjust_exposure = post_processor.adjustExposure;
+    settings.linear_to_srgb = post_processor.linearToSrbg;
+    settings.tonemapping = post_processor.tonemapping;
+    return settings;
+}
+
+ChromaRenderer::Progress ChromaRenderer::Impl::getProgress()
+{
+    Progress progress;
+    progress.progress = cudaPathTracer.getProgress();
+    progress.instant_rays_per_sec = cudaPathTracer.getInstantRaysPerSec();
+    progress.finished_samples = cudaPathTracer.getFinishedSamples();
+    progress.target_samples_per_pixel = cudaPathTracer.getTargetSamplesPerPixel();
+    return progress;
+}
+
+Scene& ChromaRenderer::Impl::getScene()
+{
+    return scene;
+}
+
+Image& ChromaRenderer::Impl::getTarget()
+{
+    return final_target;
+}
+
+bool ChromaRenderer::Impl::isIdle()
+{
+    if (state == State::RENDERING && !isRunning())
+        state = State::IDLE;
+    return (state == State::IDLE);
+}
+
+ChromaRenderer::State ChromaRenderer::Impl::getState()
+{
+    if (state == ChromaRenderer::RENDERING)
+    {
+        if (!isRunning())
+            state = ChromaRenderer::IDLE;
+    }
+    /*if (state == ChromaRenderer::PROCESSINGSCENE)
+    {
+        if (scene.ready)
+            state = ChromaRenderer::IDLE;
+    }*/
+    return state;
+}
+
+void ChromaRenderer::Impl::genTasks()
 {
     const unsigned int width = scene.camera.width;
     const unsigned int height = scene.camera.height;
 
-    // Divide the screen in squared tiles of approximately TILESIZE pixels wide
-    const int widthDivs = (int)floor(width / TILESIZE);
-    const int heightDivs = (int)floor(height / TILESIZE);
+    constexpr int tile_size = 64;
+    const int widthDivs = (int)floor(width / tile_size);
+    const int heightDivs = (int)floor(height / tile_size);
 
     const int widthStep = static_cast<int>(std::ceil((float)width / (float)widthDivs));
     const int heightStep = static_cast<int>(std::ceil((float)height / (float)heightDivs));
 
-    // Put all tiles in the queue
-    // std::vector<Interval> tasks;
-    // tasks.clear();
     for (int i = 0; i < widthDivs; i++)
     {
         Interval interval;
@@ -67,7 +196,7 @@ void ChromaRenderer::genTasks()
             }
             switch (rendererType)
             {
-            case ChromaRenderer::RAYCAST:
+            case ChromaRenderer::Impl::RAYCAST:
                 threadPool.enqueue(std::bind(&RayCasting::trace,
                                              std::ref(renderer),
                                              sps.get(),
@@ -77,7 +206,7 @@ void ChromaRenderer::genTasks()
                                              interval,
                                              std::placeholders::_1));
                 break;
-            case ChromaRenderer::PATHTRACE:
+            case ChromaRenderer::Impl::PATHTRACE:
                 threadPool.enqueue(std::bind(&PathTracing::trace,
                                              std::ref(pathtracing),
                                              sps.get(),
@@ -91,18 +220,16 @@ void ChromaRenderer::genTasks()
             }
         }
     }
-
-    // std::random_shuffle(tasks.begin(), tasks.end());
 }
 
-void ChromaRenderer::setSize(unsigned int width, unsigned int height)
+void ChromaRenderer::Impl::setSize(unsigned int width, unsigned int height)
 {
     renderer_target.setSize(width, height);
     final_target.setSize(width, height);
     scene.camera.setSize(width, height);
-    // scene.camera.computeUVW();
 }
-void ChromaRenderer::setSettings(RendererSettings& psettings)
+
+void ChromaRenderer::Impl::setSettings(const RendererSettings& psettings)
 {
     settings = psettings;
     scene.camera.horizontalFOV(settings.horizontalFOV);
@@ -113,205 +240,84 @@ void ChromaRenderer::setSettings(RendererSettings& psettings)
     pathtracing.setSettings(settings);
     cudaPathTracer.setSettings(settings);
 }
-RendererSettings ChromaRenderer::getSettings()
+
+RendererSettings ChromaRenderer::Impl::getSettings()
 {
     return settings;
 }
-void ChromaRenderer::startRender()
-{
-    start();
-}
-void ChromaRenderer::startRender(RendererSettings& psettings)
-{
-    setSettings(psettings);
-    start();
-}
-void ChromaRenderer::start()
+
+void ChromaRenderer::Impl::startRender()
 {
     if (!isIdle())
+    {
         return;
+    }
 
-    // <Init>
     threadPool.clearTaskQueue();
     renderer_target.clear();
     final_target.clear();
 
     switch (rendererType)
     {
-    case ChromaRenderer::RAYCAST:
+    case ChromaRenderer::Impl::RAYCAST:
         renderer.init();
         break;
-    case ChromaRenderer::PATHTRACE:
+    case ChromaRenderer::Impl::PATHTRACE:
         pathtracing.init();
         break;
-    case ChromaRenderer::CUDAPATHTRACE:
+    case ChromaRenderer::Impl::CUDAPATHTRACE:
         cudaPathTracer.setTargetImage(renderer_target);
         cudaPathTracer.setCamera(scene.camera);
         break;
     }
-    // </Init>
 
     stopwatch.restart();
 
     switch (rendererType)
     {
-    case ChromaRenderer::RAYCAST:
-    case ChromaRenderer::PATHTRACE:
+    case ChromaRenderer::Impl::RAYCAST:
+    case ChromaRenderer::Impl::PATHTRACE:
         genTasks();
         break;
-    case ChromaRenderer::CUDAPATHTRACE:
-        // threadPool.enqueue(std::bind(&CudaPathTracer::renderThread, std::ref(cudaPathTracer), std::ref(image),
-        // std::placeholders::_1));
+    case ChromaRenderer::Impl::CUDAPATHTRACE:
         break;
     }
 
     state = State::RENDERING;
     running = true;
 }
-void ChromaRenderer::stopRender(bool /*block*/)
+
+void ChromaRenderer::Impl::stopRender()
 {
     threadPool.clearTaskQueue();
     running = false;
     state = State::IDLE;
 }
 
-void ChromaRenderer::importScene(std::string filename)
-{
-    importScene(filename, []() {});
-}
-
-void ChromaRenderer::importScene(std::string filename, std::function<void()> onLoad)
+void ChromaRenderer::Impl::importScene(const std::string& filename)
 {
     if (!isIdle())
+    {
         return;
-    /*scene.clear();
-    Object o;
-    ModelImporter::import(filename, o);
-    scene.addObject(o);*/
-
-    /*Mesh m;
-    Object o;
-
-    ModelImporter::import(filename, m);
-    ModelImporter::import(filename, o);
-
-    if (m.t.size() != o.f.size())
-        std::cout << "Different sizes" << std::endl;
-
-    for (int i = 0; i < m.t.size(); i++)
-    {
-        for (size_t j = 0; j < 3; j++)
-        {
-            if (m.t[i].getVertex(j)->x != o.f[i].v[j].x
-                || m.t[i].getVertex(j)->y != o.f[i].v[j].y
-                || m.t[i].getVertex(j)->z != o.f[i].v[j].z)
-                std::cout << "Different vertex" << std::endl;
-        }
     }
-
-    // Compute each triangle's bbox, it's centroid and the bbox of all triangles and of all centroids
-    std::vector<BVHPrimitiveInfo> mPrim;
-    mPrim.reserve(m.t.size());
-    for (int i = 0; i < m.t.size(); i++)
-    {
-        BoundingBox bb;
-        bb = BoundingBox();
-        for (int dim = 0; dim < 3; dim++)
-            bb.expand(*m.t[i].getVertex(dim));
-        mPrim.emplace_back(bb, i);
-    }
-    // Compute each triangle's bbox, it's centroid and the bbox of all triangles and of all centroids
-    std::vector<BVHPrimitiveInfo> oPrim;
-    oPrim.reserve(m.t.size());
-    for (int i = 0; i < m.t.size(); i++)
-    {
-        BoundingBox bb;
-        bb = BoundingBox();
-        for (int dim = 0; dim < 3; dim++)
-            bb.expand(*m.t[i].getVertex(dim));
-        oPrim.emplace_back(bb, i);
-    }
-
-
-    if (mPrim.size() != oPrim.size())
-        std::cout << "Different sizes" << std::endl;
-
-    for (int i = 0; i < mPrim.size(); i++)
-    {
-        if (mPrim[i].index != oPrim[i].index)
-            std::cout << "Different index" << std::endl;
-        if (mPrim[i].centroid.x != oPrim[i].centroid.x
-            || mPrim[i].centroid.y != oPrim[i].centroid.y
-            || mPrim[i].centroid.z != oPrim[i].centroid.z)
-            std::cout << "Different centroid" << std::endl;
-
-        if (mPrim[i].bbox.max.x != oPrim[i].bbox.max.x
-            || mPrim[i].bbox.max.y != oPrim[i].bbox.max.y
-            || mPrim[i].bbox.max.z != oPrim[i].bbox.max.z)
-            std::cout << "Different bbox max" << std::endl;
-
-        if (mPrim[i].bbox.min.x != oPrim[i].bbox.min.x
-            || mPrim[i].bbox.min.y != oPrim[i].bbox.min.y
-            || mPrim[i].bbox.min.z != oPrim[i].bbox.min.z)
-            std::cout << "Different bbox min" << std::endl;
-    }
-
-    std::cout << "DUDE!" << std::endl;
-    std::cin.get();
-
-    return;*/
-
-    /*Mesh m;
-    Object o;
-
-    ModelImporter::import(filename, m);
-    ModelImporter::import(filename, o);
-
-    std::cout << "uint32_t size:                " << sizeof(uint32_t) << std::endl;
-    std::cout << "std::vector<glm::vec3>* size: " << sizeof(std::vector<glm::vec3>*) << std::endl;
-    std::cout << "glm::vec3 size:               " << sizeof(glm::vec3) << std::endl;
-    std::cout << "Triangle size:                " << sizeof(Triangle) << std::endl;
-    std::cout << "Face size:                    " << sizeof(Face) << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "Object total size " << o.sizeInBytes() / 1024 << "KB" << std::endl;
-    std::cout << "    Faces         " << (sizeof(Face) * o.f.size()) / 1024 << "KB" << "   #" << o.f.size() <<
-    std::endl; std::cout << std::endl;
-
-    std::cout << "Mesh   total size " << m.sizeInBytes() / 1024 << "KB" << std::endl;
-    std::cout << "    Triangles     " << (sizeof(Triangle) * m.t.size()) / 1024 << "KB" << "   #" << m.t.size() <<
-    std::endl; std::cout << "    Vertices      " << (sizeof(glm::vec3) * m.v.size()) / 1024 << "KB" << "   #" <<
-    m.v.size() << std::endl; std::cout << "    Normals       " << (sizeof(glm::vec3) * m.n.size()) / 1024 << "KB" << "
-    #" << m.n.size() << std::endl;
-
-    std::cin.get();*/
 
     state = State::LOADINGSCENE;
-    // threadPool.enqueue(
-    //	std::bind(&ModelImporter::importcbm, filename,
-    //	static_cast<std::function<void(Mesh*)>>(std::bind(&ChromaRenderer::cbSceneLoadedm, std::ref(*this),
-    // std::placeholders::_1)))
-    //	);
-
-    // threadPool.enqueue(
-    //	std::bind(&ModelImporter::importcbscene, filename, std::ref(scene),
-    //	static_cast<std::function<void()>>(std::bind(&ChromaRenderer::cbSceneLoadedScene, std::ref(*this), onLoad)))
-    //	);
-
-    // TODO: load scene asynchronously but only initialize cudaPathTracer (see cbSceneLoadedScene) on the main thread.
     ModelImporter::importcbscene(
         filename,
         scene,
-        static_cast<std::function<void()>>(std::bind(&ChromaRenderer::cbSceneLoadedScene, std::ref(*this), onLoad)));
+        static_cast<std::function<void()>>(std::bind(&ChromaRenderer::Impl::cbSceneLoadedScene, std::ref(*this))));
 }
 
-void ChromaRenderer::setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels)
+void ChromaRenderer::Impl::setEnvMap(const float* data,
+                                     const uint32_t width,
+                                     const uint32_t height,
+                                     const uint32_t channels)
 {
     cudaPathTracer.setEnvMap(data, width, height, channels);
     env_map.setData(data, width, height);
 }
 
-void ChromaRenderer::importEnviromentMap(std::string filename)
+void ChromaRenderer::Impl::importEnviromentMap(const std::string& filename)
 {
     const uint32_t requested_channels = 4;
     float* data = nullptr;
@@ -319,7 +325,9 @@ void ChromaRenderer::importEnviromentMap(std::string filename)
     data = stbi_loadf(filename.c_str(), &width, &height, &channels, requested_channels);
 
     if (data == nullptr)
+    {
         std::cout << "Could not load hdri!" << std::endl;
+    }
 
     std::cout << "Width: " << width << " Height: " << height << " Channels: " << channels << std::endl;
 
@@ -328,7 +336,7 @@ void ChromaRenderer::importEnviromentMap(std::string filename)
     stbi_image_free(data);
 }
 
-void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
+void ChromaRenderer::Impl::cbSceneLoadedScene()
 {
     state = State::PROCESSINGSCENE;
     sps = std::make_unique<BVH>();
@@ -345,55 +353,19 @@ void ChromaRenderer::cbSceneLoadedScene(std::function<void()> onLoad)
     cudaPathTracer.setCamera(scene.camera);
 
     state = State::IDLE;
-    onLoad();
 }
 
-// void ChromaRenderer::cbSceneLoadedm(Mesh* m)
-// {
-//     std::cout << "Mesh   total size " << m->sizeInBytes() / 1024 << "KB" << std::endl;
-//     std::cout << "    Triangles     " << (sizeof(Triangle) * m->t.size()) / 1024 << "KB"
-//               << "   #" << m->t.size() << std::endl;
-//     std::cout << "    Vertices      " << (sizeof(glm::vec3) * m->v.size()) / 1024 << "KB"
-//               << "   #" << m->v.size() << std::endl;
-//     std::cout << "    Normals       " << (sizeof(glm::vec3) * m->n.size()) / 1024 << "KB"
-//               << "   #" << m->n.size() << std::endl;
-
-//     scene.clear();
-//     threadPool.enqueue(std::bind(
-//         static_cast<void (Scene::*)(Mesh*, std::function<void(void)>)>(&Scene::addMesh),
-//         std::ref(scene),
-//         m,
-//         static_cast<std::function<void(void)>>(std::bind(&ChromaRenderer::cbSceneProcessed, std::ref(*this)))));
-//     state = State::PROCESSINGSCENE;
-// }
-
-// void ChromaRenderer::cbSceneLoaded(Object o)
-// {
-//     scene.clear();
-//     threadPool.enqueue(std::bind(
-//         static_cast<void (Scene::*)(Object, std::function<void(void)>)>(&Scene::addObject),
-//         std::ref(scene),
-//         o,
-//         static_cast<std::function<void(void)>>(std::bind(&ChromaRenderer::cbSceneProcessed, std::ref(*this)))));
-//     state = State::PROCESSINGSCENE;
-// }
-
-void ChromaRenderer::cbSceneProcessed()
-{
-    state = State::IDLE;
-}
-
-void ChromaRenderer::update()
+void ChromaRenderer::Impl::update()
 {
     if (state == State::RENDERING)
     {
         switch (rendererType)
         {
-        case ChromaRenderer::RAYCAST:
+        case ChromaRenderer::Impl::RAYCAST:
             break;
-        case ChromaRenderer::PATHTRACE:
+        case ChromaRenderer::Impl::PATHTRACE:
             break;
-        case ChromaRenderer::CUDAPATHTRACE:
+        case ChromaRenderer::Impl::CUDAPATHTRACE:
             cudaPathTracer.render();
             post_processor.process(scene.camera, renderer_target, final_target, true);
             if (cudaPathTracer.getProgress() >= 1.0f)
@@ -406,19 +378,19 @@ void ChromaRenderer::update()
     }
 }
 
-bool ChromaRenderer::isRunning()
+bool ChromaRenderer::Impl::isRunning()
 {
     if (running)
     {
         switch (rendererType)
         {
-        case ChromaRenderer::RAYCAST:
+        case ChromaRenderer::Impl::RAYCAST:
             running = renderer.donePixelCount < pixelCount;
             break;
-        case ChromaRenderer::PATHTRACE:
+        case ChromaRenderer::Impl::PATHTRACE:
             running = pathtracing.donePixelCount < pixelCount;
             break;
-        case ChromaRenderer::CUDAPATHTRACE:
+        case ChromaRenderer::Impl::CUDAPATHTRACE:
             running = cudaPathTracer.getFinishedSamples() < cudaPathTracer.getTargetSamplesPerPixel();
             break;
         default:
@@ -428,166 +400,88 @@ bool ChromaRenderer::isRunning()
         if (!running)
         {
             stopwatch.stop();
-            printStatistics();
         }
     }
     return running;
 }
-float ChromaRenderer::getProgress()
-{
-    if (state == State::RENDERING)
-    {
-        switch (rendererType)
-        {
-        case ChromaRenderer::RAYCAST:
-            return ((float)renderer.donePixelCount * invPixelCount);
-            break;
-        case ChromaRenderer::PATHTRACE:
-            return ((float)pathtracing.donePixelCount * invPixelCount);
-            break;
-        case ChromaRenderer::CUDAPATHTRACE:
-            return cudaPathTracer.getProgress();
-            break;
-        default:
-            return 1.0f;
-            break;
-        }
-    }
 
-    return 0.0f;
-}
-void ChromaRenderer::clearScene()
+ChromaRenderer::ChromaRenderer() : impl_{std::make_unique<ChromaRenderer::Impl>()}
 {
-    if (!isIdle())
-        return;
-    scene.clear();
 }
 
-const std::string currentDateTime() // Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+ChromaRenderer::~ChromaRenderer() = default;
+
+ChromaRenderer::State ChromaRenderer::getState()
 {
-    time_t now = time(0);
-    struct tm tstruct;
-    char buf[80];
-    tstruct = *localtime(&now);
-    // for more information about date/time format
-    strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S", &tstruct);
-
-    return buf;
-}
-void ChromaRenderer::saveLog()
-{
-    /*std::ofstream file;
-    std::string name("logs\\log-");
-    name.append(currentDateTime());
-    name.append(".txt");
-    std::cout<<name<<std::endl;
-    file.open(name.c_str());
-
-    file.precision(6);
-    file<<std::fixed;
-
-    //write config
-    //file<<"Width: "<<WIDTH<<std::endl;
-    //file<<"Height: "<<HEIGHT<<std::endl;
-    //file<<"Number of threads: "<<NUM_THREADS<<std::endl;
-    //file<<"Pixels per tile: "<<PIXELSPERTILE<<std::endl;
-    file<<"Scene triangle count: "<<scene.triangleCount()<<std::endl;
-    #ifdef SUPERSAMPLING
-    file<<"Supersampling: true"<<std::endl;
-    #else
-    file<<"Supersampling: false"<<std::endl;
-    #endif
-    #ifdef SHADOWRAY
-    file<<"Shadow rays: true"<<std::endl;
-    #else
-    file<<"Shadow rays: false"<<std::endl;
-    #endif
-    #ifdef BOUNDINGBOXTEST
-    file<<"Boundingbox: true"<<std::endl;
-    #else
-    file<<"Boundingbox: false"<<std::endl;
-    #endif
-    #ifdef SIMD
-    file<<"SIMD: true"<<std::endl;
-    #else
-    file<<"SIMD: false"<<std::endl;
-    #endif
-
-    file<<std::endl<<"ElapsedTime(s)    MillionRay-TriangleIntesections/s"<<std::endl;
-
-    if(renderer.log.size() > 0)
-    {
-        //long rayCount = HEIGHT*WIDTH;
-        long rayCount = 0;
-        //write the info
-        for(int i = TEST_WARMUPS; i < renderer.log.size(); i++)
-        {
-            file<<renderer.log[i].elapsedTime
-                <<"        "
-                <<(rayCount*(renderer.log[i].triangleCount/renderer.log[i].elapsedTime)/1000000)
-                <<std::endl;
-        }
-        //calc the average info
-        double averageElapsedTime = 0.0;
-        long averageTriangleCount = 0;
-        for(int i = TEST_WARMUPS; i < renderer.log.size(); i++)
-        {
-            averageElapsedTime += renderer.log[i].elapsedTime;
-            averageTriangleCount += renderer.log[i].triangleCount;
-        }
-        averageElapsedTime /= (renderer.log.size() - TEST_WARMUPS);
-        averageTriangleCount /= (renderer.log.size() - TEST_WARMUPS);
-        //write the average info
-        file<<std::endl
-            <<"Average"
-            <<std::endl
-            <<averageElapsedTime
-            <<"        "
-            <<(rayCount*(averageTriangleCount/averageElapsedTime)/1000000)
-            <<std::endl;
-    }
-    file.close();*/
+    return impl_->getState();
 }
 
-void ChromaRenderer::printStatistics()
+bool ChromaRenderer::isRunning()
 {
-    switch (rendererType)
-    {
-    case ChromaRenderer::RAYCAST: {
-        std::cout << std::endl
-                  << "Samples\\pixel:   " << settings.samplesperpixel << std::endl
-                  << "Samples\\s:       "
-                  << ((float)(settings.samplesperpixel * renderer.donePixelCount) /
-                      ((float)stopwatch.elapsedMillis.count() / 1000.0f)) /
-                         1000.0f
-                  << "K" << std::endl
-                  << "Rendering time:  " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
-                  << std::endl;
-    }
-    break;
-    case ChromaRenderer::PATHTRACE: {
-        std::cout << std::endl
-                  << "Samples\\pixel:   " << pathtracing.targetSamplesPerPixel << std::endl
-                  << "Samples\\s:       "
-                  << ((float)(pathtracing.targetSamplesPerPixel * pathtracing.donePixelCount) /
-                      ((float)stopwatch.elapsedMillis.count() / 1000.0f)) /
-                         1000.0f
-                  << "K" << std::endl
-                  << "Rendering time:  " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
-                  << std::endl;
-    }
-    break;
-    case ChromaRenderer::CUDAPATHTRACE:
-        std::cout << std::endl
-                  << "Samples\\pixel:   " << cudaPathTracer.getFinishedSamples() << std::endl
-                  << "Samples\\s:       "
-                  << (((float)cudaPathTracer.getFinishedSamples() * (float)renderer_target.getWidth() *
-                       (float)renderer_target.getHeight()) /
-                      ((float)stopwatch.elapsedMillis.count() / 1000.0f)) /
-                         1000.0f
-                  << "K" << std::endl
-                  << "Rendering time:  " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
-                  << std::endl;
-        break;
-    }
+    return impl_->isRunning();
+}
+
+void ChromaRenderer::update()
+{
+    impl_->update();
+}
+
+void ChromaRenderer::stopRender()
+{
+    impl_->stopRender();
+}
+
+void ChromaRenderer::importScene(const std::string& filename)
+{
+    impl_->importScene(filename);
+}
+
+void ChromaRenderer::importEnviromentMap(const std::string& filename)
+{
+    impl_->importEnviromentMap(filename);
+}
+
+void ChromaRenderer::startRender()
+{
+    impl_->startRender();
+}
+
+RendererSettings ChromaRenderer::getSettings()
+{
+    return impl_->getSettings();
+}
+
+void ChromaRenderer::setSettings(const RendererSettings& settings)
+{
+    impl_->setSettings(settings);
+}
+
+Scene& ChromaRenderer::getScene()
+{
+    return impl_->getScene();
+}
+
+Image& ChromaRenderer::getTarget()
+{
+    return impl_->getTarget();
+}
+
+ChromaRenderer::Progress ChromaRenderer::getProgress()
+{
+    return impl_->getProgress();
+}
+
+void ChromaRenderer::updateMaterials()
+{
+    impl_->updateMaterials();
+}
+
+void ChromaRenderer::setPostProcessingSettings(const ChromaRenderer::PostProcessingSettings& settings)
+{
+    impl_->setPostProcessingSettings(settings);
+}
+
+ChromaRenderer::PostProcessingSettings ChromaRenderer::getPostProcessingSettings()
+{
+    return impl_->getPostProcessingSettings();
 }

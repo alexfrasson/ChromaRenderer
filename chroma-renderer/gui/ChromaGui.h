@@ -2,18 +2,16 @@
 
 #include "chroma-renderer/core/renderer/ChromaRenderer.h"
 
-#include <GLFW/glfw3.h>
-
 class ChromaGui
 {
   public:
-    static void MainMenu(GLFWwindow* window, ChromaRenderer* cr);
+    static void MainMenu(ChromaRenderer* cr);
     static void DockSpace();
     static bool SettingsWindow(ChromaRenderer* cr);
     static bool ViewportWindow(ChromaRenderer* cr);
     static bool MaterialsWindow(ChromaRenderer* cr);
 
-    static bool RenderGui(GLFWwindow* window, ChromaRenderer* cr);
+    static bool RenderGui(ChromaRenderer* cr);
 
   private:
     ChromaGui() = delete;

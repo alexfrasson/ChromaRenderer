@@ -1,6 +1,7 @@
 #include "chroma-renderer/gui/ChromaGui.h"
 #include "chroma-renderer/gui/ChromaGUIUtils.h"
 
+#include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <nfd.h>
@@ -24,7 +25,7 @@ int currentFrameTimeIndex = 0;
 
 float movementSpeed = 30.0f;
 
-void ChromaGui::MainMenu(GLFWwindow* /*window*/, ChromaRenderer* cr)
+void ChromaGui::MainMenu(ChromaRenderer* cr)
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -184,99 +185,91 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
-    // ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_::ImGuiCond_Once);
     if (!ImGui::Begin("Material Editor"))
     {
         ImGui::End();
         return false;
     }
 
-    // ShowHelpMarker("This example shows how you may implement a property editor using two columns.\nAll objects/fields
-    // data are dummies here.\nRemember that in many simple cases, you can use ImGui::SameLine(xxx) to position\nyour
-    // cursor horizontally instead of using the Columns() API.");
-
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
     ImGui::Columns(2);
     ImGui::Separator();
 
-    struct funcs
-    {
-        static bool ShowDummyObject(Material& mat, int uid)
+    auto show_material = [](Material& mat) {
+        bool somethingChanged = false;
+
+        ImGui::PushID((void*)&mat);
+        ImGui::AlignTextToFramePadding();
+        const bool node_open = ImGui::TreeNodeEx(mat.name.c_str());
+
+        ImGui::NextColumn();
+        ImGui::AlignTextToFramePadding();
+
+        ImGui::NextColumn();
+        if (node_open)
         {
-            bool somethingChanged = false;
-
-            ImGui::PushID(
-                uid); // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
-            ImGui::AlignTextToFramePadding(); // Text and Tree nodes are less high than regular widgets, here we add
-                                              // vertical spacing to make the tree lines equal high.
-            bool node_open = ImGui::TreeNodeEx(mat.name.c_str());
-
-            ImGui::NextColumn();
+            ImGui::PushID(0);
             ImGui::AlignTextToFramePadding();
-            // ImGui::Text("my sailor is rich");
+            ImGui::TreeNodeEx("KD",
+                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                  ImGuiTreeNodeFlags_Bullet);
 
             ImGui::NextColumn();
-            if (node_open)
+            ImGui::PushItemWidth(-1);
+            if (ImGui::ColorEdit3("", &mat.kd.r))
             {
-                ImGui::PushID(0);
-                ImGui::AlignTextToFramePadding();
-                ImGui::TreeNodeEx("KD",
-                                  ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                      ImGuiTreeNodeFlags_Bullet);
-
-                ImGui::NextColumn();
-                ImGui::PushItemWidth(-1);
-                if (ImGui::ColorEdit3("", &mat.kd.r))
-                    somethingChanged = true;
-
-                ImGui::PopItemWidth();
-                ImGui::NextColumn();
-                ImGui::PopID();
-
-                ImGui::PushID(1);
-                ImGui::AlignTextToFramePadding();
-                ImGui::TreeNodeEx("KE",
-                                  ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                      ImGuiTreeNodeFlags_Bullet);
-
-                ImGui::NextColumn();
-                ImGui::PushItemWidth(-1);
-                if (ImGui::ColorEdit3("", &mat.ke.r))
-                    somethingChanged = true;
-
-                ImGui::PopItemWidth();
-                ImGui::NextColumn();
-                ImGui::PopID();
-
-                ImGui::PushID(2);
-                ImGui::AlignTextToFramePadding();
-                ImGui::TreeNodeEx("Transparency",
-                                  ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                      ImGuiTreeNodeFlags_Bullet);
-
-                ImGui::NextColumn();
-                ImGui::PushItemWidth(-1);
-                if (ImGui::ColorEdit3("", &mat.transparent.r))
-                    somethingChanged = true;
-
-                ImGui::PopItemWidth();
-                ImGui::NextColumn();
-                ImGui::PopID();
-
-                ImGui::TreePop();
+                somethingChanged = true;
             }
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
             ImGui::PopID();
 
-            return somethingChanged;
+            ImGui::PushID(1);
+            ImGui::AlignTextToFramePadding();
+            ImGui::TreeNodeEx("KE",
+                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                  ImGuiTreeNodeFlags_Bullet);
+
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(-1);
+            if (ImGui::ColorEdit3("", &mat.ke.r))
+            {
+                somethingChanged = true;
+            }
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+            ImGui::PopID();
+
+            ImGui::PushID(2);
+            ImGui::AlignTextToFramePadding();
+            ImGui::TreeNodeEx("Transparency",
+                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                  ImGuiTreeNodeFlags_Bullet);
+
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(-1);
+            if (ImGui::ColorEdit3("", &mat.transparent.r))
+            {
+                somethingChanged = true;
+            }
+
+            ImGui::PopItemWidth();
+            ImGui::NextColumn();
+            ImGui::PopID();
+
+            ImGui::TreePop();
         }
+        ImGui::PopID();
+
+        return somethingChanged;
     };
 
-    // Iterate dummy objects with dummy members (all the same data)
-    for (size_t i = 0; i < cr->scene.materials.size(); i++)
-        if (funcs::ShowDummyObject(cr->scene.materials[i], (int)i))
-            somethingChanged = true;
-    // for (int obj_i = 0; obj_i < 3; obj_i++)
-    //	funcs::ShowDummyObject("Object", obj_i);
+    for (Material& mat : cr->getScene().materials)
+    {
+        somethingChanged |= show_material(mat);
+    }
 
     ImGui::Columns(1);
     ImGui::Separator();
@@ -320,20 +313,25 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
                 ImGui::DragInt("Samples/pixel", &rs.samplesperpixel, 1, 1, 99999);
             }
 
+            Scene& scene = cr->getScene();
+
             float hfov = rs.horizontalFOV * RADTODEGREE;
             if (ImGui::DragFloat("HFov", &hfov, 1, 5, 360))
             {
                 rs.horizontalFOV = hfov * DEGREETORAD;
-                cr->scene.camera.horizontalFOV(rs.horizontalFOV);
+                scene.camera.horizontalFOV(rs.horizontalFOV);
                 somethingChanged = true;
             }
 
-            ImGui::DragFloat("Apperture", &cr->scene.camera.apperture, 0.01f, 0.0001f, 1000.0f);
-            ImGui::DragFloat("Shutter time", &cr->scene.camera.shutterTime, 0.01f, 0.0001f, 1000.0f);
-            ImGui::DragFloat("ISO", &cr->scene.camera.iso, 1.0f, 1.0f, 6000.0f);
-            ImGui::Checkbox("Adjust exposure", &cr->post_processor.adjustExposure);
-            ImGui::Checkbox("Tonemapping", &cr->post_processor.tonemapping);
-            ImGui::Checkbox("Linear to sRGB", &cr->post_processor.linearToSrbg);
+            ImGui::DragFloat("Apperture", &scene.camera.apperture, 0.01f, 0.0001f, 1000.0f);
+            ImGui::DragFloat("Shutter time", &scene.camera.shutterTime, 0.01f, 0.0001f, 1000.0f);
+            ImGui::DragFloat("ISO", &scene.camera.iso, 1.0f, 1.0f, 6000.0f);
+
+            ChromaRenderer::PostProcessingSettings settings = cr->getPostProcessingSettings();
+            ImGui::Checkbox("Adjust exposure", &settings.adjust_exposure);
+            ImGui::Checkbox("Tonemapping", &settings.tonemapping);
+            ImGui::Checkbox("Linear to sRGB", &settings.linear_to_srgb);
+            cr->setPostProcessingSettings(settings);
 
             ImGui::DragFloat("Movement Speed", &movementSpeed, 1.0f, 0.0f, 10000.0f);
 
@@ -350,13 +348,14 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
                 cr->stopRender();
             else
             {
-                cr->startRender(rs);
+                cr->setSettings(rs);
+                cr->startRender();
             }
         }
 
         if (ImGui::Button("Save"))
         {
-            saveImage("image.bmp", &cr->final_target);
+            saveImage("image.bmp", &cr->getTarget());
         }
     }
     ImGui::End();
@@ -405,12 +404,13 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
 
     ImGui::Begin("Viewport");
     {
-        ImGui::Text("%.3f MRays/sec", cr->cudaPathTracer.getInstantRaysPerSec() * 0.000001f);
+        ChromaRenderer::Progress progress = cr->getProgress();
+        ImGui::Text("%.3f MRays/sec", progress.instant_rays_per_sec * 0.000001f);
         ImGui::SameLine();
-        ImGui::ProgressBar(cr->cudaPathTracer.getProgress(),
+        ImGui::ProgressBar(progress.progress,
                            ImVec2(-1, 0),
-                           (std::to_string(cr->cudaPathTracer.getFinishedSamples()) + std::string("/") +
-                            std::to_string(cr->cudaPathTracer.getTargetSamplesPerPixel()))
+                           (std::to_string(progress.finished_samples) + std::string("/") +
+                            std::to_string(progress.target_samples_per_pixel))
                                .c_str());
 
         const ImVec2 img_available_region = ImGui::GetContentRegionAvail();
@@ -424,7 +424,9 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
             somethingChanged = true;
         }
 
-        DrawImage(cr->final_target);
+        DrawImage(cr->getTarget());
+
+        Camera& camera = cr->getScene().camera;
 
         if (cr->isRunning() && ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_None))
         {
@@ -434,22 +436,22 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
 
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_W])
                 {
-                    cr->scene.camera.eye += cr->scene.camera.forward * ImGui::GetIO().DeltaTime * movementSpeed;
+                    camera.eye += camera.forward * ImGui::GetIO().DeltaTime * movementSpeed;
                     somethingChanged = true;
                 }
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_S])
                 {
-                    cr->scene.camera.eye -= cr->scene.camera.forward * ImGui::GetIO().DeltaTime * movementSpeed;
+                    camera.eye -= camera.forward * ImGui::GetIO().DeltaTime * movementSpeed;
                     somethingChanged = true;
                 }
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_D])
                 {
-                    cr->scene.camera.eye += cr->scene.camera.right * ImGui::GetIO().DeltaTime * movementSpeed;
+                    camera.eye += camera.right * ImGui::GetIO().DeltaTime * movementSpeed;
                     somethingChanged = true;
                 }
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_A])
                 {
-                    cr->scene.camera.eye -= cr->scene.camera.right * ImGui::GetIO().DeltaTime * movementSpeed;
+                    camera.eye -= camera.right * ImGui::GetIO().DeltaTime * movementSpeed;
                     somethingChanged = true;
                 }
 
@@ -458,14 +460,13 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
                     glm::vec2 angle = glm::vec2(ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y) *
                                       ImGui::GetIO().DeltaTime * lookSens;
 
-                    cr->scene.camera.forward = glm::normalize(rotateY(cr->scene.camera.forward, -angle.x));
-                    cr->scene.camera.right = glm::normalize(glm::cross(cr->scene.camera.forward, glm::vec3(0, -1, 0)));
-                    cr->scene.camera.up = -glm::normalize(glm::cross(cr->scene.camera.forward, cr->scene.camera.right));
+                    camera.forward = glm::normalize(rotateY(camera.forward, -angle.x));
+                    camera.right = glm::normalize(glm::cross(camera.forward, glm::vec3(0, -1, 0)));
+                    camera.up = -glm::normalize(glm::cross(camera.forward, camera.right));
 
-                    cr->scene.camera.forward =
-                        glm::normalize(glm::rotate(cr->scene.camera.forward, angle.y, cr->scene.camera.right));
-                    cr->scene.camera.right = glm::normalize(glm::cross(cr->scene.camera.forward, glm::vec3(0, 1, 0)));
-                    cr->scene.camera.up = -glm::normalize(glm::cross(cr->scene.camera.forward, cr->scene.camera.right));
+                    camera.forward = glm::normalize(glm::rotate(camera.forward, angle.y, camera.right));
+                    camera.right = glm::normalize(glm::cross(camera.forward, glm::vec3(0, 1, 0)));
+                    camera.up = -glm::normalize(glm::cross(camera.forward, camera.right));
 
                     somethingChanged = true;
                 }
@@ -475,29 +476,20 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
     ImGui::End();
 
     ImGui::Begin("Debug");
-    ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->final_target.getWidth(), (int)cr->final_target.getHeight());
+    ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->getTarget().getWidth(), (int)cr->getTarget().getHeight());
     ImGui::End();
 
     return somethingChanged;
 }
 
-void EnvMapDebug(ChromaRenderer* cr)
-{
-    ImGui::Begin("EnvMapDebug");
-
-    DrawImage(cr->env_map, true);
-
-    ImGui::End();
-}
-
-bool ChromaGui::RenderGui(GLFWwindow* window, ChromaRenderer* cr)
+bool ChromaGui::RenderGui(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
     currentFrameTimeIndex = (currentFrameTimeIndex + 1) % (int)frameTimes.size();
     frameTimes[currentFrameTimeIndex] = ImGui::GetIO().DeltaTime * 1000.0f;
 
-    MainMenu(window, cr);
+    MainMenu(cr);
 
     DockSpace();
 
@@ -505,14 +497,12 @@ bool ChromaGui::RenderGui(GLFWwindow* window, ChromaRenderer* cr)
 
     if (MaterialsWindow(cr))
     {
-        cr->cudaPathTracer.setMaterials(cr->scene.materials);
+        cr->updateMaterials();
         somethingChanged = true;
     }
 
     if (SettingsWindow(cr))
         somethingChanged = true;
-
-    EnvMapDebug(cr);
 
     if (ViewportWindow(cr))
         somethingChanged = true;
