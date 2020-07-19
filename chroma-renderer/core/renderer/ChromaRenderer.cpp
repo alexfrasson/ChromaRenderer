@@ -97,20 +97,20 @@ void ChromaRenderer::Impl::updateMaterials()
     cudaPathTracer.setMaterials(scene.materials);
 }
 
-void ChromaRenderer::Impl::setPostProcessingSettings(const ChromaRenderer::PostProcessingSettings& settings)
+void ChromaRenderer::Impl::setPostProcessingSettings(const ChromaRenderer::PostProcessingSettings& a_settings)
 {
-    post_processor.adjustExposure = settings.adjust_exposure;
-    post_processor.linearToSrbg = settings.linear_to_srgb;
-    post_processor.tonemapping = settings.tonemapping;
+    post_processor.adjustExposure = a_settings.adjust_exposure;
+    post_processor.linearToSrbg = a_settings.linear_to_srgb;
+    post_processor.tonemapping = a_settings.tonemapping;
 }
 
 ChromaRenderer::PostProcessingSettings ChromaRenderer::Impl::getPostProcessingSettings()
 {
-    ChromaRenderer::PostProcessingSettings settings;
-    settings.adjust_exposure = post_processor.adjustExposure;
-    settings.linear_to_srgb = post_processor.linearToSrbg;
-    settings.tonemapping = post_processor.tonemapping;
-    return settings;
+    ChromaRenderer::PostProcessingSettings post_processing_settings;
+    post_processing_settings.adjust_exposure = post_processor.adjustExposure;
+    post_processing_settings.linear_to_srgb = post_processor.linearToSrbg;
+    post_processing_settings.tonemapping = post_processor.tonemapping;
+    return post_processing_settings;
 }
 
 ChromaRenderer::Progress ChromaRenderer::Impl::getProgress()

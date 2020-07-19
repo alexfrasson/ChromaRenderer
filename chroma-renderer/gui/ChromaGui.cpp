@@ -196,7 +196,7 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
     ImGui::Separator();
 
     auto show_material = [](Material& mat) {
-        bool somethingChanged = false;
+        bool material_changed = false;
 
         ImGui::PushID((void*)&mat);
         ImGui::AlignTextToFramePadding();
@@ -218,7 +218,7 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
             ImGui::PushItemWidth(-1);
             if (ImGui::ColorEdit3("", &mat.kd.r))
             {
-                somethingChanged = true;
+                material_changed = true;
             }
 
             ImGui::PopItemWidth();
@@ -235,7 +235,7 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
             ImGui::PushItemWidth(-1);
             if (ImGui::ColorEdit3("", &mat.ke.r))
             {
-                somethingChanged = true;
+                material_changed = true;
             }
 
             ImGui::PopItemWidth();
@@ -252,7 +252,7 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
             ImGui::PushItemWidth(-1);
             if (ImGui::ColorEdit3("", &mat.transparent.r))
             {
-                somethingChanged = true;
+                material_changed = true;
             }
 
             ImGui::PopItemWidth();
@@ -263,7 +263,7 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
         }
         ImGui::PopID();
 
-        return somethingChanged;
+        return material_changed;
     };
 
     for (Material& mat : cr->getScene().materials)

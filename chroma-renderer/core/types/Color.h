@@ -9,7 +9,7 @@ class Color
     {
     }
 
-    Color(float r, float g, float b) : r(r), g(g), b(b)
+    Color(float red, float green, float blue) : r(red), g(green), b(blue)
     {
     }
 

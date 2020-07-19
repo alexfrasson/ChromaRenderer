@@ -22,11 +22,11 @@ struct BvhNodeToDo
     BvhNodeToDo() : node(NULL)
     {
     }
-    BvhNodeToDo(BvhNode* node, float tmin, float tmax)
+    BvhNodeToDo(BvhNode* a_node, float a_tmin, float a_tmax)
     {
-        this->node = node;
-        this->tmin = tmin;
-        this->tmax = tmax;
+        node = a_node;
+        tmin = a_tmin;
+        tmax = a_tmax;
     }
     BvhNode* node;
     float tmin, tmax;

@@ -11,10 +11,10 @@ struct Plane
     Plane() : dim(0), value(0)
     {
     }
-    Plane(int dim, float value)
+    Plane(int a_dim, float a_value)
     {
-        this->dim = dim;
-        this->value = value;
+        dim = a_dim;
+        value = a_value;
     }
     int dim; // 0 = X, 1 = Y, 2 = Z
     float value;
@@ -75,11 +75,11 @@ struct Event
     Event() : triangle(0), type(0)
     {
     }
-    Event(Plane p, int tri, int type)
+    Event(Plane a_plane, int a_triangle, int a_type)
     {
-        plane = p;
-        triangle = tri;
-        this->type = type;
+        plane = a_plane;
+        triangle = a_triangle;
+        type = a_type;
     }
     Plane plane;  // The spliting candidate plane
     int triangle; // Triangle that generated the event
@@ -91,11 +91,11 @@ struct PEvent
     PEvent() : triangle(NULL), type(0)
     {
     }
-    PEvent(Plane p, Face* tri, Side* s, int type)
+    PEvent(Plane a_plane, Face* a_triangle, Side* s, int a_type)
     {
-        plane = p;
-        triangle = tri;
-        this->type = type;
+        plane = a_plane;
+        triangle = a_triangle;
+        type = a_type;
         flag = s;
     }
     Plane plane;    // The spliting candidate plane
