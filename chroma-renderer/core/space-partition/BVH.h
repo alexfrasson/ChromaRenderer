@@ -40,11 +40,11 @@ struct LinearBvhNode
 
 struct BVHPrimitiveInfo
 {
-    BVHPrimitiveInfo(BoundingBox bbox, int index)
+    BVHPrimitiveInfo(BoundingBox a_bbox, int a_index)
     {
-        this->centroid = bbox.centroid();
-        this->bbox = bbox;
-        this->index = index;
+        centroid = a_bbox.centroid();
+        bbox = a_bbox;
+        index = a_index;
     }
     glm::vec3 centroid;
     BoundingBox bbox;

@@ -255,7 +255,7 @@ void MainLoop()
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            bool somethingChanged = ChromaGui::RenderGui(g_window, cr.get());
+            bool somethingChanged = ChromaGui::RenderGui(cr.get());
 
             cr->update();
 

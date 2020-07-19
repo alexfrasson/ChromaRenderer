@@ -4,17 +4,12 @@
 
 #define EPSILON 0.000001f
 
-Ray::Ray(void)
-    : origin(0.0), direction(0.0, 0.0, 1.0),
-      // mint(-std::numeric_limits<float>::infinity()),
-      mint(0), maxt(std::numeric_limits<float>::infinity())
+Ray::Ray(void) : origin(0.0), direction(0.0, 0.0, 1.0), mint(0), maxt(std::numeric_limits<float>::infinity())
 {
 }
 
-Ray::Ray(const glm::vec3& origin, const glm::vec3& dir)
-    : origin(origin), direction(dir),
-      // mint(-std::numeric_limits<float>::infinity()),
-      mint(0), maxt(std::numeric_limits<float>::infinity())
+Ray::Ray(const glm::vec3& a_origin, const glm::vec3& a_direction)
+    : origin(a_origin), direction(a_direction), mint(0), maxt(std::numeric_limits<float>::infinity())
 {
 }
 

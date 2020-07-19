@@ -85,10 +85,10 @@ struct CudaBoundingBox
         min.z = min.x;
     }
 
-    CudaBoundingBox(const glm::vec3& min, const glm::vec3& max)
+    CudaBoundingBox(const glm::vec3& a_min, const glm::vec3& a_max)
     {
-        this->min = min;
-        this->max = max;
+        min = a_min;
+        max = a_max;
     }
 
     __host__ __device__ glm::vec3& operator[](const int& i)
