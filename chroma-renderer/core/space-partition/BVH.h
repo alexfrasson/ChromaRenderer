@@ -1,9 +1,7 @@
 #pragma once
 
-#include "chroma-renderer/core/space-partition/IIntersectable.h"
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 #include "chroma-renderer/core/types/Mesh.h"
-#include "chroma-renderer/core/types/Ray.h"
 
 #include <vector>
 
@@ -67,10 +65,6 @@ class BVH : public ISpacePartitioningStructure
                        int endID);
     float cost(float saL, float nL, float saR, float nR);
     float cost(float sa, float n);
-    bool intersect(Ray& r, Intersection& intersection) const;
-    bool intersectF(const Ray& r, Intersection& intersection, float& nNodeHitsNormalized) const;
-    bool intersectF(const Ray& r, Intersection& intersection) const;
-    uint32_t nIntersectedNodes(const Ray& r);
 
     size_t sizeInBytes(void);
     void abort(void)
@@ -81,7 +75,6 @@ class BVH : public ISpacePartitioningStructure
     unsigned int nNodes;
     int maxDepth;
 
-    std::vector<Face> tris;
     std::vector<Triangle*> triangles;
 
     std::vector<int> id;

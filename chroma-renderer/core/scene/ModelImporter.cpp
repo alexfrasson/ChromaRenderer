@@ -214,8 +214,6 @@ void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, 
             t.vdata = &m->v;
             t.ndata = &m->n;
 
-            t.precomputeStuff();
-
             // Material
             t.material = &s.materials[mesh->mMaterialIndex];
 
@@ -290,8 +288,6 @@ void convertToMeshRecursive(Scene& s,
             t.vdata = &m->v;
             t.ndata = &m->n;
 
-            t.precomputeStuff();
-
             // Material
             t.material = &s.materials[mesh->mMaterialIndex];
 
@@ -362,8 +358,6 @@ bool convert(const aiScene* scene, Mesh& m)
 
             t.vdata = &m.v;
             t.ndata = &m.n;
-
-            t.precomputeStuff();
 
             m.t.emplace_back(t);
         }

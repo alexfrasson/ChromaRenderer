@@ -1,17 +1,10 @@
 #pragma once
 
 #include "chroma-renderer/core/types/BoundingBox.h"
-#include "chroma-renderer/core/types/Ray.h"
-
-#include <glm/vec3.hpp>
 
 #include <cmath>
+#include <glm/vec3.hpp>
 #include <vector>
-
-// tan(FOV/2) = (screenSize/2) / screenPlaneDistance
-// tan(FOV_H/2) = (screen_width/2) / screenPlaneDistance
-// tan(FOV_V / 2) = (screen_height / 2) / screenPlaneDistance
-// tan(FOV_H/2) / screen_width = tan(FOV_V/2) / screen_height
 
 class Camera
 {
@@ -51,11 +44,6 @@ class Camera
 
     void setSize(int w, int h);
     void lookAt(glm::vec3 target);
-
-    void randomRayDirection(const int i, const int j, Ray& ray) const;
-    void rayDirection(const int i, const int j, Ray& ray) const;
-    void rayDirection(const int i, const int j, std::vector<Ray>& rays) const;
-    void rayDirection(const int i, const int j, std::vector<Ray>& rays, const unsigned int nRays) const;
 
     void fit(const BoundingBox& bb);
     float fov();

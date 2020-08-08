@@ -11,7 +11,7 @@ struct RendererSettings
     float horizontalFOV;
 
     int samplesperpixel;
-    
+
     RendererSettings();
 
     bool operator==(const RendererSettings& rs) const;
