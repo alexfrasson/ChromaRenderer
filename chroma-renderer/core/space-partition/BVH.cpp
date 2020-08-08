@@ -106,73 +106,73 @@ uint32_t BVH::countPrim(LinearBvhNode* node, int n)
             countPrim(&lroot[node->secondChildOffset], node->secondChildOffset));
 }
 
-bool BVH::build(std::vector<Object>& o)
-{
-    if (o.empty())
-        return false;
+// bool BVH::build(std::vector<Object>& o)
+// {
+//     if (o.empty())
+//         return false;
 
-    std::cout.precision(6);
-    std::cout << "Scene triangle count: " << o[0].f.size() << std::endl;
-    std::cout << "Building bvh... " << std::endl;
+//     std::cout.precision(6);
+//     std::cout << "Scene triangle count: " << o[0].f.size() << std::endl;
+//     std::cout << "Building bvh... " << std::endl;
 
-    Stopwatch stopwatch;
-    stopwatch.start();
+//     Stopwatch stopwatch;
+//     stopwatch.start();
 
-    clear();
+//     clear();
 
-    //
-    nLeafs = 0;
-    nNodes = 0;
-    maxDepth = 0;
+//     //
+//     nLeafs = 0;
+//     nNodes = 0;
+//     maxDepth = 0;
 
-    // Compute each triangle's bbox, it's centroid and the bbox of all triangles and of all centroids
-    std::vector<BVHPrimitiveInfo> primitive;
-    primitive.reserve(o[0].f.size());
-    for (size_t i = 0; i < o[0].f.size(); i++)
-    {
-        BoundingBox bb;
-        bb = BoundingBox();
-        for (int dim = 0; dim < 3; dim++)
-            bb.expand(o[0].f[i].v[dim]);
-        primitive.emplace_back(bb, (int)i);
-    }
+//     // Compute each triangle's bbox, it's centroid and the bbox of all triangles and of all centroids
+//     std::vector<BVHPrimitiveInfo> primitive;
+//     primitive.reserve(o[0].f.size());
+//     for (size_t i = 0; i < o[0].f.size(); i++)
+//     {
+//         BoundingBox bb;
+//         bb = BoundingBox();
+//         for (int dim = 0; dim < 3; dim++)
+//             bb.expand(o[0].f[i].v[dim]);
+//         primitive.emplace_back(bb, (int)i);
+//     }
 
-    root = buildnode(0, primitive, 0, (int)primitive.size());
+//     root = buildnode(0, primitive, 0, (int)primitive.size());
 
-    tris.reserve(primitive.size());
-    for (size_t i = 0; i < primitive.size(); i++)
-        tris.emplace_back(o[0].f[primitive[i].index]);
+//     tris.reserve(primitive.size());
+//     for (size_t i = 0; i < primitive.size(); i++)
+//         tris.emplace_back(o[0].f[primitive[i].index]);
 
-    // Flatten
-    lroot = new LinearBvhNode[nNodes];
-    int offset = 0;
-    flattenBvh(root, offset);
+//     // Flatten
+//     lroot = new LinearBvhNode[nNodes];
+//     int offset = 0;
+//     flattenBvh(root, offset);
 
-    stopwatch.stop();
+//     stopwatch.stop();
 
-    std::cout << "Node #" << std::endl
-              << "    Leaf:        " << nLeafs << std::endl
-              << "    Interior:    " << nNodes - nLeafs << std::endl
-              << "    Total:       " << nNodes << std::endl
-              << "Max depth:       " << maxDepth << std::endl
-              << "Avg. tris/leaf:  " << (float)tris.size() / (float)nLeafs << std::endl
-              << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
-              << "Done!" << std::endl;
+//     std::cout << "Node #" << std::endl
+//               << "    Leaf:        " << nLeafs << std::endl
+//               << "    Interior:    " << nNodes - nLeafs << std::endl
+//               << "    Total:       " << nNodes << std::endl
+//               << "Max depth:       " << maxDepth << std::endl
+//               << "Avg. tris/leaf:  " << (float)tris.size() / (float)nLeafs << std::endl
+//               << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
+//               << "Done!" << std::endl;
 
-    // std::cout << "NODESSSS: " << countPrim(lroot, 0) << std::endl;
+//     // std::cout << "NODESSSS: " << countPrim(lroot, 0) << std::endl;
 
-    float sum = 0.f;
-    for (size_t i = 1; i < nNodes; i++)
-    {
-        if (lroot[i].nPrimitives > 0)
-        {
-            sum += lroot[i].bbox.volume() / lroot[0].bbox.volume();
-        }
-    }
-    std::cout << "Volume ratio: " << sum << std::endl;
+//     float sum = 0.f;
+//     for (size_t i = 1; i < nNodes; i++)
+//     {
+//         if (lroot[i].nPrimitives > 0)
+//         {
+//             sum += lroot[i].bbox.volume() / lroot[0].bbox.volume();
+//         }
+//     }
+//     std::cout << "Volume ratio: " << sum << std::endl;
 
-    return true;
-}
+//     return true;
+// }
 bool BVH::build(std::vector<Mesh*>& m)
 {
     if (m.empty())

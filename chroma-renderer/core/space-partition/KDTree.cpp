@@ -252,70 +252,70 @@ KDTree::~KDTree()
 {
     free(root);
 }
-bool KDTree::build(std::vector<Object>& objects)
-{
-    if (objects.size() == 0)
-        return false;
+// bool KDTree::build(std::vector<Object>& objects)
+// {
+//     if (objects.size() == 0)
+//         return false;
 
-    if (maxDepth > MAX_DEPTH)
-    {
-        std::cout << "Hardcoded max depth of " << MAX_DEPTH << ". Can't go beyond that" << std::endl;
-        maxDepth = MAX_DEPTH;
-    }
+//     if (maxDepth > MAX_DEPTH)
+//     {
+//         std::cout << "Hardcoded max depth of " << MAX_DEPTH << ". Can't go beyond that" << std::endl;
+//         maxDepth = MAX_DEPTH;
+//     }
 
-    std::cout.precision(6);
-    std::cout << "Scene triangle count: " << objects[0].f.size() << std::endl;
-    std::cout << "Building kd-tree... " << std::endl;
+//     std::cout.precision(6);
+//     std::cout << "Scene triangle count: " << objects[0].f.size() << std::endl;
+//     std::cout << "Building kd-tree... " << std::endl;
 
-    root = free(root);
+//     root = free(root);
 
-    nNodes = 0;
-    nLeafs = 0;
-    nTriangles = 0;
-    depth = 0;
+//     nNodes = 0;
+//     nLeafs = 0;
+//     nTriangles = 0;
+//     depth = 0;
 
-    Stopwatch stopwatch;
-    stopwatch.start();
+//     Stopwatch stopwatch;
+//     stopwatch.start();
 
-    bb = objects[0].boundingBox;
+//     bb = objects[0].boundingBox;
 
-    // presorted
-    // kdtriangles = objects[0].f;
+//     // presorted
+//     // kdtriangles = objects[0].f;
 
-    std::vector<Side> flags(objects[0].f.size(), Side::BOTH);
+//     std::vector<Side> flags(objects[0].f.size(), Side::BOTH);
 
-    // std::vector<std::pair<Face*, Side*>> triandflag;
-    std::vector<TFpointers> triandflag;
-    triandflag.reserve(objects[0].f.size());
-    for (size_t i = 0; i < objects[0].f.size(); i++)
-        triandflag.emplace_back(objects[0].f.data() + i, flags.data() + i);
+//     // std::vector<std::pair<Face*, Side*>> triandflag;
+//     std::vector<TFpointers> triandflag;
+//     triandflag.reserve(objects[0].f.size());
+//     for (size_t i = 0; i < objects[0].f.size(); i++)
+//         triandflag.emplace_back(objects[0].f.data() + i, flags.data() + i);
 
-    std::vector<PEvent> events;
-    presortedGenEvents(triandflag, bb, events);
-    std::sort(events.begin(), events.end(), peventCmp);
+//     std::vector<PEvent> events;
+//     presortedGenEvents(triandflag, bb, events);
+//     std::sort(events.begin(), events.end(), peventCmp);
 
-    root = presortedBuildNodeSah(0, triandflag, events, bb);
+//     root = presortedBuildNodeSah(0, triandflag, events, bb);
 
-    // presorted
+//     // presorted
 
-    // root = buildNodeSah(0, objects[0].f, bb);
+//     // root = buildNodeSah(0, objects[0].f, bb);
 
-    if (stop)
-    {
-        free(root);
-        std::cout << "Tree building aborted!" << std::endl;
-        return false;
-    }
+//     if (stop)
+//     {
+//         free(root);
+//         std::cout << "Tree building aborted!" << std::endl;
+//         return false;
+//     }
 
-    stopwatch.stop();
+//     stopwatch.stop();
 
-    printInfo();
+//     printInfo();
 
-    std::cout << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
-              << "Done!" << std::endl;
+//     std::cout << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
+//               << "Done!" << std::endl;
 
-    return true;
-}
+//     return true;
+// }
 KDTNode* KDTree::presortedBuildNodeSah(int pdepth,
                                        std::vector<TFpointers>& triandflag,
                                        std::vector<PEvent>& events,

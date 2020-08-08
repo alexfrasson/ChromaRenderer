@@ -1,6 +1,5 @@
 #pragma once
 
-#include "chroma-renderer/core/scene/Object.h"
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 #include "chroma-renderer/core/types/Ray.h"
 
@@ -203,7 +202,7 @@ class KDTree : public ISpacePartitioningStructure
 
     // bool intersectNode(KDTNode* node, const Ray& r, float tmin, float tmax, float& hitT, const Face** hitTriangle);
 
-    bool build(std::vector<Object>& objects);
+    //bool build(std::vector<Object>& objects);
     // bool intersect(const Ray& r, const Face** hitTriangle, float& hitDistance);
     // bool intersectNonRecursive(const Ray& r, const Face** hitTriangle, float& hitDistance) const;
     // bool intersectNonRecursiveP(const Ray& r, const Face** hitTriangle, float& hitDistance) const;

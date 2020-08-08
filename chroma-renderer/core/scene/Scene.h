@@ -1,7 +1,6 @@
 #pragma once
 
 #include "chroma-renderer/core/scene/Camera.h"
-#include "chroma-renderer/core/scene/Object.h"
 #include "chroma-renderer/core/types/Material.h"
 #include "chroma-renderer/core/types/Mesh.h"
 
@@ -19,7 +18,6 @@ class Scene
     void clear();
     BoundingBox getBoundingBox();
 
-    std::vector<Object> objects;
     std::vector<Mesh*> meshes;
     std::vector<Material> materials;
     Camera camera;

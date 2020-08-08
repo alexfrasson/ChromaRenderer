@@ -10,7 +10,7 @@
 #include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/types/environment_map.h"
 #include "chroma-renderer/core/utility/Config.h"
-#include "chroma-renderer/core/utility/RTUtils.h"
+//#include "chroma-renderer/core/utility/RTUtils.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 #include "chroma-renderer/core/utility/ThreadPool.h"
 

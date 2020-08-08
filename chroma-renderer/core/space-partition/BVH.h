@@ -1,6 +1,5 @@
 #pragma once
 
-#include "chroma-renderer/core/scene/Object.h"
 #include "chroma-renderer/core/space-partition/IIntersectable.h"
 #include "chroma-renderer/core/space-partition/ISpacePartitioningStructure.h"
 #include "chroma-renderer/core/types/Mesh.h"
@@ -59,7 +58,6 @@ class BVH : public ISpacePartitioningStructure
     void clear();
     BvhNode* free(BvhNode* node);
     int flattenBvh(BvhNode* node, int& offset);
-    bool build(std::vector<Object>& o);
     bool build(std::vector<Mesh*>& m);
     BvhNode* buildnode(int depth, std::vector<BVHPrimitiveInfo>& primitive, int startID, int endID);
     BvhNode* buildNode(int depth,
