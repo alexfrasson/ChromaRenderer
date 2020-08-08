@@ -8,14 +8,13 @@ Scene::~Scene()
 size_t Scene::triangleCount()
 {
     size_t tc = 0;
-    for (size_t i = 0; i < objects.size(); i++)
-        tc += objects[i].f.size();
+    for (size_t i = 0; i < meshes.size(); i++)
+        tc += meshes[i]->t.size();
     return tc;
 }
 
 void Scene::clear()
 {
-    objects.clear();
     for (size_t i = 0; i < meshes.size(); i++)
     {
         delete meshes[i];
@@ -27,23 +26,6 @@ void Scene::clear()
 BoundingBox Scene::getBoundingBox()
 {
     BoundingBox bb;
-
-    for (size_t i = 0; i < objects.size(); i++)
-    {
-        if (objects[i].boundingBox.max.x > bb.max.x)
-            bb.max.x = objects[i].boundingBox.max.x;
-        if (objects[i].boundingBox.max.z > bb.max.z)
-            bb.max.z = objects[i].boundingBox.max.z;
-        if (objects[i].boundingBox.max.y > bb.max.y)
-            bb.max.y = objects[i].boundingBox.max.y;
-
-        if (objects[i].boundingBox.min.x < bb.min.x)
-            bb.min.x = objects[i].boundingBox.min.x;
-        if (objects[i].boundingBox.min.z < bb.min.z)
-            bb.min.z = objects[i].boundingBox.min.z;
-        if (objects[i].boundingBox.min.y < bb.min.y)
-            bb.min.y = objects[i].boundingBox.min.y;
-    }
 
     for (size_t i = 0; i < meshes.size(); i++)
     {
