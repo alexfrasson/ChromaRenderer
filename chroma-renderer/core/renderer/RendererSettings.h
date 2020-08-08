@@ -10,16 +10,8 @@ struct RendererSettings
 
     float horizontalFOV;
 
-    unsigned int nthreads;
-
-    bool supersampling;
     int samplesperpixel;
-    int maxPathDepth;
-
-    bool boundingboxtest;
-
-    bool shadowray;
-
+    
     RendererSettings();
 
     bool operator==(const RendererSettings& rs) const;

@@ -9,10 +9,7 @@
 #include "chroma-renderer/core/types/Image.h"
 #include "chroma-renderer/core/types/Mesh.h"
 #include "chroma-renderer/core/types/environment_map.h"
-#include "chroma-renderer/core/utility/Config.h"
-//#include "chroma-renderer/core/utility/RTUtils.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
-#include "chroma-renderer/core/utility/ThreadPool.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <atomic>
@@ -63,7 +60,6 @@ class ChromaRenderer::Impl
     Image renderer_target;
     Image final_target;
     Image env_map;
-    ThreadPool threadPool;
     bool running = false;
     float invPixelCount;
     int pixelCount;
@@ -77,7 +73,6 @@ ChromaRenderer::Impl::Impl() : state(State::IDLE)
 
 ChromaRenderer::Impl::~Impl()
 {
-    threadPool.abort();
 }
 
 void ChromaRenderer::Impl::updateMaterials()
@@ -157,7 +152,6 @@ void ChromaRenderer::Impl::setSettings(const RendererSettings& psettings)
     setSize(settings.width, settings.height);
     pixelCount = settings.width * settings.height;
     invPixelCount = 1.f / (float)pixelCount;
-    threadPool.setNumberWorkers(settings.nthreads);
     cudaPathTracer.setSettings(settings);
 }
 
@@ -173,7 +167,6 @@ void ChromaRenderer::Impl::startRender()
         return;
     }
 
-    threadPool.clearTaskQueue();
     renderer_target.clear();
     final_target.clear();
 
@@ -188,7 +181,6 @@ void ChromaRenderer::Impl::startRender()
 
 void ChromaRenderer::Impl::stopRender()
 {
-    threadPool.clearTaskQueue();
     running = false;
     state = State::IDLE;
 }
