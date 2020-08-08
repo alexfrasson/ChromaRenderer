@@ -1,8 +1,6 @@
 #include "chroma-renderer/core/renderer/ChromaRenderer.h"
 #include "chroma-renderer/core/renderer/CudaPathTracer.h"
-#include "chroma-renderer/core/renderer/PathTracing.h"
 #include "chroma-renderer/core/renderer/PostProcessor.h"
-#include "chroma-renderer/core/renderer/RayCasting.h"
 #include "chroma-renderer/core/renderer/RendererSettings.h"
 #include "chroma-renderer/core/scene/ModelImporter.h"
 #include "chroma-renderer/core/scene/Scene.h"
@@ -49,13 +47,6 @@ class ChromaRenderer::Impl
     void updateMaterials();
 
   private:
-    enum RendererType
-    {
-        RAYCAST,
-        PATHTRACE,
-        CUDAPATHTRACE
-    };
-
     void setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels);
     void saveLog();
     void setSize(unsigned int width, unsigned int height);
@@ -63,12 +54,9 @@ class ChromaRenderer::Impl
     bool isIdle();
     void cbSceneLoadedScene();
 
-    RendererType rendererType = RendererType::CUDAPATHTRACE;
     RendererSettings settings;
     Scene scene;
     State state;
-    RayCasting renderer;
-    PathTracing pathtracing;
     CudaPathTracer cudaPathTracer;
     PostProcessor post_processor;
     Stopwatch stopwatch;
@@ -155,73 +143,6 @@ ChromaRenderer::State ChromaRenderer::Impl::getState()
     return state;
 }
 
-void ChromaRenderer::Impl::genTasks()
-{
-    const unsigned int width = scene.camera.width;
-    const unsigned int height = scene.camera.height;
-
-    constexpr int tile_size = 64;
-    const int widthDivs = (int)floor(width / tile_size);
-    const int heightDivs = (int)floor(height / tile_size);
-
-    const int widthStep = static_cast<int>(std::ceil((float)width / (float)widthDivs));
-    const int heightStep = static_cast<int>(std::ceil((float)height / (float)heightDivs));
-
-    for (int i = 0; i < widthDivs; i++)
-    {
-        Interval interval;
-        for (int j = 0; j < heightDivs; j++)
-        {
-            interval.fromWidth = widthStep * i;
-            interval.fromHeight = heightStep * j;
-            if (i == widthDivs - 1 && j == heightDivs - 1)
-            {
-                interval.toWidth = width;
-                interval.toHeight = height;
-            }
-            else if (i == widthDivs - 1)
-            {
-                interval.toWidth = width;
-                interval.toHeight = heightStep * (j + 1);
-            }
-            else if (j == heightDivs - 1)
-            {
-                interval.toWidth = widthStep * (i + 1);
-                interval.toHeight = height;
-            }
-            else
-            {
-                interval.toWidth = widthStep * (i + 1);
-                interval.toHeight = heightStep * (j + 1);
-            }
-            switch (rendererType)
-            {
-            case ChromaRenderer::Impl::RAYCAST:
-                threadPool.enqueue(std::bind(&RayCasting::trace,
-                                             std::ref(renderer),
-                                             sps.get(),
-                                             std::ref(scene),
-                                             std::ref(renderer_target),
-                                             std::ref(settings),
-                                             interval,
-                                             std::placeholders::_1));
-                break;
-            case ChromaRenderer::Impl::PATHTRACE:
-                threadPool.enqueue(std::bind(&PathTracing::trace,
-                                             std::ref(pathtracing),
-                                             sps.get(),
-                                             std::ref(scene),
-                                             std::ref(renderer_target),
-                                             interval,
-                                             std::placeholders::_1));
-                break;
-            default:
-                break;
-            }
-        }
-    }
-}
-
 void ChromaRenderer::Impl::setSize(unsigned int width, unsigned int height)
 {
     renderer_target.setSize(width, height);
@@ -237,7 +158,6 @@ void ChromaRenderer::Impl::setSettings(const RendererSettings& psettings)
     pixelCount = settings.width * settings.height;
     invPixelCount = 1.f / (float)pixelCount;
     threadPool.setNumberWorkers(settings.nthreads);
-    pathtracing.setSettings(settings);
     cudaPathTracer.setSettings(settings);
 }
 
@@ -257,31 +177,10 @@ void ChromaRenderer::Impl::startRender()
     renderer_target.clear();
     final_target.clear();
 
-    switch (rendererType)
-    {
-    case ChromaRenderer::Impl::RAYCAST:
-        renderer.init();
-        break;
-    case ChromaRenderer::Impl::PATHTRACE:
-        pathtracing.init();
-        break;
-    case ChromaRenderer::Impl::CUDAPATHTRACE:
-        cudaPathTracer.setTargetImage(renderer_target);
-        cudaPathTracer.setCamera(scene.camera);
-        break;
-    }
+    cudaPathTracer.setTargetImage(renderer_target);
+    cudaPathTracer.setCamera(scene.camera);
 
     stopwatch.restart();
-
-    switch (rendererType)
-    {
-    case ChromaRenderer::Impl::RAYCAST:
-    case ChromaRenderer::Impl::PATHTRACE:
-        genTasks();
-        break;
-    case ChromaRenderer::Impl::CUDAPATHTRACE:
-        break;
-    }
 
     state = State::RENDERING;
     running = true;
@@ -359,21 +258,12 @@ void ChromaRenderer::Impl::update()
 {
     if (state == State::RENDERING)
     {
-        switch (rendererType)
+        cudaPathTracer.render();
+        post_processor.process(scene.camera, renderer_target, final_target, true);
+        if (cudaPathTracer.getProgress() >= 1.0f)
         {
-        case ChromaRenderer::Impl::RAYCAST:
-            break;
-        case ChromaRenderer::Impl::PATHTRACE:
-            break;
-        case ChromaRenderer::Impl::CUDAPATHTRACE:
-            cudaPathTracer.render();
-            post_processor.process(scene.camera, renderer_target, final_target, true);
-            if (cudaPathTracer.getProgress() >= 1.0f)
-            {
-                running = false;
-                state = State::IDLE;
-            }
-            break;
+            running = false;
+            state = State::IDLE;
         }
     }
 }
@@ -382,21 +272,7 @@ bool ChromaRenderer::Impl::isRunning()
 {
     if (running)
     {
-        switch (rendererType)
-        {
-        case ChromaRenderer::Impl::RAYCAST:
-            running = renderer.donePixelCount < pixelCount;
-            break;
-        case ChromaRenderer::Impl::PATHTRACE:
-            running = pathtracing.donePixelCount < pixelCount;
-            break;
-        case ChromaRenderer::Impl::CUDAPATHTRACE:
-            running = cudaPathTracer.getFinishedSamples() < cudaPathTracer.getTargetSamplesPerPixel();
-            break;
-        default:
-            running = false;
-            break;
-        }
+        running = cudaPathTracer.getFinishedSamples() < cudaPathTracer.getTargetSamplesPerPixel();
         if (!running)
         {
             stopwatch.stop();
