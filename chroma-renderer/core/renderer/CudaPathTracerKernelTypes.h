@@ -11,19 +11,19 @@ struct CudaPathIteration
     glm::vec3 rayDir;
     glm::vec3 mask;
     glm::vec3 color;
-    uint32_t bounce;
-    uint32_t samples;
+    std::uint32_t bounce;
+    std::uint32_t samples;
 };
 
 struct CudaEnviromentSettings
 {
-    cudaTextureObject_t texObj;
-    int cdf_size;
-    int pdf_size;
+    cudaTextureObject_t texObj{};
+    std::size_t cdf_size{0};
+    std::size_t pdf_size{0};
     float* cdf{nullptr};
     float* pdf{nullptr};
-    int width;
-    int height;
+    std::size_t width{0};
+    std::size_t height{0};
 };
 
 struct CudaCamera
@@ -72,7 +72,8 @@ struct CudaMaterial
 
 struct CudaBoundingBox
 {
-    glm::vec3 max, min;
+    glm::vec3 min{};
+    glm::vec3 max{};
 
     CudaBoundingBox()
     {
@@ -85,35 +86,37 @@ struct CudaBoundingBox
         min.z = min.x;
     }
 
-    CudaBoundingBox(const glm::vec3& a_min, const glm::vec3& a_max)
+    CudaBoundingBox(const glm::vec3& a_min, const glm::vec3& a_max) : min{a_min}, max{a_max}
     {
-        min = a_min;
-        max = a_max;
     }
 
     __host__ __device__ glm::vec3& operator[](const int& i)
     {
         if (i == 0)
+        {
             return min;
+        }
         return max;
     }
 
     __host__ __device__ const glm::vec3& operator[](const int& i) const
     {
         if (i == 0)
+        {
             return min;
+        }
         return max;
     }
 };
 
+// NOLINTNEXTLINE (cppcoreguidelines-pro-type-member-init, hicpp-member-init)
 struct CudaLinearBvhNode
 {
-    CudaBoundingBox bbox;
+    CudaBoundingBox bbox{};
     union {
         unsigned int primitivesOffset;  // Leaf
         unsigned int secondChildOffset; // Interior
     };
-    unsigned char nPrimitives; // 0 -> interior node
-    unsigned char axis;
-    // unsigned char pad[2];
+    unsigned char nPrimitives{0}; // 0 -> interior node
+    unsigned char axis{0};
 };

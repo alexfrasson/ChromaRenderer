@@ -23,7 +23,7 @@ class CudaPathTracer
     void render();
 
     void setSceneGeometry(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
-    void setEnvMap(const float* hdriEnvData, const int hdriEnvWidth, const int hdriEnvHeight, const int channels);
+    void setEnvMap(const float* hdriEnvData, std::size_t hdriEnvWidth, std::size_t hdriEnvHeight, std::size_t channels);
     void setCamera(const Camera& cam);
     void setSettings(const RendererSettings& settings);
     void setMaterials(const std::vector<Material>& materials);
@@ -36,5 +36,5 @@ class CudaPathTracer
 
   private:
     class Impl;
-    std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Impl> impl_; // NOLINT
 };

@@ -7,18 +7,18 @@
 
 #include <iostream>
 
-#define cudaErrorCheck(ans)                                                                                     \
-    {                                                                                                           \
-        if (ans != cudaSuccess)                                                                                 \
-        {                                                                                                       \
-            std::cerr << "CudaError: " << cudaGetErrorString(ans) << "(" << __FILE__ << "(" << __LINE__ << "))" \
-                      << std::endl;                                                                             \
-            exit(-1);                                                                                           \
-            return;                                                                                             \
-        }                                                                                                       \
+constexpr void cudaErrorCheck(const cudaError_t error_code)
+{
+    if (error_code != cudaSuccess)
+    {
+        std::cerr << "CudaError: " << cudaGetErrorString(error_code) << "(" << __FILE__ << "(" << __LINE__ << "))"
+                  << std::endl;
+        exit(-1);
     }
+}
 
-#define MAX_PATH_DEPTH 3
+// NOLINTNEXTLINE(clang-diagnostic-unused-const-variable)
+constexpr uint32_t MAX_PATH_DEPTH{3};
 
 extern "C" void setTextureFilterMode(bool bLinearFilter);
 extern "C" void bindTextureToArray(cudaArray* aarray);
@@ -29,9 +29,7 @@ extern "C" void trace(cudaStream_t& stream,
                       dim3 texDim,
                       CudaCamera cam,
                       CudaTriangle* triangles,
-                      unsigned int nTriangles,
                       CudaMaterial* materials,
-                      unsigned int nMaterials,
                       unsigned int seed,
                       CudaLinearBvhNode* linearBVH,
                       CudaEnviromentSettings enviromentSettings);

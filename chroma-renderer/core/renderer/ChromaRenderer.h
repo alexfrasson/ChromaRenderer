@@ -35,6 +35,11 @@ class ChromaRenderer
     ChromaRenderer();
     ~ChromaRenderer();
 
+    ChromaRenderer(const ChromaRenderer&) = delete;
+    ChromaRenderer(ChromaRenderer&&) = delete;
+    ChromaRenderer& operator=(const ChromaRenderer&) = delete;
+    ChromaRenderer& operator=(ChromaRenderer&&) = delete;
+
     void startRender();
     void stopRender();
     void update();
@@ -45,7 +50,7 @@ class ChromaRenderer
     RendererSettings getSettings();
     void setSettings(const RendererSettings& settings);
     void setPostProcessingSettings(const PostProcessingSettings& settings);
-    PostProcessingSettings getPostProcessingSettings();
+    PostProcessingSettings getPostProcessingSettings() const;
     Scene& getScene();
     Image& getTarget();
     Progress getProgress();
@@ -53,5 +58,5 @@ class ChromaRenderer
 
   private:
     class Impl;
-    std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Impl> impl_; // NOLINT
 };

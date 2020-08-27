@@ -1,10 +1,6 @@
 #include "chroma-renderer/core/types/Mesh.h"
 
-Mesh::Mesh()
-{
-}
-
-size_t Mesh::sizeInBytes()
+size_t Mesh::sizeInBytes() const
 {
     size_t size = sizeof(Mesh);
     size += sizeof(Triangle) * t.size();
@@ -23,17 +19,29 @@ void Mesh::genBoundingBox()
         for (size_t j = 0; j < 3; j++)
         {
             if (v[t[i].v[j]].x > boundingBox.max.x)
+            {
                 boundingBox.max.x = v[t[i].v[j]].x;
+            }
             if (v[t[i].v[j]].y > boundingBox.max.y)
+            {
                 boundingBox.max.y = v[t[i].v[j]].y;
+            }
             if (v[t[i].v[j]].z > boundingBox.max.z)
+            {
                 boundingBox.max.z = v[t[i].v[j]].z;
+            }
             if (v[t[i].v[j]].x < boundingBox.min.x)
+            {
                 boundingBox.min.x = v[t[i].v[j]].x;
+            }
             if (v[t[i].v[j]].y < boundingBox.min.y)
+            {
                 boundingBox.min.y = v[t[i].v[j]].y;
+            }
             if (v[t[i].v[j]].z < boundingBox.min.z)
+            {
                 boundingBox.min.z = v[t[i].v[j]].z;
+            }
         }
     }
 }
@@ -67,5 +75,7 @@ void Mesh::genSmoothNormals()
 
     // Normalize normals
     for (size_t i = 0; i < n.size(); i++)
+    {
         n[i] = glm::normalize(n[i]);
+    }
 }

@@ -1,11 +1,12 @@
 #include "chroma-renderer/core/types/environment_map.h"
 
-#define _USE_MATH_DEFINES
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
-#include <math.h>
+
+constexpr double PI{3.1415926535897932384626433};
 
 double luma(double r, double g, double b)
 {
@@ -13,12 +14,12 @@ double luma(double r, double g, double b)
 }
 
 EnvironmentMap::EnvironmentMap(const float* data, const uint32_t width, const uint32_t height)
-    : data_{nullptr}, width_{width}, height_{height}
+    : width_{width}, height_{height}
 {
     const size_t color_components = 4;
     const size_t pixel_count = width_ * height_;
-    data_ = new float[pixel_count * color_components];
-    std::memcpy(data_, data, pixel_count * color_components * sizeof(float));
+    data_.resize(pixel_count * color_components);
+    std::memcpy(data_.data(), data, pixel_count * color_components * sizeof(float));
 
     double sum{0.0};
     double max{std::numeric_limits<double>::min()};
@@ -49,7 +50,7 @@ EnvironmentMap::EnvironmentMap(const float* data, const uint32_t width, const ui
         double l = luma(r, g, b);
 
         const double v = floorf((float)i / (float)width) / (float)height;
-        const double theta = v * M_PI;
+        const double theta = v * PI;
         const double sinTheta = std::sin(theta);
         l *= sinTheta;
 
@@ -63,9 +64,4 @@ EnvironmentMap::EnvironmentMap(const float* data, const uint32_t width, const ui
     std::cout << "min: " << min << std::endl;
 
     distribution_ = Distribution{pdf};
-}
-
-EnvironmentMap::~EnvironmentMap()
-{
-    delete[] data_;
 }

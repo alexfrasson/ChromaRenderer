@@ -2,25 +2,18 @@
 
 #include <glm/vec3.hpp>
 
+#include <algorithm>
 #include <limits>
 
 struct BoundingBox
 {
-    BoundingBox()
-    {
-        max.x = -std::numeric_limits<float>::infinity();
-        max.y = max.x;
-        max.z = max.x;
-
-        min.x = std::numeric_limits<float>::infinity();
-        min.y = min.x;
-        min.z = min.x;
-    }
+    BoundingBox() = default;
     BoundingBox(const glm::vec3& a_min, const glm::vec3& a_max)
     {
         min = a_min;
         max = a_max;
     }
+
     float surfaceArea() const
     {
         float x = max.x - min.x;
@@ -28,6 +21,7 @@ struct BoundingBox
         float z = max.z - min.z;
         return (2 * x * y + 2 * x * z + 2 * y * z);
     }
+
     float volume() const
     {
         float x = max.x - min.x;
@@ -35,21 +29,18 @@ struct BoundingBox
         float z = max.z - min.z;
         return (x * y * z);
     }
+
     void expand(const glm::vec3& p)
     {
-        if (p.x < min.x)
-            min.x = p.x;
-        if (p.y < min.y)
-            min.y = p.y;
-        if (p.z < min.z)
-            min.z = p.z;
-        if (p.x > max.x)
-            max.x = p.x;
-        if (p.y > max.y)
-            max.y = p.y;
-        if (p.z > max.z)
-            max.z = p.z;
+        min.x = std::min(min.x, p.x);
+        min.y = std::min(min.y, p.y);
+        min.z = std::min(min.z, p.z);
+
+        max.x = std::max(max.x, p.x);
+        max.y = std::max(max.y, p.y);
+        max.z = std::max(max.z, p.z);
     }
+
     void expand(const BoundingBox& bb)
     {
         expand(bb.max);
@@ -59,11 +50,16 @@ struct BoundingBox
     bool contains(const glm::vec3& p) const
     {
         if (p.x < min.x || p.y < min.y || p.z < min.z)
+        {
             return false;
+        }
         if (p.x > max.x || p.y > max.y || p.z > max.z)
+        {
             return false;
+        }
         return true;
     }
+
     glm::vec3 centroid() const
     {
         return ((max + min) * 0.5f);
@@ -73,19 +69,25 @@ struct BoundingBox
     {
         return (glm::vec3((max + min) * 0.5f));
     }
-    glm::vec3 max, min;
 
     glm::vec3& operator[](const int& i)
     {
         if (i == 0)
+        {
             return min;
+        }
         return max;
     }
 
     const glm::vec3& operator[](const int& i) const
     {
         if (i == 0)
+        {
             return min;
+        }
         return max;
     }
+
+    glm::vec3 max{std::numeric_limits<float>::lowest()};
+    glm::vec3 min{std::numeric_limits<float>::max()};
 };

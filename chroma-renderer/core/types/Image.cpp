@@ -5,31 +5,22 @@
 #include <cstring>
 #include <iostream>
 
-Image::Image() : buffer(nullptr), width(0), height(0), hasDataChanged(false), textureID(0)
-{
-}
-
-Image::~Image()
-{
-    if (buffer != nullptr)
-        delete[] buffer;
-}
-
 void Image::update()
 {
     if (hasDataChanged)
+    {
         updateOpenGLTexture();
+    }
 }
 
 void Image::genOpenGLTexture()
 {
     assert(width > 0 && height > 0);
-    assert(buffer != nullptr);
 
     glDeleteTextures(1, &textureID);
 
     // Gen and upload texture
-    GLint last_texture;
+    GLint last_texture{0};
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
 
     glGenTextures(1, &textureID);
@@ -44,11 +35,11 @@ void Image::genOpenGLTexture()
     // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     if (colorComponents == 1)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
     }
     else
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
     }
 
     // Restore state
@@ -60,25 +51,29 @@ void Image::genOpenGLTexture()
 GLuint Image::getOpenGLTextureID()
 {
     if (textureID == 0)
+    {
         genOpenGLTexture();
+    }
 
     return textureID;
 }
 
 void Image::readDataFromOpenGLTexture()
 {
-    if (textureID == 0 || buffer == NULL)
+    if (textureID == 0)
+    {
         return;
+    }
 
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     if (colorComponents == 1)
     {
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, &buffer[0]);
     }
     else
     {
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, &buffer[0]);
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -86,18 +81,20 @@ void Image::readDataFromOpenGLTexture()
 
 void Image::updateOpenGLTexture()
 {
-    if (textureID == 0 || buffer == NULL)
+    if (textureID == 0)
+    {
         return;
+    }
 
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     if (colorComponents == 1)
     {
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED, GL_FLOAT, buffer);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED, GL_FLOAT, &buffer[0]);
     }
     else
     {
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, buffer);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, &buffer[0]);
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -105,15 +102,17 @@ void Image::updateOpenGLTexture()
     hasDataChanged = false;
 }
 
-void Image::setColor(unsigned int widthPixelPos,
-                     unsigned int heightPixelPos,
-                     unsigned int r,
-                     unsigned int g,
-                     unsigned int b,
-                     unsigned int a)
+void Image::setColor(std::uint32_t widthPixelPos,
+                     std::uint32_t heightPixelPos,
+                     std::uint32_t r,
+                     std::uint32_t g,
+                     std::uint32_t b,
+                     std::uint32_t a)
 {
-    if (widthPixelPos >= width || heightPixelPos >= height || buffer == NULL)
+    if (widthPixelPos >= width || heightPixelPos >= height)
+    {
         return;
+    }
     buffer[mapPosToArray(widthPixelPos, heightPixelPos) + 0] = std::max(0.0f, std::min(255.0f, (float)r));
     buffer[mapPosToArray(widthPixelPos, heightPixelPos) + 1] = std::max(0.0f, std::min(255.0f, (float)g));
     buffer[mapPosToArray(widthPixelPos, heightPixelPos) + 2] = std::max(0.0f, std::min(255.0f, (float)b));
@@ -122,10 +121,12 @@ void Image::setColor(unsigned int widthPixelPos,
     hasDataChanged = true;
 }
 
-void Image::setColor(unsigned int widthPixelPos, unsigned int heightPixelPos, const Color& color)
+void Image::setColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos, const Color& color)
 {
-    if (widthPixelPos >= width || heightPixelPos >= height || buffer == NULL)
+    if (widthPixelPos >= width || heightPixelPos >= height)
+    {
         return;
+    }
     buffer[mapPosToArray(widthPixelPos, heightPixelPos) + 0] = 255 * std::max(0.0f, std::min(1.0f, color.r));
     buffer[mapPosToArray(widthPixelPos, heightPixelPos) + 1] = 255 * std::max(0.0f, std::min(1.0f, color.g));
     buffer[mapPosToArray(widthPixelPos, heightPixelPos) + 2] = 255 * std::max(0.0f, std::min(1.0f, color.b));
@@ -134,10 +135,12 @@ void Image::setColor(unsigned int widthPixelPos, unsigned int heightPixelPos, co
     hasDataChanged = true;
 }
 
-Color Image::getColor(unsigned int widthPixelPos, unsigned int heightPixelPos)
+Color Image::getColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos)
 {
-    if (widthPixelPos >= width || heightPixelPos >= height || buffer == NULL)
+    if (widthPixelPos >= width || heightPixelPos >= height)
+    {
         return Color(0.0f);
+    }
 
     Color c;
 
@@ -149,12 +152,11 @@ Color Image::getColor(unsigned int widthPixelPos, unsigned int heightPixelPos)
 
 void Image::clear()
 {
-    memset(buffer, 0, colorComponents * width * height * 4);
-
+    memset(&buffer[0], 0, colorComponents * width * height * 4);
     hasDataChanged = true;
 }
 
-void Image::setSize(unsigned int _width, unsigned int _height)
+void Image::setSize(std::uint32_t _width, std::uint32_t _height)
 {
     if (_width == width && _height == height)
     {
@@ -168,11 +170,14 @@ void Image::setSize(unsigned int _width, unsigned int _height)
     genOpenGLTexture();
 }
 
-void Image::setData(const float* data, const uint32_t _width, const uint32_t _height, const unsigned short components)
+void Image::setData(const float* data,
+                    const std::uint32_t _width,
+                    const std::uint32_t _height,
+                    const std::uint8_t components)
 {
     colorComponents = components;
     setSize(_width, _height);
-    memcpy(buffer, data, colorComponents * width * height * 4);
+    memcpy(&buffer[0], data, colorComponents * width * height * 4);
     genOpenGLTexture();
     updateOpenGLTexture();
 }
@@ -180,8 +185,5 @@ void Image::setData(const float* data, const uint32_t _width, const uint32_t _he
 void Image::createBuffer()
 {
     assert(width > 0 && height > 0);
-
-    delete[] buffer;
-    buffer = new float[colorComponents * width * height];
-    memset(buffer, 0, colorComponents * width * height * 4);
+    buffer.assign(colorComponents * width * height, 0);
 }

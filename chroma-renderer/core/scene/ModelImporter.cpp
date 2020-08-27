@@ -7,44 +7,51 @@
 #include <assimp/version.h>
 #include <glm/vec3.hpp>
 
-#include <cmath>
+#include <algorithm>
 #include <iostream>
+#include <memory>
 
-// Example stream
-class myStream : public Assimp::LogStream
+class CustomAssimpLogStream : public Assimp::LogStream
 {
   public:
-    // Constructor
-    myStream()
+    void write(const char* /*message*/) override
     {
-        // empty
-    }
-
-    // Destructor
-    ~myStream()
-    {
-        // empty
-    }
-    // Write womethink using your own functionality
-    void write(const char* /*message*/)
-    {
-        // std::cout << message;
+        // std::cout << message << std::endl;
     }
 };
 
-const aiScene* importAssimpScene(std::string fileName)
+class AssimpLogging
 {
-    Assimp::DefaultLogger::create();
-    // Select the kinds of messages you want to receive on this log stream
-    const unsigned int severity =
-        Assimp::Logger::Debugging | Assimp::Logger::Info | Assimp::Logger::Err | Assimp::Logger::Warn;
-    // Attaching it to the default logger
-    Assimp::DefaultLogger::get()->attachStream(new myStream(), severity);
+  public:
+    AssimpLogging()
+    {
+        Assimp::DefaultLogger::create();
+        Assimp::DefaultLogger::get()->attachStream(&custom_log_stream, severity);
+    }
 
-    // Create an instance of the Importer class
+    ~AssimpLogging()
+    {
+        Assimp::DefaultLogger::get()->detatchStream(&custom_log_stream, severity);
+        Assimp::DefaultLogger::kill();
+    }
+
+    AssimpLogging(const AssimpLogging&) = delete;
+    AssimpLogging(AssimpLogging&&) = delete;
+    AssimpLogging& operator=(const AssimpLogging&) = delete;
+    AssimpLogging& operator=(AssimpLogging&&) = delete;
+
+  private:
+    CustomAssimpLogStream custom_log_stream{};
+    const std::uint32_t severity =
+        Assimp::Logger::Debugging | Assimp::Logger::Info | Assimp::Logger::Err | Assimp::Logger::Warn; // NOLINT
+};
+
+std::unique_ptr<aiScene> importAssimpScene(const std::string& fileName)
+{
+    AssimpLogging assimp_logging{};
+
     Assimp::Importer importer;
     importer.SetExtraVerbose(true);
-    // Assimp scene object
     importer.ReadFile(fileName, aiProcess_Triangulate
                       //| aiProcess_JoinIdenticalVertices
                       //| aiProcess_SortByPType
@@ -54,17 +61,14 @@ const aiScene* importAssimpScene(std::string fileName)
                       //| aiProcess_OptimizeMeshes
                       //| aiProcess_ImproveCacheLocality
     );
-    const aiScene* assimpScene = importer.GetOrphanedScene();
-    // If the import failed, report it
-    if (!assimpScene)
+
+    std::unique_ptr<aiScene> assimpScene{importer.GetOrphanedScene()};
+    if (assimpScene == nullptr)
     {
         std::cout << importer.GetErrorString() << std::endl;
-        Assimp::DefaultLogger::kill();
-        return NULL;
+        return {nullptr};
     }
 
-    Assimp::DefaultLogger::kill();
-    // We're done. Everything will be cleaned up by the importer destructor
     return assimpScene;
 }
 
@@ -78,28 +82,24 @@ aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
         node = node->mParent;
     }
 
-    aiMatrix4x4 localToWorld = aiMatrix4x4();
+    aiMatrix4x4 localToWorld{};
 
-    for (int i = (int)transforms.size() - 1; i >= 0; i--)
-    // for (size_t i = 0; i < transforms.size(); i++)
-    {
-        localToWorld *= transforms[i];
-    }
+    std::for_each(transforms.rbegin(), transforms.rend(), [&](const auto& transform) { localToWorld *= transform; });
 
     return localToWorld;
 }
 
 void getTotalNumvberOfTrianglesAndVertices(const aiScene* scene,
                                            const aiNode* node,
-                                           uint64_t* nTriangles,
-                                           uint64_t* nVertices)
+                                           std::uint64_t* nTriangles,
+                                           std::uint64_t* nVertices)
 {
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    for (std::uint32_t i = 0; i < node->mNumChildren; i++)
     {
         getTotalNumvberOfTrianglesAndVertices(scene, node->mChildren[i], nTriangles, nVertices);
     }
 
-    for (unsigned int i = 0; i < node->mNumMeshes; i++)
+    for (std::uint32_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         *nTriangles += mesh->mNumFaces;
@@ -112,10 +112,10 @@ void printSceneInfo(const aiScene* scene)
     std::cout << "Scene info" << std::endl;
     std::cout << "\tMeshes:    " << scene->mNumMeshes << std::endl;
 
-    uint64_t triangles = 0;
-    uint64_t vertices = 0;
+    std::uint64_t triangles = 0;
+    std::uint64_t vertices = 0;
     // Count triangles and vertices
-    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
+    for (std::uint32_t i = 0; i < scene->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[i];
 
@@ -139,12 +139,13 @@ void printSceneInfo(const aiScene* scene)
     std::cout << "\tMaterials: " << scene->mNumMaterials << std::endl;
     std::cout << "\tTextures:  " << scene->mNumTextures << std::endl << std::endl;
 }
+
 void printMeshInfo(const aiScene* scene)
 {
-    uint64_t triangles = 0;
-    uint64_t vertices = 0;
+    std::uint64_t triangles = 0;
+    std::uint64_t vertices = 0;
     // Count triangles and vertices
-    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
+    for (std::uint32_t i = 0; i < scene->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[i];
         triangles += mesh->mNumFaces;
@@ -159,30 +160,30 @@ void printMeshInfo(const aiScene* scene)
 // Compute the absolute transformation matrices of each node
 void ComputeAbsoluteTransform(aiNode* pcNode)
 {
-    if (pcNode->mParent)
+    if (pcNode->mParent != nullptr)
     {
         pcNode->mTransformation = pcNode->mParent->mTransformation * pcNode->mTransformation;
     }
 
-    for (unsigned int i = 0; i < pcNode->mNumChildren; ++i)
+    for (std::uint32_t i = 0; i < pcNode->mNumChildren; ++i)
     {
         ComputeAbsoluteTransform(pcNode->mChildren[i]);
     }
 }
 
 // If nodes have been transformed before hand
-void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, Mesh* m, uint32_t& offset)
+void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, Mesh* m, std::uint32_t& offset)
 {
     aiMatrix4x4 mWorldIT = node->mTransformation;
     mWorldIT.Inverse().Transpose();
-    aiMatrix3x3 m3x3 = aiMatrix3x3(mWorldIT);
+    aiMatrix3x3 m3x3{mWorldIT};
 
-    for (size_t i = 0; i < node->mNumMeshes; i++)
+    for (std::size_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
         // Copy vertex and normal data
-        for (unsigned int k = 0; k < mesh->mNumVertices; k++)
+        for (std::uint32_t k = 0; k < mesh->mNumVertices; k++)
         {
             aiVector3D v = node->mTransformation * mesh->mVertices[k];
             m->v.emplace_back(v.x, v.y, v.z);
@@ -197,18 +198,22 @@ void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, 
         }
 
         // Copy everything
-        for (unsigned int j = 0; j < mesh->mNumFaces; j++)
+        for (std::uint32_t j = 0; j < mesh->mNumFaces; j++)
         {
             // Copy triangle data
             aiFace* face = &mesh->mFaces[j];
             if (face->mNumIndices != 3) // if the face is not a triangle
+            {
                 continue;
+            }
             Triangle t;
-            for (unsigned int k = 0; k < face->mNumIndices; k++)
+            for (std::uint32_t k = 0; k < face->mNumIndices; k++)
             {
                 t.v[k] = face->mIndices[k] + offset;
                 if (mesh->HasNormals())
+                {
                     t.n[k] = face->mIndices[k] + offset;
+                }
             }
 
             t.vdata = &m->v;
@@ -223,15 +228,17 @@ void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, 
         offset += mesh->mNumVertices;
 
         if (!mesh->HasNormals())
+        {
             m->genSmoothNormals();
+        }
     }
 
-    for (size_t i = 0; i < node->mNumChildren; i++)
+    for (std::size_t i = 0; i < node->mNumChildren; i++)
     {
         convertToMeshRecursive(s, scene, node->mChildren[i], m, offset);
     }
 }
-//
+
 void convertToMeshRecursive(Scene& s,
                             const aiScene* scene,
                             const aiNode* node,
@@ -243,19 +250,19 @@ void convertToMeshRecursive(Scene& s,
 
     aiMatrix4x4 mWorldIT = transform;
     mWorldIT.Inverse().Transpose();
-    aiMatrix3x3 m3x3 = aiMatrix3x3(mWorldIT);
+    aiMatrix3x3 m3x3{mWorldIT};
 
     /*aiQuaternion quat;
     aiVector3D scale;
     aiVector3D pos;
     transform.Decompose(scale, quat, pos);*/
 
-    for (size_t i = 0; i < node->mNumMeshes; i++)
+    for (std::size_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
         // Copy vertex and normal data
-        for (unsigned int k = 0; k < mesh->mNumVertices; k++)
+        for (std::uint32_t k = 0; k < mesh->mNumVertices; k++)
         {
             aiVector3D v = transform * mesh->mVertices[k];
             m->v.emplace_back(v.x, v.y, v.z);
@@ -271,18 +278,22 @@ void convertToMeshRecursive(Scene& s,
         }
 
         // Copy everything
-        for (unsigned int j = 0; j < mesh->mNumFaces; j++)
+        for (std::uint32_t j = 0; j < mesh->mNumFaces; j++)
         {
             // Copy triangle data
             aiFace* face = &mesh->mFaces[j];
             if (face->mNumIndices != 3) // if the face is not a triangle
+            {
                 continue;
+            }
             Triangle t;
-            for (unsigned int k = 0; k < face->mNumIndices; k++)
+            for (std::uint32_t k = 0; k < face->mNumIndices; k++)
             {
                 t.v[k] = face->mIndices[k] + offset;
                 if (mesh->HasNormals())
+                {
                     t.n[k] = face->mIndices[k] + offset;
+                }
             }
 
             t.vdata = &m->v;
@@ -297,7 +308,9 @@ void convertToMeshRecursive(Scene& s,
         offset += mesh->mNumVertices;
 
         if (!mesh->HasNormals())
+        {
             m->genSmoothNormals();
+        }
     }
 
     for (size_t i = 0; i < node->mNumChildren; i++)
@@ -306,95 +319,30 @@ void convertToMeshRecursive(Scene& s,
     }
 }
 
-bool convert(const aiScene* scene, Mesh& m)
+std::unique_ptr<Mesh> convertToMesh(const aiScene* scene, Scene& s)
 {
-    int triangles = 0;
-    int vertices = 0;
-    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
-    {
-        aiMesh* mesh = scene->mMeshes[i];
-        triangles += mesh->mNumFaces;
-        vertices += mesh->mNumVertices;
-    }
-
-    // Reserve memory
-    m.t.reserve(triangles);
-    m.v.reserve(vertices);
-    m.n.reserve(vertices);
-
-    uint32_t offset = 0;
-
-    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
-    {
-        aiMesh* mesh = scene->mMeshes[i];
-
-        // Reserve memory
-        // m.t.reserve(mesh->mNumFaces);
-        // m.v.reserve(mesh->mNumVertices);
-        // m.n.reserve(mesh->mNumVertices);
-
-        // Copy vertex and normal data
-        for (unsigned int k = 0; k < mesh->mNumVertices; k++)
-        {
-            m.v.emplace_back(mesh->mVertices[k].x, mesh->mVertices[k].y, mesh->mVertices[k].z);
-            if (mesh->HasNormals())
-                m.n.emplace_back(mesh->mNormals[k].x, mesh->mNormals[k].y, mesh->mNormals[k].z);
-        }
-
-        // Copy everything
-        for (unsigned int j = 0; j < mesh->mNumFaces; j++)
-        {
-            // Copy triangle data
-            aiFace* face = &mesh->mFaces[j];
-            if (face->mNumIndices != 3) // if the face is not a triangle
-                continue;
-            Triangle t;
-            for (unsigned int k = 0; k < face->mNumIndices; k++)
-            {
-                t.v[k] = face->mIndices[k] + offset;
-                if (mesh->HasNormals())
-                    t.n[k] = face->mIndices[k] + offset;
-            }
-
-            t.vdata = &m.v;
-            t.ndata = &m.n;
-
-            m.t.emplace_back(t);
-        }
-
-        offset += mesh->mNumVertices;
-
-        if (!mesh->HasNormals())
-            m.genSmoothNormals();
-    }
-
-    m.genBoundingBox();
-
-    return true;
-}
-Mesh* convertToMesh(const aiScene* scene, Scene& s)
-{
-    uint64_t triangles = 0;
-    uint64_t vertices = 0;
+    std::uint64_t triangles = 0;
+    std::uint64_t vertices = 0;
 
     getTotalNumvberOfTrianglesAndVertices(scene, scene->mRootNode, &triangles, &vertices);
 
-    Mesh* m = new Mesh();
+    auto m = std::make_unique<Mesh>();
     // Reserve memory
     m->t.reserve(triangles);
     m->v.reserve(vertices);
     m->n.reserve(vertices);
 
-    uint32_t offset = 0;
+    std::uint32_t offset = 0;
 
     // ComputeAbsoluteTransform(scene->mRootNode);
 
-    convertToMeshRecursive(s, scene, scene->mRootNode, aiMatrix4x4(), m, offset);
+    convertToMeshRecursive(s, scene, scene->mRootNode, aiMatrix4x4(), m.get(), offset);
 
     m->genBoundingBox();
 
     return m;
 }
+
 void printMaterialInfo(const aiMaterial* mat)
 {
     // aiColor3D color;
@@ -411,7 +359,7 @@ void printMaterialInfo(const aiMaterial* mat)
     // if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_EMISSIVE, color))
     //	std::cout << "Emissive color: (" << color.r << ", " << color.g << ", " << color.b << ")" << std::endl;
 
-    for (uint32_t j = 0; j < mat->mNumProperties; j++)
+    for (std::uint32_t j = 0; j < mat->mNumProperties; j++)
     {
         aiMaterialProperty* prop = mat->mProperties[j];
 
@@ -422,16 +370,20 @@ void printMaterialInfo(const aiMaterial* mat)
         switch (type)
         {
         case aiPTI_Float: {
-            float* farr = (float*)prop->mData;
-            for (size_t i = 0; i < prop->mDataLength / sizeof(float); i++)
+            auto* farr = reinterpret_cast<float*>(prop->mData); // NOLINT
+            for (std::size_t i = 0; i < prop->mDataLength / sizeof(float); i++)
+            {
                 std::cout << farr[i] << ", ";
+            }
             std::cout << std::endl;
             break;
         }
         case aiPTI_Double: {
-            double* darr = (double*)prop->mData;
-            for (size_t i = 0; i < prop->mDataLength / sizeof(double); i++)
+            auto* darr = reinterpret_cast<double*>(prop->mData); // NOLINT
+            for (std::size_t i = 0; i < prop->mDataLength / sizeof(double); i++)
+            {
                 std::cout << darr[i] << ", ";
+            }
             std::cout << std::endl;
             break;
         }
@@ -440,26 +392,29 @@ void printMaterialInfo(const aiMaterial* mat)
             // ai_assert(prop->mDataLength >= 5);
 
             //// The string is stored as 32 but length prefix followed by zero-terminated UTF8 data
-            // pOut->length = static_cast<unsigned int>(*reinterpret_cast<uint32_t*>(prop->mData));
+            // pOut->length = static_cast<std::uint32_t>(*reinterpret_cast<uint32_t*>(prop->mData));
 
             // ai_assert(pOut->length + 1 + 4 == prop->mDataLength);
             // ai_assert(!prop->mData[prop->mDataLength - 1]);
             // memcpy(pOut->data, prop->mData + 4, pOut->length + 1);
 
             for (size_t i = 4; i < prop->mDataLength; i++)
+            {
                 std::cout << prop->mData[i];
+            }
             std::cout << std::endl;
             break;
         }
         case aiPTI_Integer: {
-            int* iarr = (int*)prop->mData;
-            for (size_t i = 0; i < prop->mDataLength / sizeof(int); i++)
+            auto* iarr = reinterpret_cast<int*>(prop->mData); // NOLINT
+            for (std::size_t i = 0; i < prop->mDataLength / sizeof(int); i++)
+            {
                 std::cout << iarr[i] << ", ";
+            }
             std::cout << std::endl;
             break;
         }
         case aiPTI_Buffer:
-            break;
         default:
             break;
         }
@@ -467,6 +422,7 @@ void printMaterialInfo(const aiMaterial* mat)
 
     std::cout << std::endl;
 }
+
 void extractMaterials(const aiScene* aiscene, Scene& s)
 {
     std::cout << std::endl << "Extracting materials... " << std::endl;
@@ -482,7 +438,7 @@ void extractMaterials(const aiScene* aiscene, Scene& s)
 
     s.materials.reserve(aiscene->mNumMaterials);
 
-    for (uint32_t i = 0; i < aiscene->mNumMaterials; i++)
+    for (std::uint32_t i = 0; i < aiscene->mNumMaterials; i++)
     {
         aiMaterial* mat = aiscene->mMaterials[i];
 
@@ -516,7 +472,9 @@ void extractMaterials(const aiScene* aiscene, Scene& s)
 
         // Get name
         if (AI_SUCCESS == mat->Get(AI_MATKEY_NAME, str))
+        {
             m.name = std::string(str.C_Str());
+        }
 
         s.materials.emplace_back(m);
     }
@@ -546,7 +504,7 @@ bool convert(const aiScene* aiscene, Scene& s)
 
         aiMatrix4x4 mWorldIT = nodeTransform;
         mWorldIT.Inverse().Transpose();
-        aiMatrix3x3 m3x3 = aiMatrix3x3(mWorldIT);
+        aiMatrix3x3 m3x3{mWorldIT};
 
         // multiply all properties of the camera with the absolute
         // transformation of the corresponding node
@@ -599,50 +557,20 @@ bool convert(const aiScene* aiscene, Scene& s)
     return true;
 }
 
-void ModelImporter::importcbm(std::string fileName, std::function<void(Mesh*)> cb)
-{
-    Mesh* m = new Mesh();
-    import(fileName, *m);
-    cb(m);
-}
-bool ModelImporter::import(std::string fileName, Mesh& m)
-{
-    std::cout << "----------------------------<Importer>---------------------------" << std::endl;
-    std::cout << "Loading mesh..." << std::endl;
-    const aiScene* assimpScene = importAssimpScene(fileName);
-    if (!assimpScene)
-    {
-        std::cout << "Assimp failed to load the file!" << std::endl;
-        std::cout << "---------------------------</Importer>---------------------------" << std::endl;
-        return false;
-    }
-    std::cout << "Done!" << std::endl << std::endl;
-
-    printMeshInfo(assimpScene);
-
-    std::cout << "Converting mesh..." << std::endl;
-    convert(assimpScene, m);
-    std::cout << "Done!" << std::endl << std::endl;
-
-    delete assimpScene;
-
-    std::cout << "Import of mesh " << fileName.c_str() << " succeeded." << std::endl;
-    std::cout << "---------------------------</Importer>---------------------------" << std::endl;
-    return true;
-}
-
-void ModelImporter::importcbscene(std::string fileName, Scene& s, std::function<void()> cb)
+void ModelImporter::importcbscene(const std::string& fileName, Scene& s, const std::function<void()>& cb)
 {
     import(fileName, s);
     cb();
 }
-bool ModelImporter::import(std::string fileName, Scene& s)
+
+bool ModelImporter::import(const std::string& fileName, Scene& s)
 {
     std::cout << "----------------------------<Importer>---------------------------" << std::endl;
     std::cout << "Assimp " << aiGetVersionMajor() << "." << aiGetVersionMinor() << std::endl;
     std::cout << "Loading scene..." << std::endl;
-    const aiScene* assimpScene = importAssimpScene(fileName);
-    if (!assimpScene)
+
+    const std::unique_ptr<aiScene> assimpScene = importAssimpScene(fileName);
+    if (assimpScene == nullptr)
     {
         std::cout << "Assimp failed to load the file!" << std::endl;
         std::cout << "---------------------------</Importer>---------------------------" << std::endl;
@@ -650,13 +578,11 @@ bool ModelImporter::import(std::string fileName, Scene& s)
     }
     std::cout << "Done!" << std::endl << std::endl;
 
-    printSceneInfo(assimpScene);
+    printSceneInfo(assimpScene.get());
 
     std::cout << "Converting scene..." << std::endl;
-    convert(assimpScene, s);
+    convert(assimpScene.get(), s);
     std::cout << "Done!" << std::endl << std::endl;
-
-    delete assimpScene;
 
     std::cout << "Import of scene " << fileName.c_str() << " succeeded." << std::endl;
     std::cout << "---------------------------</Importer>---------------------------" << std::endl;

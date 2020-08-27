@@ -45,19 +45,16 @@ const char* g_glsl_version;
 std::unique_ptr<ChromaRenderer> cr;
 
 #ifndef WM_DPICHANGED
-#define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers
+#define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers // NOLINT
 #endif
 
 void CherryTheme()
 {
-    // cherry colors, 3 intensities
-#define HI(v) ImVec4(0.502f, 0.075f, 0.256f, v)
-#define MED(v) ImVec4(0.455f, 0.198f, 0.301f, v)
-#define LOW(v) ImVec4(0.232f, 0.201f, 0.271f, v)
-// backgrounds (@todo: complete with BG_MED, BG_LOW)
-#define BG(v) ImVec4(0.200f, 0.220f, 0.270f, v)
-// text
-#define TEXT_COLOR(v) ImVec4(0.860f, 0.930f, 0.890f, v)
+    auto HI = [](const float v) { return ImVec4(0.502f, 0.075f, 0.256f, v); };
+    auto MED = [](const float v) { return ImVec4(0.455f, 0.198f, 0.301f, v); };
+    auto LOW = [](const float v) { return ImVec4(0.232f, 0.201f, 0.271f, v); };
+    auto BG = [](const float v) { return ImVec4(0.200f, 0.220f, 0.270f, v); };
+    auto TEXT_COLOR = [](const float v) { return ImVec4(0.860f, 0.930f, 0.890f, v); };
 
     auto& style = ImGui::GetStyle();
     style.Colors[ImGuiCol_Text] = TEXT_COLOR(0.78f);
@@ -129,8 +126,8 @@ bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
 
     io.ConfigFlags = 0;
 
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls // NOLINT
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking // NOLINT
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
@@ -161,7 +158,7 @@ bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use
     // ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application
+    // - If the file cannot be loaded, the function will return nullptr. Please handle those errors in your application
     // (e.g. use an assertion, or display an error and quit).
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling
     // ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
@@ -172,8 +169,8 @@ bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
     io.Fonts->AddFontFromFileTTF("./chroma-renderer/resources/fonts/Roboto-Medium.ttf", 16.0f);
     // io.Fonts->AddFontFromFileTTF("../resources/DroidSans.ttf", 16.0f);
     // io.Fonts->AddFontFromFileTTF("../resources/Cousine-Regular.ttf", 16.0f);
-    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
-    // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
+    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr,
+    // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != nullptr);
 
     // ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
@@ -191,17 +188,19 @@ void ImGuiCleanup()
 
 static void glfw_error_callback(int error, const char* description)
 {
-    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+    std::cerr << "Glfw Error " << error << ": " << description << std::endl;
 }
 
 bool InitGLFW()
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit())
+    if (glfwInit() == GLFW_FALSE)
+    {
         return false;
+    }
 
-        // Decide GL+GLSL versions
+    // Decide GL+GLSL versions
 #if __APPLE__
     // GL 3.2 + GLSL 150
     glsl_version = "#version 150";
@@ -219,9 +218,11 @@ bool InitGLFW()
 #endif
 
     // Create window with graphics context
-    g_window = glfwCreateWindow(1920, 1080, "ChromaRenderer", NULL, NULL);
-    if (g_window == NULL)
+    g_window = glfwCreateWindow(1920, 1080, "ChromaRenderer", nullptr, nullptr);
+    if (g_window == nullptr)
+    {
         return false;
+    }
     glfwMakeContextCurrent(g_window);
     // glfwSwapInterval(1); // Enable vsync
     glfwSwapInterval(0);
@@ -231,7 +232,7 @@ bool InitGLFW()
 
 void MainLoop()
 {
-    while (!glfwWindowShouldClose(g_window))
+    while (glfwWindowShouldClose(g_window) == 0)
     {
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -255,7 +256,7 @@ void MainLoop()
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            bool somethingChanged = ChromaGui::RenderGui(cr.get());
+            bool somethingChanged = chromagui::RenderGui(cr.get());
 
             cr->update();
 
@@ -269,7 +270,8 @@ void MainLoop()
 
         // Rendering
         ImGui::Render();
-        int display_w, display_h;
+        int display_w{0};
+        int display_h{0};
         glfwMakeContextCurrent(g_window);
         glfwGetFramebufferSize(g_window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
@@ -306,7 +308,7 @@ bool ValidateArgs(argparse::ArgumentParser& program)
     return true;
 }
 
-int main(const int argc, const char** argv)
+int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
 {
     std::set_terminate(term_func);
 
@@ -341,7 +343,7 @@ int main(const int argc, const char** argv)
 
     if (gladLoadGL() == 0)
     {
-        fprintf(stderr, "Failed to initialize OpenGL loader!\n");
+        std::cerr << "Failed to initialize OpenGL loader!" << std::endl;
         return 1;
     }
 

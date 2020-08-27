@@ -4,6 +4,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "stb-image",
-    hdrs = ["include/stb_image.h"],
-    includes = ["include"],
+    srcs = ["stb_image.cpp"],
+    hdrs = ["stb_image.h"],
+    includes = ["."],
 )

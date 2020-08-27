@@ -29,6 +29,7 @@ inline std::string OpenGlErrorToString(const GLenum error)
     }
 }
 
+// NOLINTNEXTLINE
 #define CHECK_OPENGL_ERROR                                                                                     \
     if (GLenum err = glGetError(); err != GL_NO_ERROR)                                                         \
     {                                                                                                          \

@@ -3,23 +3,34 @@
 class Color
 {
   public:
-    float r, g, b;
-
-    Color() : r(0.5f), g(0.5f), b(0.5f)
-    {
-    }
+    Color() = default;
 
     Color(float red, float green, float blue) : r(red), g(green), b(blue)
     {
     }
 
-    Color(float c) : r(c), g(c), b(c)
+    explicit Color(float c) : r(c), g(c), b(c)
     {
     }
 
     Color operator*(float f) const
     {
-        return Color(r * f, g * f, b * f);
+        return {r * f, g * f, b * f};
+    }
+
+    Color operator+(const Color& rhs) const
+    {
+        return {r + rhs.r, g + rhs.g, b + rhs.b};
+    }
+
+    Color operator*(const Color& rhs) const
+    {
+        return {r * rhs.r, g * rhs.g, b * rhs.b};
+    }
+
+    Color operator/(const float& f) const
+    {
+        return {r / f, g / f, b / f};
     }
 
     void operator+=(const Color& rhs)
@@ -27,16 +38,6 @@ class Color
         r += rhs.r;
         g += rhs.g;
         b += rhs.b;
-    }
-
-    Color operator+(const Color& rhs) const
-    {
-        return Color(r + rhs.r, g + rhs.g, b + rhs.b);
-    }
-
-    Color operator*(const Color& rhs) const
-    {
-        return Color(r * rhs.r, g * rhs.g, b * rhs.b);
     }
 
     void operator+=(float rhs)
@@ -53,15 +54,12 @@ class Color
         b /= rhs;
     }
 
-    Color operator/(const float& f) const
-    {
-        return Color(r / f, g / f, b / f);
-    }
-
     static const Color BLACK;
     static const Color BLUE;
     static const Color GREEN;
     static const Color RED;
     static const Color WHITE;
     static const Color GRAY;
+
+    float r{1.0f}, g{1.0f}, b{1.0f};
 };
