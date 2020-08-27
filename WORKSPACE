@@ -19,6 +19,12 @@ new_local_repository(
     path = "/usr/",
 )
 
+new_local_repository(
+    name = "clang_tidy",
+    build_file = "//third-party/clang-tidy:clang-tidy.BUILD",
+    path = "/usr",
+)
+
 git_repository(
     name = "bazel_skylib",
     commit = "e59b620b392a8ebbcf25879fc3fde52b4dc77535",

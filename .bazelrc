@@ -37,5 +37,10 @@ build:linux --cxxopt=-mavx
 build:linux_dbg --config=linux
 build:linux_dbg --compilation_mode=dbg
 
+build:clang_tidy --config=linux
+build:clang_tidy --cxxopt=-Wno-pragma-once-outside-header
+build:clang_tidy --cxxopt=--language=c++
+build:clang_tidy --aspects //third-party/clang-tidy:aspect.bzl%print_aspect --output_groups=report
+
 test --test_output=errors
 test --test_arg=--gtest_color=yes
