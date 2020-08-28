@@ -5,25 +5,22 @@
 #include "chroma-renderer/core/types/Mesh.h"
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
 class Scene
 {
   public:
-    Scene() = default;
-    ~Scene();
-
     size_t triangleCount();
     void clear();
     BoundingBox getBoundingBox();
 
-    std::vector<Mesh*> meshes;
+    std::vector<std::unique_ptr<Mesh>> meshes;
     std::vector<Material> materials;
     Camera camera;
-
-    bool ready;
-
-    float* hdriEnvData = nullptr;
-    int hdriEnvWidth, hdriEnvHeight;
+    bool ready{false};
+    float* hdriEnvData{nullptr};
+    int hdriEnvWidth{0};
+    int hdriEnvHeight{0};
 };

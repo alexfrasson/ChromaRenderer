@@ -6,7 +6,15 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "renderer",
     srcs = glob(["*.cpp"]) + [":path-tracer-kernel"],
-    hdrs = glob(["*.h"]),
+    hdrs = [
+        "ChromaRenderer.h",
+        "CudaPathTracer.h",
+        "CudaPathTracerKernel.h",
+        "CudaPathTracerKernelTypes.h",
+        "OpenGlErrorCheck.h",
+        "PostProcessor.h",
+        "RendererSettings.h",
+    ],
     linkstatic = True,
     deps = [
         "//chroma-renderer/core/scene",

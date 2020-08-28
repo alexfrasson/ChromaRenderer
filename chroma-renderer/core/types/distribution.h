@@ -6,7 +6,7 @@ class Distribution
 {
   public:
     Distribution() = default;
-    explicit Distribution(const std::vector<double>& function);
+    explicit Distribution(const std::vector<double>& pdf);
 
     size_t Sample(float value);
 

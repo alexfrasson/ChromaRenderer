@@ -31,7 +31,7 @@ using std::vector;
 class GLSLProgramException : public std::runtime_error
 {
   public:
-    GLSLProgramException(const string& msg) : std::runtime_error(msg)
+    explicit GLSLProgramException(const string& msg) : std::runtime_error(msg)
     {
     }
 };
@@ -52,41 +52,41 @@ enum GLSLShaderType
 class GLSLProgram
 {
   private:
-    int handle;
-    bool linked;
+    GLuint handle{0};
+    bool linked{false};
     std::map<string, int> uniformLocations;
 
     GLint getUniformLocation(const char* name);
-    bool fileExists(const string& fileName);
-    string getExtension(const char* fileName);
-
-    // Make these private in order to make the object non-copyable
-    GLSLProgram(const GLSLProgram& other) = delete;
-    GLSLProgram& operator=(const GLSLProgram& other) = delete;
 
   public:
-    GLSLProgram();
+    GLSLProgram() = default;
+    GLSLProgram(const GLSLProgram&) = delete;
+    GLSLProgram(GLSLProgram&&) = delete;
+    GLSLProgram& operator=(const GLSLProgram&) = delete;
+    GLSLProgram& operator=(GLSLProgram&&) = delete;
     ~GLSLProgram();
 
-    void compileShader(const char* fileName);
-    void compileShader(const char* fileName,
+    void compileShader(const std::string& fileName);
+    void compileShader(const std::string& fileName,
                        GLSLShader::GLSLShaderType type,
-                       vector<string> defines = vector<string>(),
-                       std::map<std::string, int> definesINT = std::map<std::string, int>());
+                       std::vector<string> defines = std::vector<string>(),
+                       const std::map<std::string, int>& definesINT = std::map<std::string, int>());
 
   private:
-    void compileShader(const string& source, GLSLShader::GLSLShaderType type, const char* fileName = NULL);
+    void compileShaderInternal(const std::string& source,
+                               GLSLShader::GLSLShaderType type,
+                               const std::string& fileName = "");
 
   public:
     void link();
-    void validate();
-    void use();
+    void validate() const;
+    void use() const;
 
-    int getHandle();
-    bool isLinked();
+    GLuint getHandle() const;
+    bool isLinked() const;
 
-    void bindAttribLocation(GLuint location, const char* name);
-    void bindFragDataLocation(GLuint location, const char* name);
+    void bindAttribLocation(GLuint location, const char* name) const;
+    void bindFragDataLocation(GLuint location, const char* name) const;
 
     void setUniform(const char* name, float x, float y, float z);
     void setUniform(const char* name, const vec2& v);
@@ -100,11 +100,11 @@ class GLSLProgram
     void setUniform(const char* name, bool val);
     void setUniform(const char* name, GLuint val);
 
-    void printActiveUniforms();
-    void printActiveUniformBlocks();
-    void printActiveAttribs();
+    void printActiveUniforms() const;
+    void printActiveUniformBlocks() const;
+    void printActiveAttribs() const;
 
-    const char* getTypeString(GLenum type);
+    static const char* getTypeString(GLenum type);
 };
 
 #endif // GLSLPROGRAM_H

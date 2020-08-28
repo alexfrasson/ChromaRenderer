@@ -10,8 +10,8 @@ struct Material
     {
     }
 
-    std::string name;
-    Color kd;
-    Color ke;
-    Color transparent;
+    std::string name{};
+    Color kd{};
+    Color ke{};
+    Color transparent{};
 };

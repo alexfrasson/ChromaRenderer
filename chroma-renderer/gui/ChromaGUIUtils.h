@@ -4,5 +4,5 @@
 
 #include <string>
 
-const std::string getDateTime();
-bool saveImage(std::string path, Image* img);
+std::string getDateTime();
+bool saveImage(const std::string& path, Image* img);

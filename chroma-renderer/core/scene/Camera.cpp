@@ -6,16 +6,6 @@
 #include <iostream>
 #include <random>
 
-Camera::Camera(void)
-    : width(1017), height(720), eye(-3, 2, 10), up(0, 1, 0), right(1, 0, 0), forward(0, 0, 1), m_HorizontalFOV(1.0f),
-      aspectRatio((float)width / static_cast<float>(height)), d(((float)width / 2.0f) / tanf(m_HorizontalFOV / 2.0f))
-{
-}
-
-Camera::~Camera(void)
-{
-}
-
 void Camera::setSize(int pwidth, int pheight)
 {
     aspectRatio = (float)pwidth / static_cast<float>(pheight);
@@ -77,7 +67,7 @@ void Camera::fit(const BoundingBox& bb)
 
     for (int i = 0; i < 8; i++)
     {
-        float angle;
+        float angle{0.0f};
         glm::vec3 vectov;
         do
         {
@@ -88,7 +78,8 @@ void Camera::fit(const BoundingBox& bb)
         } while (angle >= verticalfov || angle >= horizontalfov);
     }
 }
-float Camera::fov()
+
+float Camera::fov() const
 {
-    return 2 * atan2f((float)height * 0.5f, d);
+    return 2.0f * atan2f((float)height * 0.5f, d);
 }

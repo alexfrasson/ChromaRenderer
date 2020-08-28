@@ -19,13 +19,16 @@ namespace fs = std::filesystem;
 
 ImVec2 mainMenuBarSize;
 
-const int max_frames = 32;
-std::vector<float> frameTimes(max_frames);
-int currentFrameTimeIndex = 0;
+namespace chromagui
+{
+
+constexpr std::size_t max_frames{32};
+std::vector<float> frameTimes{max_frames};
+std::size_t currentFrameTimeIndex{0};
 
 float movementSpeed = 30.0f;
 
-void ChromaGui::MainMenu(ChromaRenderer* cr)
+void MainMenu(ChromaRenderer* cr)
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -44,21 +47,22 @@ void ChromaGui::MainMenu(ChromaRenderer* cr)
                 {
                     path.clear();
 
-                    nfdchar_t* outPath = NULL;
-                    nfdresult_t result = NFD_OpenDialog("obj,dae,gltf", NULL, &outPath);
+                    nfdchar_t* outPath = nullptr;
+                    nfdresult_t result = NFD_OpenDialog("obj,dae,gltf", nullptr, &outPath);
                     if (result == NFD_OKAY)
                     {
                         path = std::string(outPath);
-
                         if (fs::exists(path))
                         {
                             if (cr->isRunning())
+                            {
                                 cr->stopRender();
+                            }
 
                             std::cout << path << std::endl;
                             cr->importScene(path);
                         }
-                        free(outPath);
+                        free(outPath); // NOLINT
                     }
                     // else if (result == NFD_CANCEL)
                     // {
@@ -73,25 +77,28 @@ void ChromaGui::MainMenu(ChromaRenderer* cr)
                 {
                     path.clear();
 
-                    nfdchar_t* outPath = NULL;
-                    nfdresult_t result = NFD_OpenDialog("hdr,jpg,png", NULL, &outPath);
+                    nfdchar_t* outPath = nullptr;
+                    nfdresult_t result = NFD_OpenDialog("hdr,jpg,png", nullptr, &outPath);
                     if (result == NFD_OKAY)
                     {
                         path = std::string(outPath);
-
                         if (fs::exists(path))
                         {
                             bool wasRendering = cr->isRunning();
                             if (wasRendering)
+                            {
                                 cr->stopRender();
+                            }
 
                             std::cout << path << std::endl;
                             cr->importEnviromentMap(path);
 
                             if (wasRendering)
+                            {
                                 cr->startRender();
+                            }
                         }
-                        free(outPath);
+                        free(outPath); // NOLINT
                     }
                     // else if (result == NFD_CANCEL)
                     // {
@@ -110,7 +117,7 @@ void ChromaGui::MainMenu(ChromaRenderer* cr)
     }
 }
 
-void ChromaGui::DockSpace()
+void DockSpace()
 {
     static bool opt_fullscreen_persistant = true;
     static ImGuiDockNodeFlags opt_flags =
@@ -119,7 +126,7 @@ void ChromaGui::DockSpace()
 
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
     // because it would be confusing to have two docking targets within each others.
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking; // NOLINT
     if (opt_fullscreen)
     {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -128,9 +135,10 @@ void ChromaGui::DockSpace()
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-                        ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |           // NOLINT
+                        ImGuiWindowFlags_NoResize |                                           // NOLINT
+                        ImGuiWindowFlags_NoMove;                                              // NOLINT
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus; // NOLINT
     }
 
     // When using ImGuiDockNodeFlags_RenderWindowBg or ImGuiDockNodeFlags_InvisibleDockspace, DockSpace() will render
@@ -143,11 +151,13 @@ void ChromaGui::DockSpace()
     ImGui::PopStyleVar();
 
     if (opt_fullscreen)
+    {
         ImGui::PopStyleVar(2);
+    }
 
     // Dockspace
     ImGuiIO& io = ImGui::GetIO();
-    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) // NOLINT
     {
         ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
@@ -158,16 +168,17 @@ void ChromaGui::DockSpace()
             should_init_layout = false;
 
             ImGui::DockBuilderRemoveNode(dockspace_id);
-            ImGui::DockBuilderAddNode(dockspace_id, opt_flags | ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderAddNode(dockspace_id, opt_flags | ImGuiDockNodeFlags_DockSpace); // NOLINT
             ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
 
             ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using
                                                  // it here as we aren't docking anything into it.
-            ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.16f, NULL, &dock_main_id);
+            ImGuiID dock_id_left =
+                ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.16f, nullptr, &dock_main_id);
             ImGuiID dock_id_right =
-                ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
+                ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, nullptr, &dock_main_id);
             ImGuiID dock_id_left_bottom =
-                ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Down, 0.20f, NULL, &dock_id_left);
+                ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Down, 0.20f, nullptr, &dock_id_left);
 
             ImGui::DockBuilderDockWindow("Settings", dock_id_left);
             ImGui::DockBuilderDockWindow("Material Editor", dock_id_right);
@@ -181,7 +192,7 @@ void ChromaGui::DockSpace()
     ImGui::End();
 }
 
-bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
+bool MaterialsWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
@@ -211,8 +222,8 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
             ImGui::PushID(0);
             ImGui::AlignTextToFramePadding();
             ImGui::TreeNodeEx("KD",
-                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                  ImGuiTreeNodeFlags_Bullet);
+                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | // NOLINT
+                                  ImGuiTreeNodeFlags_Bullet);                                 // NOLINT
 
             ImGui::NextColumn();
             ImGui::PushItemWidth(-1);
@@ -228,8 +239,8 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
             ImGui::PushID(1);
             ImGui::AlignTextToFramePadding();
             ImGui::TreeNodeEx("KE",
-                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                  ImGuiTreeNodeFlags_Bullet);
+                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | // NOLINT
+                                  ImGuiTreeNodeFlags_Bullet);                                 // NOLINT
 
             ImGui::NextColumn();
             ImGui::PushItemWidth(-1);
@@ -245,8 +256,8 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
             ImGui::PushID(2);
             ImGui::AlignTextToFramePadding();
             ImGui::TreeNodeEx("Transparency",
-                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                  ImGuiTreeNodeFlags_Bullet);
+                              ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | // NOLINT
+                                  ImGuiTreeNodeFlags_Bullet);                                 // NOLINT
 
             ImGui::NextColumn();
             ImGui::PushItemWidth(-1);
@@ -279,7 +290,7 @@ bool ChromaGui::MaterialsWindow(ChromaRenderer* cr)
     return somethingChanged;
 }
 
-bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
+bool SettingsWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
@@ -288,14 +299,16 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
     // ImGui::SetNextWindowPos(glm::vec2(0, mainMenuBarSize.y), ImGuiCond_::ImGuiCond_Once);
     ImGui::Begin("Settings");
     {
+        // NOLINTNEXTLINE(hicpp-vararg,-warnings-as-errors, cppcoreguidelines-pro-type-vararg)
         ImGui::Text("Average %.2f ms (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        // NOLINTNEXTLINE(hicpp-vararg,-warnings-as-errors, cppcoreguidelines-pro-type-vararg)
         ImGui::Text("Current %.2f ms (%.1f FPS)", ImGui::GetIO().DeltaTime * 1000.0f, 1.0f / ImGui::GetIO().DeltaTime);
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         ImGui::PlotLines("",
                          &frameTimes[0],
                          (int)frameTimes.size(),
-                         currentFrameTimeIndex,
+                         static_cast<int>(currentFrameTimeIndex),
                          "",
                          0.0f,
                          150.0f,
@@ -310,7 +323,9 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
             {
                 ImGui::DragInt("Width", &rs.width, 1, 50, 8192);
                 ImGui::DragInt("Height", &rs.height, 1, 50, 8192);
-                ImGui::DragInt("Samples/pixel", &rs.samplesperpixel, 1, 1, 99999);
+                int samplesperpixel = static_cast<int>(rs.samplesperpixel);
+                ImGui::DragInt("Samples/pixel", &samplesperpixel, 1, 1, 99999);
+                rs.samplesperpixel = static_cast<std::uint32_t>(samplesperpixel);
             }
 
             Scene& scene = cr->getScene();
@@ -339,13 +354,17 @@ bool ChromaGui::SettingsWindow(ChromaRenderer* cr)
         }
 
         if (rs != cr->getSettings())
+        {
             cr->setSettings(rs);
+        }
 
         if (!(cr->getState() == ChromaRenderer::State::LOADINGSCENE) &&
             ImGui::Button(cr->isRunning() ? "Stop" : "Render"))
         {
             if (cr->isRunning())
+            {
                 cr->stopRender();
+            }
             else
             {
                 cr->setSettings(rs);
@@ -368,8 +387,8 @@ ImVec2 GetAvailableRegionForImage(const float aspect_ratio)
     const ImVec2 availableRegion = ImGui::GetContentRegionAvail();
     const float windowAspectRatio = availableRegion.x / (float)availableRegion.y;
 
-    float height;
-    float width;
+    float height{0};
+    float width{0};
 
     if (windowAspectRatio < aspect_ratio)
     {
@@ -398,13 +417,14 @@ void DrawImage(const Image& img, const bool flip_vert = false)
                  ImColor(255, 255, 255, 200));
 }
 
-bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
+bool ViewportWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
     ImGui::Begin("Viewport");
     {
         ChromaRenderer::Progress progress = cr->getProgress();
+        // NOLINTNEXTLINE(hicpp-vararg,-warnings-as-errors, cppcoreguidelines-pro-type-vararg)
         ImGui::Text("%.3f MRays/sec", progress.instant_rays_per_sec * 0.000001f);
         ImGui::SameLine();
         ImGui::ProgressBar(progress.progress,
@@ -476,17 +496,18 @@ bool ChromaGui::ViewportWindow(ChromaRenderer* cr)
     ImGui::End();
 
     ImGui::Begin("Debug");
+    // NOLINTNEXTLINE(hicpp-vararg,-warnings-as-errors, cppcoreguidelines-pro-type-vararg)
     ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->getTarget().getWidth(), (int)cr->getTarget().getHeight());
     ImGui::End();
 
     return somethingChanged;
 }
 
-bool ChromaGui::RenderGui(ChromaRenderer* cr)
+bool RenderGui(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
-    currentFrameTimeIndex = (currentFrameTimeIndex + 1) % (int)frameTimes.size();
+    currentFrameTimeIndex = (currentFrameTimeIndex + 1) % frameTimes.size();
     frameTimes[currentFrameTimeIndex] = ImGui::GetIO().DeltaTime * 1000.0f;
 
     MainMenu(cr);
@@ -502,10 +523,16 @@ bool ChromaGui::RenderGui(ChromaRenderer* cr)
     }
 
     if (SettingsWindow(cr))
+    {
         somethingChanged = true;
+    }
 
     if (ViewportWindow(cr))
+    {
         somethingChanged = true;
+    }
 
     return somethingChanged;
 }
+
+} // namespace chromagui

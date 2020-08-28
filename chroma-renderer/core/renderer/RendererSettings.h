@@ -1,19 +1,14 @@
 #pragma once
 
-#include <glm/vec3.hpp>
+#include <cstdint>
 
 struct RendererSettings
 {
-  public:
-    int width;
-    int height;
-
-    float horizontalFOV;
-
-    int samplesperpixel;
-
-    RendererSettings();
-
     bool operator==(const RendererSettings& rs) const;
     bool operator!=(const RendererSettings& rs) const;
+
+    int width{640};
+    int height{480};
+    float horizontalFOV{1.0};
+    std::uint32_t samplesperpixel{10000};
 };

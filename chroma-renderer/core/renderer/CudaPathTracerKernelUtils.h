@@ -7,9 +7,9 @@
 
 #include <cfloat>
 
-#define EPSILON 0.000001f
+constexpr float EPSILON{0.000001f};
 
-__host__ __device__ int binarySearch(const float* cdf, const int cdf_size, const float rand_var)
+__host__ __device__ inline int binarySearch(const float* cdf, const int cdf_size, const float rand_var)
 {
     int start = 1;
     int end = cdf_size;
@@ -35,7 +35,7 @@ __host__ __device__ int binarySearch(const float* cdf, const int cdf_size, const
     return index;
 }
 
-__device__ glm::mat3 basis(glm::vec3 normal)
+__device__ inline glm::mat3 basis(glm::vec3 normal)
 {
     glm::vec3 binormal;
     if (std::abs(normal.x) > std::abs(normal.z))
@@ -51,13 +51,13 @@ __device__ glm::mat3 basis(glm::vec3 normal)
     return glm::mat3{tangent, binormal, normal};
 }
 
-__device__ glm::vec3 toWorld(const glm::vec3 dir, const glm::vec3 normal)
+__device__ inline glm::vec3 toWorld(const glm::vec3 dir, const glm::vec3 normal)
 {
     const glm::mat3 base = basis(normal);
     return glm::normalize(base * dir);
 }
 
-__device__ glm::vec3 toLocal(const glm::vec3 dir, const glm::vec3 normal)
+__device__ inline glm::vec3 toLocal(const glm::vec3 dir, const glm::vec3 normal)
 {
     const glm::mat3 base = glm::transpose(basis(normal));
     return glm::normalize(base * dir);
@@ -69,28 +69,28 @@ struct SampleDirection
     float pdf;
 };
 
-__device__ float sphericalTheta(const glm::vec3& unit_vector)
+__device__ inline float sphericalTheta(const glm::vec3& unit_vector)
 {
     return acosf(unit_vector.y);
 }
 
-__device__ float sphericalPhi(const glm::vec3& unit_vector)
+__device__ inline float sphericalPhi(const glm::vec3& unit_vector)
 {
     const float p = atan2f(unit_vector.z, unit_vector.x);
     return (p < 0.0f) ? (p + 2.0f * glm::pi<float>()) : p;
 }
 
-__device__ bool sameHemisphere(const glm::vec3& n, const glm::vec3& a, const glm::vec3& b)
+__device__ inline bool sameHemisphere(const glm::vec3& n, const glm::vec3& a, const glm::vec3& b)
 {
     return ((glm::dot(n, a) * glm::dot(n, b)) > 0.0f);
 }
 
-__device__ bool sameHemisphere(const glm::vec3& a, const glm::vec3& b)
+__device__ inline bool sameHemisphere(const glm::vec3& a, const glm::vec3& b)
 {
     return (a.z * b.z > 0.0f);
 }
 
-__device__ float uniformSampleHemispherePdf(const glm::vec3& n, const glm::vec3& wo, const glm::vec3& wi)
+__device__ inline float uniformSampleHemispherePdf(const glm::vec3& n, const glm::vec3& wo, const glm::vec3& wi)
 {
     if (!sameHemisphere(n, wo, wi))
     {
@@ -99,10 +99,10 @@ __device__ float uniformSampleHemispherePdf(const glm::vec3& n, const glm::vec3&
     return 1.0f / glm::two_pi<float>();
 }
 
-__device__ SampleDirection uniformSampleHemisphere(const float rand0,
-                                                   const float rand1,
-                                                   const glm::vec3& n,
-                                                   const glm::vec3& wo)
+__device__ inline SampleDirection uniformSampleHemisphere(const float rand0,
+                                                          const float rand1,
+                                                          const glm::vec3& n,
+                                                          const glm::vec3& wo)
 {
     // cos(theta) = rand0 = y
     // cos^2(theta) + sin^2(theta) = 1 -> sin(theta) = srtf(1 - cos^2(theta))
@@ -116,7 +116,9 @@ __device__ SampleDirection uniformSampleHemisphere(const float rand0,
     return SampleDirection{wi, pdf};
 }
 
-__device__ float uniformSampleCosineWeightedHemispherePdf(const glm::vec3& n, const glm::vec3& wo, const glm::vec3& wi)
+__device__ inline float uniformSampleCosineWeightedHemispherePdf(const glm::vec3& n,
+                                                                 const glm::vec3& wo,
+                                                                 const glm::vec3& wi)
 {
     if (!sameHemisphere(n, wo, wi))
     {
@@ -125,10 +127,10 @@ __device__ float uniformSampleCosineWeightedHemispherePdf(const glm::vec3& n, co
     return std::abs(glm::dot(n, wi)) * glm::one_over_pi<float>();
 }
 
-__device__ SampleDirection uniformSampleCosineWeightedHemisphere(const float rand0,
-                                                                 const float rand1,
-                                                                 const glm::vec3& n,
-                                                                 const glm::vec3& wo)
+__device__ inline SampleDirection uniformSampleCosineWeightedHemisphere(const float rand0,
+                                                                        const float rand1,
+                                                                        const glm::vec3& n,
+                                                                        const glm::vec3& wo)
 {
     const float theta = asinf(sqrtf(rand0));
     const float phi = 2.0f * glm::pi<float>() * rand1;
@@ -147,7 +149,7 @@ __device__ SampleDirection uniformSampleCosineWeightedHemisphere(const float ran
     return SampleDirection{wi, pdf};
 }
 
-__device__ glm::vec3 cosineSampleHemisphere(const glm::vec3 normal, const float rand0, const float rand1)
+__device__ inline glm::vec3 cosineSampleHemisphere(const glm::vec3 normal, const float rand0, const float rand1)
 {
     const glm::vec3 w = glm::normalize(normal);
     const glm::vec3 u = glm::normalize(glm::cross((fabs(w.x) > 0.1f ? glm::vec3{0, 1, 0} : glm::vec3{1, 0, 0}), w));
@@ -159,10 +161,13 @@ __device__ glm::vec3 cosineSampleHemisphere(const glm::vec3 normal, const float 
     return glm::normalize(u * cosf(phi) * rand1_sqrt + v * sinf(phi) * rand1_sqrt + w * sqrtf(1.0f - rand1));
 }
 
-__device__ CudaRay
-rayDirectionWithOffset(const int i, const int j, const CudaCamera cam, const float rand0, const float rand1)
+__device__ inline CudaRay rayDirectionWithOffset(const int i,
+                                                 const int j,
+                                                 const CudaCamera cam,
+                                                 const float rand0,
+                                                 const float rand1)
 {
-    CudaRay ray;
+    CudaRay ray{};
     ray.mint = 0;
     ray.maxt = FLT_MAX;
     ray.origin = cam.eye;
@@ -172,7 +177,7 @@ rayDirectionWithOffset(const int i, const int j, const CudaCamera cam, const flo
 }
 
 // https://people.cs.clemson.edu/~dhouse/courses/405/notes/texture-maps.pdf
-__device__ glm::vec2 unitVectorToUv(const glm::vec3& unit_vector)
+__device__ inline glm::vec2 unitVectorToUv(const glm::vec3& unit_vector)
 {
     const float theta = sphericalTheta(unit_vector);
     const float phi = sphericalPhi(unit_vector);
@@ -182,7 +187,7 @@ __device__ glm::vec2 unitVectorToUv(const glm::vec3& unit_vector)
 }
 
 // https://people.cs.clemson.edu/~dhouse/courses/405/notes/texture-maps.pdf
-__host__ __device__ glm::vec3 uvToUnitVector(const glm::vec2& uv)
+__host__ __device__ inline glm::vec3 uvToUnitVector(const glm::vec2& uv)
 {
     const float phi = (2.0f * uv.x - 1.0f) * glm::pi<float>();
     const float theta = uv.y * glm::pi<float>();
@@ -194,9 +199,9 @@ __host__ __device__ glm::vec3 uvToUnitVector(const glm::vec2& uv)
 }
 
 // Computes ray direction given camera and pixel position
-__host__ __device__ CudaRay rayDirection(const int i, const int j, const CudaCamera cam)
+__host__ __device__ inline CudaRay rayDirection(const int i, const int j, const CudaCamera cam)
 {
-    CudaRay ray;
+    CudaRay ray{};
     ray.mint = 0;
     ray.maxt = FLT_MAX;
     ray.origin = cam.eye;
@@ -206,7 +211,9 @@ __host__ __device__ CudaRay rayDirection(const int i, const int j, const CudaCam
     return ray;
 }
 
-__host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay* ray, CudaIntersection* intersection)
+__host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle,
+                                                  CudaRay* ray,
+                                                  CudaIntersection* intersection)
 {
     const glm::vec3 edge0 = triangle->v[1] - triangle->v[0];
     const glm::vec3 edge1 = triangle->v[2] - triangle->v[0];
@@ -249,7 +256,7 @@ __host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay
     return true;
 }
 
-__host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay* ray)
+__host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle, CudaRay* ray)
 {
     const glm::vec3 edge0 = triangle->v[1] - triangle->v[0];
     const glm::vec3 edge1 = triangle->v[2] - triangle->v[0];
@@ -285,12 +292,12 @@ __host__ __device__ bool intersectTriangle(const CudaTriangle* triangle, CudaRay
 
 // [WBMS05] Williams, Amy, Steve Barrus, R.Keith Morley, and Peter Shirley. "An efficient and robust ray-box
 // intersection algorithm." In ACM SIGGRAPH 2005 Courses, p. 9. ACM, 2005.
-__host__ __device__ bool hitBoundingBoxSlab(const CudaBoundingBox& bb,
-                                            const CudaRay& ray,
-                                            const glm::vec3& invRayDir,
-                                            const bool* dirIsNeg,
-                                            float& tmin,
-                                            float& tmax)
+__host__ __device__ bool inline hitBoundingBoxSlab(const CudaBoundingBox& bb,
+                                                   const CudaRay& ray,
+                                                   const glm::vec3& invRayDir,
+                                                   const glm::ivec3& dirIsNeg,
+                                                   float& tmin,
+                                                   float& tmax)
 {
     float min = (bb[dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
     float max = (bb[1 - dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
@@ -328,14 +335,14 @@ __host__ __device__ bool hitBoundingBoxSlab(const CudaBoundingBox& bb,
     return (min < tmax) && (max > tmin);
 }
 
-__host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
-                                      const CudaLinearBvhNode* linearBVH,
-                                      CudaRay& ray,
-                                      CudaIntersection& intersection)
+__host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
+                                             const CudaLinearBvhNode* linearBVH,
+                                             CudaRay& ray,
+                                             CudaIntersection& intersection)
 {
     bool hit = false;
     const glm::vec3 invRayDir = 1.f / ray.direction;
-    const bool dirIsNeg[3] = {invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
+    const glm::ivec3 dirIsNeg{invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
 
     unsigned int todoOffset = 0;
     unsigned int nodeNum = 0;
@@ -369,7 +376,7 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
             // Internal node
             else
             {
-                if (dirIsNeg[node->axis])
+                if (dirIsNeg[node->axis] != 0)
                 {
                     todo[todoOffset++] = nodeNum + 1;
                     nodeNum = node->secondChildOffset;
@@ -394,10 +401,12 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles,
     return hit;
 }
 
-__host__ __device__ bool intersectBVH(const CudaTriangle* triangles, const CudaLinearBvhNode* linearBVH, CudaRay& ray)
+__host__ __device__ inline bool intersectBVH(const CudaTriangle* triangles,
+                                             const CudaLinearBvhNode* linearBVH,
+                                             CudaRay& ray)
 {
     const glm::vec3 invRayDir = 1.f / ray.direction;
-    const bool dirIsNeg[3] = {invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
+    const glm::ivec3 dirIsNeg{invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
 
     unsigned int todoOffset = 0;
     unsigned int nodeNum = 0;
@@ -430,7 +439,7 @@ __host__ __device__ bool intersectBVH(const CudaTriangle* triangles, const CudaL
             // Internal node
             else
             {
-                if (dirIsNeg[node->axis])
+                if (dirIsNeg[node->axis] != 0)
                 {
                     todo[todoOffset++] = nodeNum + 1;
                     nodeNum = node->secondChildOffset;

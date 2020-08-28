@@ -11,13 +11,13 @@
 #include "chroma-renderer/core/types/environment_map.h"
 #include "chroma-renderer/core/utility/Stopwatch.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <atomic>
 #include <cstdint>
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <stb_image.h>
 #include <string>
 #include <thread>
 
@@ -25,7 +25,6 @@ class ChromaRenderer::Impl
 {
   public:
     Impl();
-    ~Impl();
 
     State getState();
     bool isRunning();
@@ -36,7 +35,7 @@ class ChromaRenderer::Impl
     RendererSettings getSettings();
     void setSettings(const RendererSettings& settings);
     void setPostProcessingSettings(const ChromaRenderer::PostProcessingSettings& settings);
-    ChromaRenderer::PostProcessingSettings getPostProcessingSettings();
+    PostProcessingSettings getPostProcessingSettings() const;
     Scene& getScene();
     Image& getTarget();
     void update();
@@ -44,35 +43,31 @@ class ChromaRenderer::Impl
     void updateMaterials();
 
   private:
-    void setEnvMap(const float* data, const uint32_t width, const uint32_t height, const uint32_t channels);
+    void setEnvMap(const float* data, std::uint32_t width, std::uint32_t height, std::uint32_t channels);
     void saveLog();
-    void setSize(unsigned int width, unsigned int height);
+    void setSize(int width, int height);
     void genTasks();
     bool isIdle();
     void cbSceneLoadedScene();
 
     RendererSettings settings;
     Scene scene;
-    State state;
+    State state{State::IDLE};
     CudaPathTracer cudaPathTracer;
     PostProcessor post_processor;
     Stopwatch stopwatch;
     Image renderer_target;
     Image final_target;
     Image env_map;
-    bool running = false;
-    float invPixelCount;
-    int pixelCount;
+    bool running{false};
+    float invPixelCount{0.0f};
+    int pixelCount{0};
     std::unique_ptr<ISpacePartitioningStructure> sps;
 };
 
-ChromaRenderer::Impl::Impl() : state(State::IDLE)
+ChromaRenderer::Impl::Impl()
 {
     setSettings(settings);
-}
-
-ChromaRenderer::Impl::~Impl()
-{
 }
 
 void ChromaRenderer::Impl::updateMaterials()
@@ -80,16 +75,16 @@ void ChromaRenderer::Impl::updateMaterials()
     cudaPathTracer.setMaterials(scene.materials);
 }
 
-void ChromaRenderer::Impl::setPostProcessingSettings(const ChromaRenderer::PostProcessingSettings& a_settings)
+void ChromaRenderer::Impl::setPostProcessingSettings(const PostProcessingSettings& a_settings)
 {
     post_processor.adjustExposure = a_settings.adjust_exposure;
     post_processor.linearToSrbg = a_settings.linear_to_srgb;
     post_processor.tonemapping = a_settings.tonemapping;
 }
 
-ChromaRenderer::PostProcessingSettings ChromaRenderer::Impl::getPostProcessingSettings()
+ChromaRenderer::PostProcessingSettings ChromaRenderer::Impl::getPostProcessingSettings() const
 {
-    ChromaRenderer::PostProcessingSettings post_processing_settings;
+    PostProcessingSettings post_processing_settings{};
     post_processing_settings.adjust_exposure = post_processor.adjustExposure;
     post_processing_settings.linear_to_srgb = post_processor.linearToSrbg;
     post_processing_settings.tonemapping = post_processor.tonemapping;
@@ -98,7 +93,7 @@ ChromaRenderer::PostProcessingSettings ChromaRenderer::Impl::getPostProcessingSe
 
 ChromaRenderer::Progress ChromaRenderer::Impl::getProgress()
 {
-    Progress progress;
+    Progress progress{};
     progress.progress = cudaPathTracer.getProgress();
     progress.instant_rays_per_sec = cudaPathTracer.getInstantRaysPerSec();
     progress.finished_samples = cudaPathTracer.getFinishedSamples();
@@ -119,7 +114,9 @@ Image& ChromaRenderer::Impl::getTarget()
 bool ChromaRenderer::Impl::isIdle()
 {
     if (state == State::RENDERING && !isRunning())
+    {
         state = State::IDLE;
+    }
     return (state == State::IDLE);
 }
 
@@ -128,7 +125,9 @@ ChromaRenderer::State ChromaRenderer::Impl::getState()
     if (state == ChromaRenderer::RENDERING)
     {
         if (!isRunning())
+        {
             state = ChromaRenderer::IDLE;
+        }
     }
     /*if (state == ChromaRenderer::PROCESSINGSCENE)
     {
@@ -138,10 +137,10 @@ ChromaRenderer::State ChromaRenderer::Impl::getState()
     return state;
 }
 
-void ChromaRenderer::Impl::setSize(unsigned int width, unsigned int height)
+void ChromaRenderer::Impl::setSize(int width, int height)
 {
-    renderer_target.setSize(width, height);
-    final_target.setSize(width, height);
+    renderer_target.setSize(static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
+    final_target.setSize(static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
     scene.camera.setSize(width, height);
 }
 
@@ -193,16 +192,13 @@ void ChromaRenderer::Impl::importScene(const std::string& filename)
     }
 
     state = State::LOADINGSCENE;
-    ModelImporter::importcbscene(
-        filename,
-        scene,
-        static_cast<std::function<void()>>(std::bind(&ChromaRenderer::Impl::cbSceneLoadedScene, std::ref(*this))));
+    ModelImporter::importcbscene(filename, scene, [&]() { cbSceneLoadedScene(); });
 }
 
 void ChromaRenderer::Impl::setEnvMap(const float* data,
-                                     const uint32_t width,
-                                     const uint32_t height,
-                                     const uint32_t channels)
+                                     const std::uint32_t width,
+                                     const std::uint32_t height,
+                                     const std::uint32_t channels)
 {
     cudaPathTracer.setEnvMap(data, width, height, channels);
     env_map.setData(data, width, height);
@@ -210,9 +206,11 @@ void ChromaRenderer::Impl::setEnvMap(const float* data,
 
 void ChromaRenderer::Impl::importEnviromentMap(const std::string& filename)
 {
-    const uint32_t requested_channels = 4;
-    float* data = nullptr;
-    int width, height, channels;
+    const uint32_t requested_channels{4};
+    float* data{nullptr};
+    int width{0};
+    int height{0};
+    int channels{0};
     data = stbi_loadf(filename.c_str(), &width, &height, &channels, requested_channels);
 
     if (data == nullptr)
@@ -222,7 +220,7 @@ void ChromaRenderer::Impl::importEnviromentMap(const std::string& filename)
 
     std::cout << "Width: " << width << " Height: " << height << " Channels: " << channels << std::endl;
 
-    setEnvMap(data, width, height, requested_channels);
+    setEnvMap(data, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height), requested_channels);
 
     stbi_image_free(data);
 }
@@ -349,7 +347,7 @@ void ChromaRenderer::setPostProcessingSettings(const ChromaRenderer::PostProcess
     impl_->setPostProcessingSettings(settings);
 }
 
-ChromaRenderer::PostProcessingSettings ChromaRenderer::getPostProcessingSettings()
+ChromaRenderer::PostProcessingSettings ChromaRenderer::getPostProcessingSettings() const
 {
     return impl_->getPostProcessingSettings();
 }

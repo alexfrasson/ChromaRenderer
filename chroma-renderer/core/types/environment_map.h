@@ -7,12 +7,16 @@
 class EnvironmentMap
 {
   public:
-    EnvironmentMap(const float* data, const uint32_t width, const uint32_t height);
-    ~EnvironmentMap();
+    EnvironmentMap(const float* data, uint32_t width, uint32_t height);
+    EnvironmentMap(const EnvironmentMap&) = delete;
+    EnvironmentMap(const EnvironmentMap&&) = delete;
+    EnvironmentMap operator=(const EnvironmentMap&) = delete;
+    EnvironmentMap operator=(const EnvironmentMap&&) = delete;
+    ~EnvironmentMap() = default;
 
     const float* GetData()
     {
-        return data_;
+        return data_.data();
     }
 
     const Distribution& GetDistribution() const
@@ -26,7 +30,7 @@ class EnvironmentMap
     }
 
   private:
-    float* data_;
+    std::vector<float> data_;
     std::vector<float> pdf_;
     uint32_t width_;
     uint32_t height_;

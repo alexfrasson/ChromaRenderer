@@ -146,6 +146,8 @@ def _cuda_library_impl(ctx):
         if "-Wpedantic" in compiler_options:
             compiler_options.remove("-Wpedantic")
 
+        args.add("-Xcudafe", "--diag_suppress=esa_on_defaulted_function_ignored")
+
         args.add_all(compiler_options, before_each = "--compiler-options")
 
         #args.add("-Xcompiler", "\"{}\"".format(" -".join(ctx.fragments.cpp.cxxopts)))

@@ -2,11 +2,6 @@
 
 #include <iostream>
 
-Stopwatch::Stopwatch()
-{
-    elapsedMillis = std::chrono::milliseconds(0);
-}
-
 void Stopwatch::start()
 {
     elapsedMillis = std::chrono::milliseconds(0);
@@ -28,11 +23,12 @@ void Stopwatch::restart()
 
 StopwatchOpenGL::StopwatchOpenGL()
 {
-    glGenQueries(2, queries);
+    glGenQueries(2, &queries[0]);
 }
+
 StopwatchOpenGL::~StopwatchOpenGL()
 {
-    glDeleteQueries(2, queries);
+    glDeleteQueries(2, &queries[0]);
 }
 
 void StopwatchOpenGL::start()
@@ -52,10 +48,13 @@ double StopwatchOpenGL::elapsedMillis()
     {
         GLint available = 0;
         // Wait for all results to become available
-        while (!available)
+        while (available == 0)
+        {
             glGetQueryObjectiv(queries[1], GL_QUERY_RESULT_AVAILABLE, &available);
+        }
 
-        GLuint64 timeStamp0 = 0, timeStamp1 = 0;
+        GLuint64 timeStamp0 = 0;
+        GLuint64 timeStamp1 = 0;
         glGetQueryObjectui64v(queries[0], GL_QUERY_RESULT, &timeStamp0);
         glGetQueryObjectui64v(queries[1], GL_QUERY_RESULT, &timeStamp1);
         // OpenGL returns time in nanoseconds.

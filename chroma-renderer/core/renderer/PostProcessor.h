@@ -9,7 +9,7 @@ class PostProcessor
   public:
     PostProcessor();
 
-    void process(const Camera& cam, const Image& src, const Image& dst, const bool sync = true);
+    void process(const Camera& cam, const Image& src, const Image& dst, bool sync = true);
 
     bool tonemapping{true};
     bool linearToSrbg{true};

@@ -102,7 +102,14 @@ def handle_python_files(check_only):
 
     if check_only:
         proc_result = subprocess.run(
-            ["python3.7", "-m", "black", "--diff", "--check", "./scripts",],
+            [
+                "python3.7",
+                "-m",
+                "black",
+                "--diff",
+                "--check",
+                "./scripts",
+            ],
             capture_output=True,
             text=True,
         )
@@ -112,7 +119,12 @@ def handle_python_files(check_only):
             return False
     else:
         subprocess.run(
-            ["python3.7", "-m", "black", "./scripts",],
+            [
+                "python3.7",
+                "-m",
+                "black",
+                "./scripts",
+            ],
             capture_output=True,
             check=True,
             text=True,

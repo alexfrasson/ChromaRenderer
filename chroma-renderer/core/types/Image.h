@@ -4,51 +4,50 @@
 
 #include <cstdint>
 #include <glad/glad.h>
+#include <vector>
 
 class Image
 {
   private:
-    float* buffer;
-    unsigned int width;
-    unsigned int height;
-    unsigned short colorComponents = 4;
-    bool hasDataChanged;
+    std::vector<float> buffer;
+    std::uint32_t width{0};
+    std::uint32_t height{0};
+    std::uint8_t colorComponents = 4;
+    bool hasDataChanged{false};
 
   public:
-    GLuint textureID;
+    GLuint textureID{0};
 
-    Image();
-    ~Image();
-    Color getColor(unsigned int widthPixelPos, unsigned int heightPixelPos);
-    void setColor(unsigned int widthPixelPos,
-                  unsigned int heightPixelPos,
-                  unsigned int r,
-                  unsigned int g,
-                  unsigned int b,
-                  unsigned int a);
-    void setColor(unsigned int widthPixelPos, unsigned int heightPixelPos, const Color& color);
+    Color getColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos);
+    void setColor(std::uint32_t widthPixelPos,
+                  std::uint32_t heightPixelPos,
+                  std::uint32_t r,
+                  std::uint32_t g,
+                  std::uint32_t b,
+                  std::uint32_t a);
+    void setColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos, const Color& color);
     void clear();
-    void setSize(unsigned int width, unsigned int height);
-    void setData(const float* data, const uint32_t width, const uint32_t height, const unsigned short components = 4);
+    void setSize(std::uint32_t width, std::uint32_t height);
+    void setData(const float* data, std::uint32_t width, std::uint32_t height, std::uint8_t components = 4);
     float getAspectRatio() const
     {
         return (float)width / (float)height;
     }
-    inline unsigned int mapPosToArray(int i, int j)
+    inline std::uint32_t mapPosToArray(std::uint32_t i, std::uint32_t j) const
     {
         return (width * j + i) * colorComponents;
     }
-    inline unsigned int getWidth() const
+    inline std::uint32_t getWidth() const
     {
         return width;
     }
-    inline unsigned int getHeight() const
+    inline std::uint32_t getHeight() const
     {
         return height;
     }
     inline const float* getBuffer()
     {
-        return buffer;
+        return &buffer[0];
     }
 
     void update();
