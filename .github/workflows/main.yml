@@ -2,7 +2,6 @@ name: CI
 
 on:
   push: {}
-  #pull_request: {}
 
 jobs:
   format:
@@ -16,18 +15,6 @@ jobs:
         shell: bash
         run: |
           ./scripts/formatting-checks.sh
-
-  clangtidy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Static code analysis
-        shell: bash
-        run: |
-          ./scripts/install_deps.sh
-          export CUDA_PATH="/usr/local/cuda-10.2"
-          sudo apt-get -y -qq install clang-tidy-10 >/dev/null
-          bazel build --config=clang_tidy --keep_going //chroma-renderer/...
 
   windows:
     needs: format
@@ -47,10 +34,23 @@ jobs:
   ubuntu:
     needs: format
     runs-on: ubuntu-latest
-
+    env:
+      CUDA_PATH: /usr/local/cuda-10.2
+      CC_CONFIGURE_DEBUG: 1
     steps:
       - uses: actions/checkout@v2
+      - name: Install dependencies
+        shell: bash
+        run: |
+          ./scripts/install_deps.sh
+
       - name: Build
         shell: bash
         run: |
-          ./scripts/build.sh
+          bazelisk build --config=linux --verbose_failures //...
+          bazelisk test --config=linux --verbose_failures //...
+
+      - name: Static code analysis
+        shell: bash
+        run: |
+          bazelisk build --config=clang_tidy --keep_going //chroma-renderer/...

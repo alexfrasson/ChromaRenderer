@@ -15,9 +15,6 @@ function install_cuda() {
         cuda-curand-dev-10-2 \
         cuda-cudart-dev-10-2 \
         >/dev/null
-
-    export CUDA_PATH="/usr/local/cuda-10.2"
-    echo "CUDA_PATH set to '$CUDA_PATH'"
 }
 
 function install_deps() {
@@ -25,6 +22,7 @@ function install_deps() {
 
     echo "Installing other dependencies..."
     sudo apt-get -y -qq install libgtk-3-dev >/dev/null
+    sudo apt-get -y -qq install clang-tidy-10 >/dev/null
 }
 
 install_deps
