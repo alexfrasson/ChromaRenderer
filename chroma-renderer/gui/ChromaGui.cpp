@@ -1,4 +1,5 @@
 #include "chroma-renderer/gui/ChromaGui.h"
+#include "chroma-renderer/core/utility/floating_point_equality.h"
 #include "chroma-renderer/gui/ChromaGUIUtils.h"
 
 #include <GLFW/glfw3.h>
@@ -475,7 +476,8 @@ bool ViewportWindow(ChromaRenderer* cr)
                     somethingChanged = true;
                 }
 
-                if (ImGui::GetIO().MouseDelta.x != 0 || ImGui::GetIO().MouseDelta.y != 0)
+                if (!AlmostEquals(ImGui::GetIO().MouseDelta.x, 0.0f) ||
+                    !AlmostEquals(ImGui::GetIO().MouseDelta.y, 0.0f))
                 {
                     glm::vec2 angle = glm::vec2(ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y) *
                                       ImGui::GetIO().DeltaTime * lookSens;

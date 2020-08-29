@@ -1,4 +1,5 @@
 #include "chroma-renderer/core/scene/Camera.h"
+#include "chroma-renderer/core/utility/floating_point_equality.h"
 
 #include <glm/geometric.hpp>
 
@@ -22,16 +23,17 @@ void Camera::lookAt(glm::vec3 target)
     right = glm::normalize(right);
     up = glm::cross(forward, right);
 
-    // take care of the singularity by hardwiring in specific camera orientations
-    if (eye.x == target.x && eye.z == target.z && eye.y > target.y)
-    { // camera looking vertically down
+    if (AlmostEquals(eye.x, target.x) && AlmostEquals(eye.z, target.z) && eye.y > target.y)
+    {
+        // camera looking vertically down
         right = glm::vec3(0, 0, 1);
         up = glm::vec3(1, 0, 0);
         forward = glm::vec3(0, 1, 0);
     }
 
-    if (eye.x == target.x && eye.z == target.z && eye.y < target.y)
-    { // camera looking vertically up
+    if (AlmostEquals(eye.x, target.x) && AlmostEquals(eye.z, target.z) && eye.y < target.y)
+    {
+        // camera looking vertically up
         right = glm::vec3(1, 0, 0);
         up = glm::vec3(0, 0, 1);
         forward = glm::vec3(0, -1, 0);

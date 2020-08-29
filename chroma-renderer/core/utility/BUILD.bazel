@@ -7,9 +7,16 @@ cc_library(
     srcs = glob(["*.cpp"]),
     hdrs = glob(["*.h"]),
     deps = [
-        "//chroma-renderer/core/scene",
-        "//chroma-renderer/core/types",
         "//third-party/glad",
         "//third-party/glm",
+    ],
+)
+
+cc_test(
+    name = "utility-test",
+    srcs = glob(["test/*.cpp"]),
+    deps = [
+        ":utility",
+        "@googletest//:gtest_main",
     ],
 )

@@ -2,8 +2,8 @@
 
 #include <gtest/gtest.h>
 
-TEST(DistributionTest, Foo_Bar) // NOLINT(hicpp-no-array-decay, cppcoreguidelines-owning-memory,
-                                // cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
+// NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
+TEST(DistributionTest, Foo_Bar)
 {
     const std::size_t expected_index = 1;
     const float value = 0.5;
@@ -15,8 +15,8 @@ TEST(DistributionTest, Foo_Bar) // NOLINT(hicpp-no-array-decay, cppcoreguideline
     EXPECT_EQ(actual_index, expected_index);
 }
 
-TEST(DistributionTest, Foo_Bar2) // NOLINT(hicpp-no-array-decay, cppcoreguidelines-owning-memory,
-                                 // cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
+// NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
+TEST(DistributionTest, Foo_Bar2)
 {
     const std::size_t expected_index = 1;
     const float value = 0.5;
