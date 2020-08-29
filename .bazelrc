@@ -24,7 +24,7 @@ build:linux --copt=-Wpedantic
 build:linux --copt=-Wextra
 build:linux --copt=-Wconversion
 build:linux --copt=-Wfloat-conversion
-#build:linux --copt=-Wfloat-equal
+build:linux --copt=-Wfloat-equal
 build:linux --copt=-Wsign-compare
 build:linux --copt=-Wshadow
 build:linux --copt=-Wno-deprecated-declarations
@@ -33,6 +33,7 @@ build:linux --per_file_copt=third-party/.*@-w
 build:linux --per_file_copt=external/.*@-w
 build:linux --cxxopt=-std=c++17
 build:linux --cxxopt=-mavx
+build:linux --linkopt=-lstdc++fs
 
 build:linux_dbg --config=linux
 build:linux_dbg --compilation_mode=dbg

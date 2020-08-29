@@ -14,7 +14,7 @@ cc_library(
 )
 
 cc_test(
-    name = "utility-test",
+    name = "types-test",
     srcs = glob(["test/*.cpp"]),
     deps = [
         ":types",

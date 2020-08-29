@@ -8,6 +8,7 @@ cc_library(
     hdrs = glob(["*.h"]),
     deps = [
         "//chroma-renderer/core/types",
+        "//chroma-renderer/core/utility",
         "//third-party/glm",
     ],
 )

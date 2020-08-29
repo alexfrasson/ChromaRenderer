@@ -12,10 +12,6 @@ cc_binary(
         "//chroma-renderer/resources/fonts",
         "//chroma-renderer/shaders",
     ],
-    linkopts = select({
-        "//:on_linux": ["-lstdc++fs"],
-        "//:on_windows": [],
-    }),
     deps = [
         "//chroma-renderer/core/renderer",
         "//third-party/argparse",

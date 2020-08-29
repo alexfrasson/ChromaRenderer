@@ -16,13 +16,15 @@
 #include <iostream>
 #include <thread>
 
-template <typename T> constexpr inline void SAFE_CUDA_FREE(T& x)
+template <typename T>
+constexpr inline void SAFE_CUDA_FREE(T& x)
 {
     cudaErrorCheck(cudaFree(x));
     x = nullptr;
 }
 
-template <typename T> constexpr inline void SAFE_CUDA_FREE_ARRAY(T& x)
+template <typename T>
+constexpr inline void SAFE_CUDA_FREE_ARRAY(T& x)
 {
     cudaErrorCheck(cudaFreeArray(x));
     x = nullptr;
