@@ -16,5 +16,5 @@ class PostProcessor
     bool adjust_exposure{true};
 
   private:
-    GLSLProgram computeShader_;
+    GLSLProgram compute_shader_;
 };

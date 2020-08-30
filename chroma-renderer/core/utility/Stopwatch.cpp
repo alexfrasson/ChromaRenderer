@@ -60,5 +60,5 @@ double StopwatchOpenGL::elapsedMillis()
         // OpenGL returns time in nanoseconds.
         elapsed_millis_ = (double)(timeStamp1 - timeStamp0) / 1000000.0;
     }
-    return elapsedMillis();
+    return elapsed_millis_;
 }

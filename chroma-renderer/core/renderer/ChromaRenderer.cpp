@@ -53,15 +53,15 @@ class ChromaRenderer::Impl
     RendererSettings settings_;
     Scene scene_;
     State state_{State::kIdle};
-    CudaPathTracer cudaPathTracer_;
+    CudaPathTracer cuda_path_tracer_;
     PostProcessor post_processor_;
     Stopwatch stopwatch_;
     Image renderer_target_;
     Image final_target_;
     Image env_map_;
     bool running_{false};
-    float invPixelCount_{0.0f};
-    int pixelCount_{0};
+    float inv_pixel_count_{0.0f};
+    int pixel_count_{0};
     std::unique_ptr<ISpacePartitioningStructure> sps_;
 };
 
@@ -72,7 +72,7 @@ ChromaRenderer::Impl::Impl()
 
 void ChromaRenderer::Impl::updateMaterials()
 {
-    cudaPathTracer_.setMaterials(scene_.materials);
+    cuda_path_tracer_.setMaterials(scene_.materials);
 }
 
 void ChromaRenderer::Impl::setPostProcessingSettings(const PostProcessingSettings& a_settings)
@@ -94,10 +94,10 @@ ChromaRenderer::PostProcessingSettings ChromaRenderer::Impl::getPostProcessingSe
 ChromaRenderer::Progress ChromaRenderer::Impl::getProgress()
 {
     Progress progress{};
-    progress.progress = cudaPathTracer_.getProgress();
-    progress.instant_rays_per_sec = cudaPathTracer_.getInstantRaysPerSec();
-    progress.finished_samples = cudaPathTracer_.getFinishedSamples();
-    progress.target_samples_per_pixel = cudaPathTracer_.getTargetSamplesPerPixel();
+    progress.progress = cuda_path_tracer_.getProgress();
+    progress.instant_rays_per_sec = cuda_path_tracer_.getInstantRaysPerSec();
+    progress.finished_samples = cuda_path_tracer_.getFinishedSamples();
+    progress.target_samples_per_pixel = cuda_path_tracer_.getTargetSamplesPerPixel();
     return progress;
 }
 
@@ -149,9 +149,9 @@ void ChromaRenderer::Impl::setSettings(const RendererSettings& psettings)
     settings_ = psettings;
     scene_.camera.horizontalFOV(settings_.horizontal_fov);
     setSize(settings_.width, settings_.height);
-    pixelCount_ = settings_.width * settings_.height;
-    invPixelCount_ = 1.f / (float)pixelCount_;
-    cudaPathTracer_.setSettings(settings_);
+    pixel_count_ = settings_.width * settings_.height;
+    inv_pixel_count_ = 1.f / (float)pixel_count_;
+    cuda_path_tracer_.setSettings(settings_);
 }
 
 RendererSettings ChromaRenderer::Impl::getSettings()
@@ -169,8 +169,8 @@ void ChromaRenderer::Impl::startRender()
     renderer_target_.clear();
     final_target_.clear();
 
-    cudaPathTracer_.setTargetImage(renderer_target_);
-    cudaPathTracer_.setCamera(scene_.camera);
+    cuda_path_tracer_.setTargetImage(renderer_target_);
+    cuda_path_tracer_.setCamera(scene_.camera);
 
     stopwatch_.restart();
 
@@ -200,7 +200,7 @@ void ChromaRenderer::Impl::setEnvMap(const float* data,
                                      const std::uint32_t height,
                                      const std::uint32_t channels)
 {
-    cudaPathTracer_.setEnvMap(data, width, height, channels);
+    cuda_path_tracer_.setEnvMap(data, width, height, channels);
     env_map_.setData(data, width, height);
 }
 
@@ -230,7 +230,7 @@ void ChromaRenderer::Impl::cbSceneLoadedScene()
     state_ = State::kProcessingScene;
     sps_ = std::make_unique<BVH>();
     sps_->build(scene_.meshes);
-    cudaPathTracer_.setSceneGeometry(sps_.get(), scene_.materials);
+    cuda_path_tracer_.setSceneGeometry(sps_.get(), scene_.materials);
 
     settings_.width = scene_.camera.width;
     settings_.height = scene_.camera.height;
@@ -238,8 +238,8 @@ void ChromaRenderer::Impl::cbSceneLoadedScene()
 
     setSettings(settings_);
 
-    cudaPathTracer_.setTargetImage(renderer_target_);
-    cudaPathTracer_.setCamera(scene_.camera);
+    cuda_path_tracer_.setTargetImage(renderer_target_);
+    cuda_path_tracer_.setCamera(scene_.camera);
 
     state_ = State::kIdle;
 }
@@ -248,9 +248,9 @@ void ChromaRenderer::Impl::update()
 {
     if (state_ == State::kRendering)
     {
-        cudaPathTracer_.render();
+        cuda_path_tracer_.render();
         post_processor_.process(scene_.camera, renderer_target_, final_target_, true);
-        if (cudaPathTracer_.getProgress() >= 1.0f)
+        if (cuda_path_tracer_.getProgress() >= 1.0f)
         {
             running_ = false;
             state_ = State::kIdle;
@@ -262,7 +262,7 @@ bool ChromaRenderer::Impl::isRunning()
 {
     if (running_)
     {
-        running_ = cudaPathTracer_.getFinishedSamples() < cudaPathTracer_.getTargetSamplesPerPixel();
+        running_ = cuda_path_tracer_.getFinishedSamples() < cuda_path_tracer_.getTargetSamplesPerPixel();
         if (!running_)
         {
             stopwatch_.stop();
