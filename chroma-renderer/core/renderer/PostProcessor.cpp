@@ -25,7 +25,7 @@ void PostProcessor::process(const Camera& cam, const Image& src, const Image& ds
 
     computeShader.use();
     computeShader.setUniform("apperture", cam.apperture);
-    computeShader.setUniform("shutterTime", cam.shutterTime);
+    computeShader.setUniform("shutterTime", cam.shutter_time);
     computeShader.setUniform("iso", cam.iso);
     computeShader.setUniform("tonemapping", tonemapping);
     computeShader.setUniform("linearToSrbg", linearToSrbg);

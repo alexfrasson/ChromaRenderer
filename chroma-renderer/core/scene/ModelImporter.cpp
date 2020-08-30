@@ -26,12 +26,12 @@ class AssimpLogging
     AssimpLogging()
     {
         Assimp::DefaultLogger::create();
-        Assimp::DefaultLogger::get()->attachStream(&custom_log_stream, severity);
+        Assimp::DefaultLogger::get()->attachStream(&custom_log_stream_, severity_);
     }
 
     ~AssimpLogging()
     {
-        Assimp::DefaultLogger::get()->detatchStream(&custom_log_stream, severity);
+        Assimp::DefaultLogger::get()->detatchStream(&custom_log_stream_, severity_);
         Assimp::DefaultLogger::kill();
     }
 
@@ -41,8 +41,8 @@ class AssimpLogging
     AssimpLogging& operator=(AssimpLogging&&) = delete;
 
   private:
-    CustomAssimpLogStream custom_log_stream{};
-    const std::uint32_t severity =
+    CustomAssimpLogStream custom_log_stream_{};
+    const std::uint32_t severity_ =
         Assimp::Logger::Debugging | Assimp::Logger::Info | Assimp::Logger::Err | Assimp::Logger::Warn; // NOLINT
 };
 
@@ -541,7 +541,7 @@ bool convert(const aiScene* aiscene, Scene& s)
         // tan(FOV_H/2) = (screen_width/2) / screenPlaneDistance
         // tan(FOV_V / 2) = (screen_height / 2) / screenPlaneDistance
         // tan(FOV_H/2) / screen_width = tan(FOV_V/2) / screen_height
-        s.camera.aspectRatio = cam->mAspect;
+        s.camera.aspect_ratio = cam->mAspect;
         s.camera.width = 640;
         s.camera.d = ((float)s.camera.width / 2.0f) / tanf(cam->mHorizontalFOV / 2.0f);
         s.camera.height = static_cast<int>((float)s.camera.width / cam->mAspect);

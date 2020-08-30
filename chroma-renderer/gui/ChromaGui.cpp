@@ -340,7 +340,7 @@ bool settingsWindow(ChromaRenderer* cr)
             }
 
             ImGui::DragFloat("Apperture", &scene.camera.apperture, 0.01f, 0.0001f, 1000.0f);
-            ImGui::DragFloat("Shutter time", &scene.camera.shutterTime, 0.01f, 0.0001f, 1000.0f);
+            ImGui::DragFloat("Shutter time", &scene.camera.shutter_time, 0.01f, 0.0001f, 1000.0f);
             ImGui::DragFloat("ISO", &scene.camera.iso, 1.0f, 1.0f, 6000.0f);
 
             ChromaRenderer::PostProcessingSettings settings = cr->getPostProcessingSettings();

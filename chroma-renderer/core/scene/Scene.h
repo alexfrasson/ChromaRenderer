@@ -20,7 +20,7 @@ class Scene
     std::vector<Material> materials;
     Camera camera;
     bool ready{false};
-    float* hdriEnvData{nullptr};
-    int hdriEnvWidth{0};
-    int hdriEnvHeight{0};
+    float* hdri_env_data{nullptr};
+    int hdri_env_width{0};
+    int hdri_env_height{0};
 };
