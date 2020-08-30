@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <iostream>
 
-constexpr double pi{3.1415926535897932384626433};
+constexpr double kPi{3.1415926535897932384626433};
 
 double luma(double r, double g, double b)
 {
@@ -50,7 +50,7 @@ EnvironmentMap::EnvironmentMap(const float* data, const uint32_t width, const ui
         double l = luma(r, g, b);
 
         const double v = floorf((float)i / (float)width) / (float)height;
-        const double theta = v * pi;
+        const double theta = v * kPi;
         const double sin_theta = std::sin(theta);
         l *= sin_theta;
 

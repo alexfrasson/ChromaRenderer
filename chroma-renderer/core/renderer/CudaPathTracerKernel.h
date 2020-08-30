@@ -18,7 +18,7 @@ constexpr void cudaErrorCheck(const cudaError_t error_code)
 }
 
 // NOLINTNEXTLINE(clang-diagnostic-unused-const-variable)
-constexpr uint32_t MAX_PATH_DEPTH{3};
+constexpr uint32_t kMaxPathDepth{3};
 
 extern "C" void setTextureFilterMode(bool b_linear_filter);
 extern "C" void bindTextureToArray(cudaArray* aarray);

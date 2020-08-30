@@ -432,8 +432,8 @@ void extractMaterials(const aiScene* aiscene, Scene& s)
     if (!aiscene->HasMaterials())
     {
         Material m;
-        m.kd = Color::GREEN;
-        m.ke = Color::BLACK;
+        m.kd = Color::kGreen;
+        m.ke = Color::kBlack;
         s.materials.emplace_back(m);
         return;
     }

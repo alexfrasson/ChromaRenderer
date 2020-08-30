@@ -7,7 +7,7 @@
 
 #include <cfloat>
 
-constexpr float epsilon{0.000001f};
+constexpr float kEpsilon{0.000001f};
 
 __host__ __device__ inline int binarySearch(const float* cdf, const int cdf_size, const float rand_var)
 {
@@ -220,7 +220,7 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle,
     const glm::vec3 pvec = glm::cross(ray->direction, edge1);
     const float det = glm::dot(edge0, pvec);
 
-    if (det > -epsilon && det < epsilon)
+    if (det > -kEpsilon && det < kEpsilon)
     {
         return false;
     }
@@ -249,7 +249,7 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle,
     intersection->p = ray->origin + intersection->distance * ray->direction;
     float gama = 1.0f - (u + v);
     intersection->n = u * triangle->n[1] + v * triangle->n[2] + gama * triangle->n[0];
-    const bool backface = det < -epsilon;
+    const bool backface = det < -kEpsilon;
     intersection->n = (backface ? -1.0f : 1.0f) * glm::normalize(intersection->n);
     intersection->material = triangle->material;
 
@@ -263,7 +263,7 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle, 
     const glm::vec3 pvec = glm::cross(ray->direction, edge1);
     const float det = glm::dot(edge0, pvec);
 
-    if (det > -epsilon && det < epsilon)
+    if (det > -kEpsilon && det < kEpsilon)
     {
         return false;
     }

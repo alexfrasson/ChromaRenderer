@@ -13,8 +13,8 @@
 #include <filesystem>
 #include <iostream>
 
-constexpr auto radtodegree = 57.295779513082320876798154814105f;
-constexpr auto degreetorad = 0.01745329251994329576923690768489f;
+constexpr auto kRadtodegree = 57.295779513082320876798154814105f;
+constexpr auto kDegreetorad = 0.01745329251994329576923690768489f;
 
 namespace fs = std::filesystem;
 
@@ -23,8 +23,8 @@ ImVec2 main_menu_bar_size;
 namespace chromagui
 {
 
-constexpr std::size_t max_frames{32};
-std::vector<float> frame_times{max_frames};
+constexpr std::size_t kMaxFrames{32};
+std::vector<float> frame_times{kMaxFrames};
 std::size_t current_frame_time_index{0};
 
 float movement_speed = 30.0f;
@@ -331,10 +331,10 @@ bool settingsWindow(ChromaRenderer* cr)
 
             Scene& scene = cr->getScene();
 
-            float hfov = rs.horizontal_fov * radtodegree;
+            float hfov = rs.horizontal_fov * kRadtodegree;
             if (ImGui::DragFloat("HFov", &hfov, 1, 5, 360))
             {
-                rs.horizontal_fov = hfov * degreetorad;
+                rs.horizontal_fov = hfov * kDegreetorad;
                 scene.camera.horizontalFOV(rs.horizontal_fov);
                 something_changed = true;
             }

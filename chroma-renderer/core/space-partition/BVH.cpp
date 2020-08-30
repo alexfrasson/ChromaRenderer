@@ -8,9 +8,9 @@
 
 #define WIDEST_AXIS_SPLIT_ONLY
 
-constexpr std::int32_t num_bins = 8;
-constexpr float epsilon = 0.000001f;
-constexpr std::int32_t min_leaf_size = 10;
+constexpr std::int32_t kNumBins = 8;
+constexpr float kEpsilon = 0.000001f;
+constexpr std::int32_t kMinLeafSize = 10;
 // constexpr float KT = 1.0f; // Node traversal cost
 // constexpr float KI = 1.5f; // Triangle intersection cost
 
@@ -173,7 +173,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
 
     // Check if we should make this node a leaf
     std::size_t size = end_id - start_id;
-    if (size <= min_leaf_size)
+    if (size <= kMinLeafSize)
     {
         node->bbox = trianglesbbox;
         node->start_id = static_cast<std::int32_t>(start_id);
@@ -202,18 +202,18 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
 
     // Precompute constants. This constants will be used to calculate the each centroid's binid.
     // BinID[i] = k1[i] * (tsc[n][i] - k0[i])
-    float k1 = (num_bins * (1 - epsilon)) / (centroidsbbox.max[widest_dim] - centroidsbbox.min[widest_dim]);
+    float k1 = (kNumBins * (1 - kEpsilon)) / (centroidsbbox.max[widest_dim] - centroidsbbox.min[widest_dim]);
     float k0 = centroidsbbox.min[widest_dim];
 
     // Bins for each axis
-    std::int32_t bin[num_bins];
-    for (std::int32_t j = 0; j < num_bins; j++)
+    std::int32_t bin[kNumBins];
+    for (std::int32_t j = 0; j < kNumBins; j++)
     {
         bin[j] = 0;
     }
 
     // Bin's bounds
-    BoundingBox binbound[num_bins];
+    BoundingBox binbound[kNumBins];
 
     for (std::size_t i = start_id; i < end_id; i++)
     {
@@ -229,7 +229,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
     std::int32_t min_cost_dim = widest_dim;
     std::int32_t min_cost_bin = -1;
 
-    for (std::int32_t i = 0; i < num_bins; i++)
+    for (std::int32_t i = 0; i < kNumBins; i++)
     {
         std::int32_t nl{0};
         std::int32_t nr{0};
@@ -243,7 +243,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
                 bbl.expand(binbound[j]);
             }
         }
-        for (std::int32_t j = i + 1; j < num_bins; j++)
+        for (std::int32_t j = i + 1; j < kNumBins; j++)
         {
             if (bin[j] > 0)
             {
@@ -441,7 +441,7 @@ std::unique_ptr<BvhNode> BVH::buildnode(std::int32_t depth,
 
     // Check if we should make this node a leaf
     std::size_t size = end_id - start_id;
-    if (size <= min_leaf_size)
+    if (size <= kMinLeafSize)
     {
         node->bbox = trianglesbbox;
         node->start_id = static_cast<std::int32_t>(start_id);

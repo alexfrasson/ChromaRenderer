@@ -54,12 +54,12 @@ class Color
         b /= rhs;
     }
 
-    static const Color BLACK;
-    static const Color BLUE;
-    static const Color GREEN;
-    static const Color RED;
-    static const Color WHITE;
-    static const Color GRAY;
+    static const Color kBlack;
+    static const Color kBlue;
+    static const Color kGreen;
+    static const Color kRed;
+    static const Color kWhite;
+    static const Color kGray;
 
     float r{1.0f}, g{1.0f}, b{1.0f};
 };

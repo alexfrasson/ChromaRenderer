@@ -227,7 +227,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         pathIteration.ray_origin = hitpoint;
         pathIteration.bounce++;
 
-        if (pathIteration.bounce == MAX_PATH_DEPTH || brdf_sample.pdf <= 0.0f || brdf_cos_theta <= 0.0f)
+        if (pathIteration.bounce == kMaxPathDepth || brdf_sample.pdf <= 0.0f || brdf_cos_theta <= 0.0f)
         {
             finishSample(pos, accuBuffer, &pathIteration);
         }
