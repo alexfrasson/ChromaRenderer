@@ -240,14 +240,14 @@ std::vector<CudaLinearBvhNode> sceneToCudaLinearBvhNode(const ISpacePartitioning
     const BVH* bvh = dynamic_cast<const BVH*>(sps);
 
     std::vector<CudaLinearBvhNode> cudaLinearBVH;
-    cudaLinearBVH.reserve(bvh->nNodes);
+    cudaLinearBVH.reserve(bvh->n_nodes);
 
-    for (unsigned int i = 0; i < bvh->nNodes; i++)
+    for (unsigned int i = 0; i < bvh->n_nodes; i++)
     {
         CudaLinearBvhNode n;
         n.axis = bvh->lroot[i].axis;
-        n.nPrimitives = bvh->lroot[i].nPrimitives;
-        n.primitivesOffset = bvh->lroot[i].primitivesOffset;
+        n.nPrimitives = bvh->lroot[i].n_primitives;
+        n.primitivesOffset = bvh->lroot[i].primitives_offset;
         n.bbox.max.x = bvh->lroot[i].bbox.max.x;
         n.bbox.max.y = bvh->lroot[i].bbox.max.y;
         n.bbox.max.z = bvh->lroot[i].bbox.max.z;

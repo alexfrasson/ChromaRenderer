@@ -10,9 +10,9 @@ struct BvhNode
 {
     BoundingBox bbox{};
     std::unique_ptr<BvhNode> child[2] = {nullptr, nullptr};
-    std::int32_t startID{0};
-    std::int32_t endID{0};
-    bool isLeaf{false};
+    std::int32_t start_id{0};
+    std::int32_t end_id{0};
+    bool is_leaf{false};
     uint8_t axis{0};
 };
 
@@ -22,10 +22,10 @@ struct LinearBvhNode
     BoundingBox bbox{};
     union {
 
-        std::uint32_t primitivesOffset;  // Leaf
-        std::uint32_t secondChildOffset; // Interior
+        std::uint32_t primitives_offset;   // Leaf
+        std::uint32_t second_child_offset; // Interior
     };
-    std::uint8_t nPrimitives{0}; // 0 -> interior node
+    std::uint8_t n_primitives{0}; // 0 -> interior node
     std::uint8_t axis{0};
     std::uint8_t pad[2];
 };
@@ -78,9 +78,9 @@ class BVH : public ISpacePartitioningStructure
 
     std::size_t countPrim(LinearBvhNode* node, std::size_t n);
 
-    std::uint32_t nLeafs{0};
-    std::uint32_t nNodes{0};
-    std::int32_t maxDepth{0};
+    std::uint32_t n_leafs{0};
+    std::uint32_t n_nodes{0};
+    std::int32_t max_depth{0};
     std::vector<Triangle*> triangles{};
     std::vector<std::size_t> id{};
     std::unique_ptr<BvhNode> root{};
