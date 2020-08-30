@@ -26,12 +26,12 @@ class AssimpLogging
     AssimpLogging()
     {
         Assimp::DefaultLogger::create();
-        Assimp::DefaultLogger::get()->attachStream(&custom_log_stream, severity);
+        Assimp::DefaultLogger::get()->attachStream(&custom_log_stream_, severity_);
     }
 
     ~AssimpLogging()
     {
-        Assimp::DefaultLogger::get()->detatchStream(&custom_log_stream, severity);
+        Assimp::DefaultLogger::get()->detatchStream(&custom_log_stream_, severity_);
         Assimp::DefaultLogger::kill();
     }
 
@@ -41,18 +41,18 @@ class AssimpLogging
     AssimpLogging& operator=(AssimpLogging&&) = delete;
 
   private:
-    CustomAssimpLogStream custom_log_stream{};
-    const std::uint32_t severity =
+    CustomAssimpLogStream custom_log_stream_{};
+    const std::uint32_t severity_ =
         Assimp::Logger::Debugging | Assimp::Logger::Info | Assimp::Logger::Err | Assimp::Logger::Warn; // NOLINT
 };
 
-std::unique_ptr<aiScene> importAssimpScene(const std::string& fileName)
+std::unique_ptr<aiScene> importAssimpScene(const std::string& file_name)
 {
     AssimpLogging assimp_logging{};
 
     Assimp::Importer importer;
     importer.SetExtraVerbose(true);
-    importer.ReadFile(fileName, aiProcess_Triangulate
+    importer.ReadFile(file_name, aiProcess_Triangulate
                       //| aiProcess_JoinIdenticalVertices
                       //| aiProcess_SortByPType
                       //| aiProcess_PreTransformVertices
@@ -62,14 +62,14 @@ std::unique_ptr<aiScene> importAssimpScene(const std::string& fileName)
                       //| aiProcess_ImproveCacheLocality
     );
 
-    std::unique_ptr<aiScene> assimpScene{importer.GetOrphanedScene()};
-    if (assimpScene == nullptr)
+    std::unique_ptr<aiScene> assimp_scene{importer.GetOrphanedScene()};
+    if (assimp_scene == nullptr)
     {
         std::cout << importer.GetErrorString() << std::endl;
         return {nullptr};
     }
 
-    return assimpScene;
+    return assimp_scene;
 }
 
 aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
@@ -82,28 +82,28 @@ aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
         node = node->mParent;
     }
 
-    aiMatrix4x4 localToWorld{};
+    aiMatrix4x4 local_to_world{};
 
-    std::for_each(transforms.rbegin(), transforms.rend(), [&](const auto& transform) { localToWorld *= transform; });
+    std::for_each(transforms.rbegin(), transforms.rend(), [&](const auto& transform) { local_to_world *= transform; });
 
-    return localToWorld;
+    return local_to_world;
 }
 
 void getTotalNumvberOfTrianglesAndVertices(const aiScene* scene,
                                            const aiNode* node,
-                                           std::uint64_t* nTriangles,
-                                           std::uint64_t* nVertices)
+                                           std::uint64_t* n_triangles,
+                                           std::uint64_t* n_vertices)
 {
     for (std::uint32_t i = 0; i < node->mNumChildren; i++)
     {
-        getTotalNumvberOfTrianglesAndVertices(scene, node->mChildren[i], nTriangles, nVertices);
+        getTotalNumvberOfTrianglesAndVertices(scene, node->mChildren[i], n_triangles, n_vertices);
     }
 
     for (std::uint32_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        *nTriangles += mesh->mNumFaces;
-        *nVertices += mesh->mNumVertices;
+        *n_triangles += mesh->mNumFaces;
+        *n_vertices += mesh->mNumVertices;
     }
 }
 
@@ -158,25 +158,25 @@ void printMeshInfo(const aiScene* scene)
 }
 
 // Compute the absolute transformation matrices of each node
-void ComputeAbsoluteTransform(aiNode* pcNode)
+void computeAbsoluteTransform(aiNode* pc_node)
 {
-    if (pcNode->mParent != nullptr)
+    if (pc_node->mParent != nullptr)
     {
-        pcNode->mTransformation = pcNode->mParent->mTransformation * pcNode->mTransformation;
+        pc_node->mTransformation = pc_node->mParent->mTransformation * pc_node->mTransformation;
     }
 
-    for (std::uint32_t i = 0; i < pcNode->mNumChildren; ++i)
+    for (std::uint32_t i = 0; i < pc_node->mNumChildren; ++i)
     {
-        ComputeAbsoluteTransform(pcNode->mChildren[i]);
+        computeAbsoluteTransform(pc_node->mChildren[i]);
     }
 }
 
 // If nodes have been transformed before hand
 void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, Mesh* m, std::uint32_t& offset)
 {
-    aiMatrix4x4 mWorldIT = node->mTransformation;
-    mWorldIT.Inverse().Transpose();
-    aiMatrix3x3 m3x3{mWorldIT};
+    aiMatrix4x4 m_world_it = node->mTransformation;
+    m_world_it.Inverse().Transpose();
+    aiMatrix3x3 m3x3{m_world_it};
 
     for (std::size_t i = 0; i < node->mNumMeshes; i++)
     {
@@ -248,9 +248,9 @@ void convertToMeshRecursive(Scene& s,
 {
     transform = transform * node->mTransformation;
 
-    aiMatrix4x4 mWorldIT = transform;
-    mWorldIT.Inverse().Transpose();
-    aiMatrix3x3 m3x3{mWorldIT};
+    aiMatrix4x4 m_world_it = transform;
+    m_world_it.Inverse().Transpose();
+    aiMatrix3x3 m3x3{m_world_it};
 
     /*aiQuaternion quat;
     aiVector3D scale;
@@ -430,8 +430,8 @@ void extractMaterials(const aiScene* aiscene, Scene& s)
     if (!aiscene->HasMaterials())
     {
         Material m;
-        m.kd = Color::GREEN;
-        m.ke = Color::BLACK;
+        m.kd = Color::kGreen;
+        m.ke = Color::kBlack;
         s.materials.emplace_back(m);
         return;
     }
@@ -494,7 +494,7 @@ bool convert(const aiScene* aiscene, Scene& s)
 
         const aiNode* nd = aiscene->mRootNode->FindNode(cam->mName);
 
-        aiMatrix4x4 nodeTransform = getLocalToWorldTransform(nd);
+        aiMatrix4x4 node_transform = getLocalToWorldTransform(nd);
 
         // multiply all properties of the camera with the absolute
         // transformation of the corresponding node
@@ -502,15 +502,15 @@ bool convert(const aiScene* aiscene, Scene& s)
         aiVector3D camLookAt = aiMatrix3x3(nodeTransform) * cam->mLookAt;
         aiVector3D camUp = aiMatrix3x3(nodeTransform) * cam->mUp;*/
 
-        aiMatrix4x4 mWorldIT = nodeTransform;
-        mWorldIT.Inverse().Transpose();
-        aiMatrix3x3 m3x3{mWorldIT};
+        aiMatrix4x4 m_world_it = node_transform;
+        m_world_it.Inverse().Transpose();
+        aiMatrix3x3 m3x3{m_world_it};
 
         // multiply all properties of the camera with the absolute
         // transformation of the corresponding node
-        aiVector3D camPos = nodeTransform * cam->mPosition;
-        aiVector3D camLookAt = m3x3 * cam->mLookAt;
-        aiVector3D camUp = m3x3 * cam->mUp;
+        aiVector3D cam_pos = node_transform * cam->mPosition;
+        aiVector3D cam_look_at = m3x3 * cam->mLookAt;
+        aiVector3D cam_up = m3x3 * cam->mUp;
 
         // aiMatrix4x4 mat;
 
@@ -532,16 +532,16 @@ bool convert(const aiScene* aiscene, Scene& s)
         aiVector3D camLookAt = cam->mLookAt;
         aiVector3D camUp = cam->mUp;*/
 
-        s.camera.eye = glm::vec3(camPos.x, camPos.y, camPos.z);
-        s.camera.forward = glm::normalize(glm::vec3(camLookAt.x, camLookAt.y, camLookAt.z));
-        s.camera.up = glm::normalize(glm::vec3(camUp.x, camUp.y, camUp.z));
+        s.camera.eye = glm::vec3(cam_pos.x, cam_pos.y, cam_pos.z);
+        s.camera.forward = glm::normalize(glm::vec3(cam_look_at.x, cam_look_at.y, cam_look_at.z));
+        s.camera.up = glm::normalize(glm::vec3(cam_up.x, cam_up.y, cam_up.z));
         s.camera.right = glm::normalize(glm::cross(s.camera.forward, s.camera.up));
 
         // tan(FOV/2) = (screenSize/2) / screenPlaneDistance
         // tan(FOV_H/2) = (screen_width/2) / screenPlaneDistance
         // tan(FOV_V / 2) = (screen_height / 2) / screenPlaneDistance
         // tan(FOV_H/2) / screen_width = tan(FOV_V/2) / screen_height
-        s.camera.aspectRatio = cam->mAspect;
+        s.camera.aspect_ratio = cam->mAspect;
         s.camera.width = 640;
         s.camera.d = ((float)s.camera.width / 2.0f) / tanf(cam->mHorizontalFOV / 2.0f);
         s.camera.height = static_cast<int>((float)s.camera.width / cam->mAspect);
@@ -557,20 +557,20 @@ bool convert(const aiScene* aiscene, Scene& s)
     return true;
 }
 
-void ModelImporter::importcbscene(const std::string& fileName, Scene& s, const std::function<void()>& cb)
+void model_importer::importcbscene(const std::string& file_name, Scene& s, const std::function<void()>& cb)
 {
-    import(fileName, s);
+    import(file_name, s);
     cb();
 }
 
-bool ModelImporter::import(const std::string& fileName, Scene& s)
+bool model_importer::import(const std::string& file_name, Scene& s)
 {
     std::cout << "----------------------------<Importer>---------------------------" << std::endl;
     std::cout << "Assimp " << aiGetVersionMajor() << "." << aiGetVersionMinor() << std::endl;
     std::cout << "Loading scene..." << std::endl;
 
-    const std::unique_ptr<aiScene> assimpScene = importAssimpScene(fileName);
-    if (assimpScene == nullptr)
+    const std::unique_ptr<aiScene> assimp_scene = importAssimpScene(file_name);
+    if (assimp_scene == nullptr)
     {
         std::cout << "Assimp failed to load the file!" << std::endl;
         std::cout << "---------------------------</Importer>---------------------------" << std::endl;
@@ -578,13 +578,13 @@ bool ModelImporter::import(const std::string& fileName, Scene& s)
     }
     std::cout << "Done!" << std::endl << std::endl;
 
-    printSceneInfo(assimpScene.get());
+    printSceneInfo(assimp_scene.get());
 
     std::cout << "Converting scene..." << std::endl;
-    convert(assimpScene.get(), s);
+    convert(assimp_scene.get(), s);
     std::cout << "Done!" << std::endl << std::endl;
 
-    std::cout << "Import of scene " << fileName.c_str() << " succeeded." << std::endl;
+    std::cout << "Import of scene " << file_name.c_str() << " succeeded." << std::endl;
     std::cout << "---------------------------</Importer>---------------------------" << std::endl;
     return true;
 }

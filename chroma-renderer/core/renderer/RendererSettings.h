@@ -9,6 +9,6 @@ struct RendererSettings
 
     int width{640};
     int height{480};
-    float horizontalFOV{1.0};
+    float horizontal_fov{1.0};
     std::uint32_t samplesperpixel{10000};
 };

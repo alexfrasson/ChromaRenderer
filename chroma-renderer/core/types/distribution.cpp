@@ -3,7 +3,7 @@
 #include <cassert>
 #include <stdexcept>
 
-void NormalizeCdf(std::vector<float>& cdf, const float value)
+void normalizeCdf(std::vector<float>& cdf, const float value)
 {
     for (auto& cdf_value : cdf)
     {
@@ -11,7 +11,7 @@ void NormalizeCdf(std::vector<float>& cdf, const float value)
     }
 }
 
-std::vector<float> ComputeCdf(const std::vector<double>& pdf)
+std::vector<float> computeCdf(const std::vector<double>& pdf)
 {
     std::vector<float> cdf;
     cdf.reserve(pdf.size() + 1);
@@ -30,18 +30,18 @@ Distribution::Distribution(const std::vector<double>& pdf)
 {
     assert(pdf.size() > 0);
 
-    cdf = ComputeCdf(pdf);
+    cdf_ = computeCdf(pdf);
 
-    assert(cdf.size() == pdf.size() + 1);
+    assert(cdf_.size() == pdf.size() + 1);
 
-    NormalizeCdf(cdf, cdf.back());
+    normalizeCdf(cdf_, cdf_.back());
 }
 
-size_t Distribution::Sample(float value)
+size_t Distribution::sample(float value)
 {
-    for (size_t i = 0; i < cdf.size(); i++)
+    for (std::size_t i = 0; i < cdf_.size(); i++)
     {
-        if (cdf[i] > value)
+        if (cdf_[i] > value)
         {
             return i - 1;
         }

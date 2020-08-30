@@ -17,14 +17,14 @@
 #include <thread>
 
 template <typename T>
-constexpr inline void SAFE_CUDA_FREE(T& x)
+constexpr inline void safeCudaFree(T& x)
 {
     cudaErrorCheck(cudaFree(x));
     x = nullptr;
 }
 
 template <typename T>
-constexpr inline void SAFE_CUDA_FREE_ARRAY(T& x)
+constexpr inline void safeCudaFreeArray(T& x)
 {
     cudaErrorCheck(cudaFreeArray(x));
     x = nullptr;
@@ -44,7 +44,10 @@ class CudaPathTracer::Impl
     void reset();
 
     void setSceneGeometry(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
-    void setEnvMap(const float* hdriEnvData, std::size_t hdriEnvWidth, std::size_t hdriEnvHeight, std::size_t channels);
+    void setEnvMap(const float* hdri_env_data,
+                   std::size_t hdri_env_width,
+                   std::size_t hdri_env_height,
+                   std::size_t channels);
     void setTargetImage(const Image& img);
     void setCamera(const Camera& cam);
     void setMaterials(const std::vector<Material>& materials, const bool& sync);
@@ -61,41 +64,41 @@ class CudaPathTracer::Impl
     {
         std::uint32_t width{0};
         std::uint32_t height{0};
-        GLuint texID{0};
-        cudaGraphicsResource* cudaTextureResource{nullptr};
+        GLuint tex_id{0};
+        cudaGraphicsResource* cuda_texture_resource{nullptr};
 
         bool changed(const Image& img) const;
     };
 
     std::uint32_t iteration{0};
-    std::uint32_t targetSamplesPerPixel{0};
+    std::uint32_t target_samples_per_pixel{0};
 
-    float gammaCorrectionScale{1.0f};
+    float gamma_correction_scale{1.0f};
 
-    RegisteredImage registeredImage{};
+    RegisteredImage registered_image{};
 
     cudaStream_t stream{};
     cudaStream_t cpystream{};
 
-    CudaLinearBvhNode* dev_cudaLinearBVHNodes{nullptr};
-    std::size_t nCudaLinearBVHNodes{0};
+    CudaLinearBvhNode* dev_cuda_linear_bvh_nodes{nullptr};
+    std::size_t n_cuda_linear_bvh_nodes{0};
 
-    CudaTriangle* dev_cudaTrianglesBVH{nullptr};
-    std::size_t nCudaTrianglesBVH{0};
+    CudaTriangle* dev_cuda_triangles_bvh{nullptr};
+    std::size_t n_cuda_triangles_bvh{0};
 
-    CudaMaterial* dev_cudaMaterials{nullptr};
-    std::size_t nCudaMaterials{0};
+    CudaMaterial* dev_cuda_materials{nullptr};
+    std::size_t n_cuda_materials{0};
 
     CudaCamera cuda_cam{};
-    CudaEnviromentSettings enviromentSettings;
+    CudaEnviromentSettings enviroment_settings;
 
-    cudaArray* envArray{nullptr};
+    cudaArray* env_array{nullptr};
 
-    glm::vec4* dev_accuBuffer{nullptr};
-    CudaPathIteration* dev_pathIterationBuffer{nullptr};
+    glm::vec4* dev_accu_buffer{nullptr};
+    CudaPathIteration* dev_path_iteration_buffer{nullptr};
 
     Stopwatch stopwatch{};
-    std::chrono::milliseconds lastIterationElapsedMillis{0};
+    std::chrono::milliseconds last_iteration_elapsed_millis{0};
 };
 
 CudaPathTracer::CudaPathTracer() : impl_{std::make_unique<CudaPathTracer::Impl>()}
@@ -104,12 +107,12 @@ CudaPathTracer::CudaPathTracer() : impl_{std::make_unique<CudaPathTracer::Impl>(
 
 CudaPathTracer::~CudaPathTracer() = default;
 
-void CudaPathTracer::setEnvMap(const float* hdriEnvData,
-                               const std::size_t hdriEnvWidth,
-                               const std::size_t hdriEnvHeight,
+void CudaPathTracer::setEnvMap(const float* hdri_env_data,
+                               const std::size_t hdri_env_width,
+                               const std::size_t hdri_env_height,
                                const std::size_t channels)
 {
-    impl_->setEnvMap(hdriEnvData, hdriEnvWidth, hdriEnvHeight, channels);
+    impl_->setEnvMap(hdri_env_data, hdri_env_width, hdri_env_height, channels);
 }
 
 void CudaPathTracer::setSceneGeometry(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials)
@@ -163,58 +166,58 @@ float CudaPathTracer::getInstantRaysPerSec() const
 }
 
 // Print device properties
-void printDevProp(cudaDeviceProp devProp)
+void printDevProp(cudaDeviceProp dev_prop)
 {
-    std::cout << "Major revision number:         " << (int)devProp.major << std::endl;
-    std::cout << "Minor revision number:         " << (int)devProp.minor << std::endl;
-    std::cout << "Name:                          " << devProp.name << std::endl; // NOLINT
-    std::cout << "Total global memory:           " << (int)devProp.totalGlobalMem << std::endl;
-    std::cout << "Total shared memory per block: " << (int)devProp.sharedMemPerBlock << std::endl;
-    std::cout << "Total registers per block:     " << (int)devProp.regsPerBlock << std::endl;
-    std::cout << "Warp size:                     " << (int)devProp.warpSize << std::endl;
-    std::cout << "Maximum memory pitch:          " << (int)devProp.memPitch << std::endl;
-    std::cout << "Maximum threads per block:     " << (int)devProp.maxThreadsPerBlock << std::endl;
+    std::cout << "Major revision number:         " << (int)dev_prop.major << std::endl;
+    std::cout << "Minor revision number:         " << (int)dev_prop.minor << std::endl;
+    std::cout << "Name:                          " << dev_prop.name << std::endl; // NOLINT
+    std::cout << "Total global memory:           " << (int)dev_prop.totalGlobalMem << std::endl;
+    std::cout << "Total shared memory per block: " << (int)dev_prop.sharedMemPerBlock << std::endl;
+    std::cout << "Total registers per block:     " << (int)dev_prop.regsPerBlock << std::endl;
+    std::cout << "Warp size:                     " << (int)dev_prop.warpSize << std::endl;
+    std::cout << "Maximum memory pitch:          " << (int)dev_prop.memPitch << std::endl;
+    std::cout << "Maximum threads per block:     " << (int)dev_prop.maxThreadsPerBlock << std::endl;
     for (int i = 0; i < 3; ++i)
     {
-        std::cout << "Maximum dimension " << i << " of block:  " << (int)devProp.maxThreadsDim[i] << std::endl;
+        std::cout << "Maximum dimension " << i << " of block:  " << (int)dev_prop.maxThreadsDim[i] << std::endl;
     }
     for (int i = 0; i < 3; ++i)
     {
-        std::cout << "Maximum dimension " << i << " of grid:   " << (int)devProp.maxGridSize[i] << std::endl;
+        std::cout << "Maximum dimension " << i << " of grid:   " << (int)dev_prop.maxGridSize[i] << std::endl;
     }
-    std::cout << "Clock rate:                    " << (int)devProp.clockRate << std::endl;
-    std::cout << "Total constant memory:         " << (int)devProp.totalConstMem << std::endl;
-    std::cout << "Texture alignment:             " << (int)devProp.textureAlignment << std::endl;
-    std::cout << "Concurrent copy and execution: " << (devProp.deviceOverlap == 1 ? "Yes" : "No") << std::endl;
-    std::cout << "Number of multiprocessors:     " << (int)devProp.multiProcessorCount << std::endl;
-    std::cout << "Kernel execution timeout:      " << (devProp.kernelExecTimeoutEnabled == 1 ? "Yes" : "No")
+    std::cout << "Clock rate:                    " << (int)dev_prop.clockRate << std::endl;
+    std::cout << "Total constant memory:         " << (int)dev_prop.totalConstMem << std::endl;
+    std::cout << "Texture alignment:             " << (int)dev_prop.textureAlignment << std::endl;
+    std::cout << "Concurrent copy and execution: " << (dev_prop.deviceOverlap == 1 ? "Yes" : "No") << std::endl;
+    std::cout << "Number of multiprocessors:     " << (int)dev_prop.multiProcessorCount << std::endl;
+    std::cout << "Kernel execution timeout:      " << (dev_prop.kernelExecTimeoutEnabled == 1 ? "Yes" : "No")
               << std::endl;
 }
 
-CudaCamera CameraToCudaCamera(Camera cam)
+CudaCamera cameraToCudaCamera(Camera cam)
 {
-    CudaCamera cudaCam{};
-    cudaCam.width = cam.width;
-    cudaCam.height = cam.height;
-    cudaCam.d = cam.d;
-    cudaCam.right.x = cam.right.x;
-    cudaCam.right.y = cam.right.y;
-    cudaCam.right.z = cam.right.z;
-    cudaCam.up.x = cam.up.x;
-    cudaCam.up.y = cam.up.y;
-    cudaCam.up.z = cam.up.z;
-    cudaCam.forward.x = cam.forward.x;
-    cudaCam.forward.y = cam.forward.y;
-    cudaCam.forward.z = cam.forward.z;
-    cudaCam.eye.x = cam.eye.x;
-    cudaCam.eye.y = cam.eye.y;
-    cudaCam.eye.z = cam.eye.z;
-    return cudaCam;
+    CudaCamera cuda_cam{};
+    cuda_cam.width = cam.width;
+    cuda_cam.height = cam.height;
+    cuda_cam.d = cam.d;
+    cuda_cam.right.x = cam.right.x;
+    cuda_cam.right.y = cam.right.y;
+    cuda_cam.right.z = cam.right.z;
+    cuda_cam.up.x = cam.up.x;
+    cuda_cam.up.y = cam.up.y;
+    cuda_cam.up.z = cam.up.z;
+    cuda_cam.forward.x = cam.forward.x;
+    cuda_cam.forward.y = cam.forward.y;
+    cuda_cam.forward.z = cam.forward.z;
+    cuda_cam.eye.x = cam.eye.x;
+    cuda_cam.eye.y = cam.eye.y;
+    cuda_cam.eye.z = cam.eye.z;
+    return cuda_cam;
 }
 
-std::vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& materials)
+std::vector<CudaMaterial> sceneToCudaMaterials(const std::vector<Material>& materials)
 {
-    std::vector<CudaMaterial> cudaMaterials;
+    std::vector<CudaMaterial> cuda_materials;
 
     for (const auto& m : materials)
     {
@@ -228,26 +231,26 @@ std::vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& mate
         cm.transparent.x = m.transparent.r;
         cm.transparent.y = m.transparent.g;
         cm.transparent.z = m.transparent.b;
-        cudaMaterials.push_back(cm);
+        cuda_materials.push_back(cm);
     }
 
-    return cudaMaterials;
+    return cuda_materials;
 }
 
-std::vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioningStructure* sps)
+std::vector<CudaLinearBvhNode> sceneToCudaLinearBvhNode(const ISpacePartitioningStructure* sps)
 {
     // Lets assume this is a bvh :)
     const BVH* bvh = dynamic_cast<const BVH*>(sps);
 
-    std::vector<CudaLinearBvhNode> cudaLinearBVH;
-    cudaLinearBVH.reserve(bvh->nNodes);
+    std::vector<CudaLinearBvhNode> cuda_linear_bvh;
+    cuda_linear_bvh.reserve(bvh->n_nodes);
 
-    for (unsigned int i = 0; i < bvh->nNodes; i++)
+    for (unsigned int i = 0; i < bvh->n_nodes; i++)
     {
         CudaLinearBvhNode n;
         n.axis = bvh->lroot[i].axis;
-        n.nPrimitives = bvh->lroot[i].nPrimitives;
-        n.primitivesOffset = bvh->lroot[i].primitivesOffset;
+        n.n_primitives = bvh->lroot[i].n_primitives;
+        n.primitives_offset = bvh->lroot[i].primitives_offset;
         n.bbox.max.x = bvh->lroot[i].bbox.max.x;
         n.bbox.max.y = bvh->lroot[i].bbox.max.y;
         n.bbox.max.z = bvh->lroot[i].bbox.max.z;
@@ -255,20 +258,20 @@ std::vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioning
         n.bbox.min.y = bvh->lroot[i].bbox.min.y;
         n.bbox.min.z = bvh->lroot[i].bbox.min.z;
 
-        cudaLinearBVH.push_back(n);
+        cuda_linear_bvh.push_back(n);
     }
 
-    return cudaLinearBVH;
+    return cuda_linear_bvh;
 }
 
-std::vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps,
+std::vector<CudaTriangle> sceneToCudaTrianglesBvh(const ISpacePartitioningStructure* sps,
                                                   const std::vector<Material>& materials)
 {
     // Lets assume this is a bvh :)
     const BVH* bvh = dynamic_cast<const BVH*>(sps);
 
-    std::vector<CudaTriangle> cudaTriangles;
-    cudaTriangles.reserve(bvh->triangles.size());
+    std::vector<CudaTriangle> cuda_triangles;
+    cuda_triangles.reserve(bvh->triangles.size());
 
     for (Triangle* t : bvh->triangles)
     {
@@ -296,14 +299,14 @@ std::vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStruct
             }
         }
 
-        cudaTriangles.push_back(ct);
+        cuda_triangles.push_back(ct);
     }
 
-    return cudaTriangles;
+    return cuda_triangles;
 }
 
 // this hash function calculates a new random number generator seed for each frame, based on framenumber
-unsigned int WangHash(unsigned int a)
+unsigned int wangHash(unsigned int a)
 {
     a = (a ^ 61u) ^ (a >> 16u);
     a = a + (a << 3u);
@@ -321,19 +324,19 @@ CudaPathTracer::Impl::Impl()
     cudaErrorCheck(cudaStreamCreateWithFlags(&cpystream, cudaStreamNonBlocking));
 
     // Number of CUDA devices
-    int devCount{0};
-    cudaErrorCheck(cudaGetDeviceCount(&devCount));
+    int dev_count{0};
+    cudaErrorCheck(cudaGetDeviceCount(&dev_count));
     std::cout << "CUDA Device Query..." << std::endl;
-    std::cout << "There are " << devCount << " CUDA devices." << std::endl;
+    std::cout << "There are " << dev_count << " CUDA devices." << std::endl;
 
     // Iterate through devices
-    for (int i = 0; i < devCount; ++i)
+    for (int i = 0; i < dev_count; ++i)
     {
         // Get device properties
         std::cout << std::endl << "CUDA Device " << i << std::endl;
-        cudaDeviceProp devProp{};
-        cudaErrorCheck(cudaGetDeviceProperties(&devProp, i));
-        printDevProp(devProp);
+        cudaDeviceProp dev_prop{};
+        cudaErrorCheck(cudaGetDeviceProperties(&dev_prop, i));
+        printDevProp(dev_prop);
         std::cout << std::endl << std::endl;
     }
 }
@@ -342,22 +345,22 @@ CudaPathTracer::Impl::~Impl()
 {
     cudaErrorCheck(cudaDeviceSynchronize());
 
-    if (registeredImage.cudaTextureResource != nullptr)
+    if (registered_image.cuda_texture_resource != nullptr)
     {
-        cudaErrorCheck(cudaGraphicsUnregisterResource(registeredImage.cudaTextureResource));
+        cudaErrorCheck(cudaGraphicsUnregisterResource(registered_image.cuda_texture_resource));
     }
 
-    SAFE_CUDA_FREE(dev_cudaTrianglesBVH);
-    SAFE_CUDA_FREE(dev_cudaLinearBVHNodes);
-    SAFE_CUDA_FREE(dev_cudaMaterials);
-    SAFE_CUDA_FREE(dev_accuBuffer);
-    SAFE_CUDA_FREE(dev_pathIterationBuffer);
+    safeCudaFree(dev_cuda_triangles_bvh);
+    safeCudaFree(dev_cuda_linear_bvh_nodes);
+    safeCudaFree(dev_cuda_materials);
+    safeCudaFree(dev_accu_buffer);
+    safeCudaFree(dev_path_iteration_buffer);
 
-    cudaErrorCheck(cudaDestroyTextureObject(enviromentSettings.texObj));
+    cudaErrorCheck(cudaDestroyTextureObject(enviroment_settings.tex_obj));
 
-    SAFE_CUDA_FREE_ARRAY(envArray);
-    SAFE_CUDA_FREE(enviromentSettings.cdf);
-    SAFE_CUDA_FREE(enviromentSettings.pdf);
+    safeCudaFreeArray(env_array);
+    safeCudaFree(enviroment_settings.cdf);
+    safeCudaFree(enviroment_settings.pdf);
 
     cudaErrorCheck(cudaStreamDestroy(stream));
     cudaErrorCheck(cudaStreamDestroy(cpystream));
@@ -367,11 +370,11 @@ CudaPathTracer::Impl::~Impl()
 
 void CudaPathTracer::Impl::render()
 {
-    const bool firstIteration = iteration == 0;
+    const bool first_iteration = iteration == 0;
 
     cudaErrorCheck(cudaGetLastError());
 
-    if (firstIteration)
+    if (first_iteration)
     {
         cudaErrorCheck(cudaStreamSynchronize(stream));
     }
@@ -382,7 +385,7 @@ void CudaPathTracer::Impl::render()
         if (err == cudaSuccess)
         {
             stopwatch.stop();
-            lastIterationElapsedMillis = stopwatch.elapsedMillis;
+            last_iteration_elapsed_millis = stopwatch.elapsed_millis;
             stopwatch.start();
             copyFrameToTexture();
         }
@@ -397,24 +400,24 @@ void CudaPathTracer::Impl::render()
     }
 
     // calculate a new seed for the random number generator, based on the framenumber
-    unsigned int hashedframes = WangHash(iteration);
+    unsigned int hashedframes = wangHash(iteration);
 
     trace(stream,
-          dev_pathIterationBuffer,
-          dev_accuBuffer,
-          dim3(registeredImage.width, registeredImage.height),
+          dev_path_iteration_buffer,
+          dev_accu_buffer,
+          dim3(registered_image.width, registered_image.height),
           cuda_cam,
-          dev_cudaTrianglesBVH,
-          dev_cudaMaterials,
+          dev_cuda_triangles_bvh,
+          dev_cuda_materials,
           hashedframes,
-          dev_cudaLinearBVHNodes,
-          enviromentSettings);
+          dev_cuda_linear_bvh_nodes,
+          enviroment_settings);
 
     cudaErrorCheck(cudaGetLastError());
 
     iteration++;
 
-    if (firstIteration)
+    if (first_iteration)
     {
         cudaErrorCheck(cudaStreamSynchronize(stream));
 
@@ -427,62 +430,64 @@ void CudaPathTracer::Impl::reset()
     iteration = 0;
 }
 
-void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
-                                     const std::size_t hdriEnvWidth,
-                                     const std::size_t hdriEnvHeight,
+void CudaPathTracer::Impl::setEnvMap(const float* hdri_env_data,
+                                     const std::size_t hdri_env_width,
+                                     const std::size_t hdri_env_height,
                                      const std::size_t channels)
 {
-    cudaErrorCheck(cudaDestroyTextureObject(enviromentSettings.texObj));
-    SAFE_CUDA_FREE_ARRAY(envArray);
-    SAFE_CUDA_FREE(enviromentSettings.cdf);
-    SAFE_CUDA_FREE(enviromentSettings.pdf);
+    cudaErrorCheck(cudaDestroyTextureObject(enviroment_settings.tex_obj));
+    safeCudaFreeArray(env_array);
+    safeCudaFree(enviroment_settings.cdf);
+    safeCudaFree(enviroment_settings.pdf);
 
-    std::size_t size = hdriEnvWidth * hdriEnvHeight * channels * sizeof(float);
+    std::size_t size = hdri_env_width * hdri_env_height * channels * sizeof(float);
 
-    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
+    cudaChannelFormatDesc channel_desc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
 
-    cudaErrorCheck(cudaMallocArray(&envArray, &channelDesc, hdriEnvWidth, hdriEnvHeight));
-    cudaErrorCheck(cudaMemcpyToArray(envArray, 0, 0, hdriEnvData, size, cudaMemcpyHostToDevice));
+    cudaErrorCheck(cudaMallocArray(&env_array, &channel_desc, hdri_env_width, hdri_env_height));
+    cudaErrorCheck(cudaMemcpyToArray(env_array, 0, 0, hdri_env_data, size, cudaMemcpyHostToDevice));
 
-    cudaResourceDesc resDesc{};
-    memset(&resDesc, 0, sizeof(resDesc));
-    resDesc.resType = cudaResourceTypeArray;
-    resDesc.res.array.array = envArray;
+    cudaResourceDesc res_desc{};
+    memset(&res_desc, 0, sizeof(res_desc));
+    res_desc.resType = cudaResourceTypeArray;
+    res_desc.res.array.array = env_array;
 
-    cudaTextureDesc texDesc{};
-    memset(&texDesc, 0, sizeof(texDesc));
-    texDesc.addressMode[0] = cudaAddressModeWrap;
-    texDesc.addressMode[1] = cudaAddressModeWrap;
-    texDesc.filterMode = cudaFilterModePoint;
-    texDesc.readMode = cudaReadModeElementType;
-    texDesc.normalizedCoords = 1;
+    cudaTextureDesc tex_desc{};
+    memset(&tex_desc, 0, sizeof(tex_desc));
+    tex_desc.addressMode[0] = cudaAddressModeWrap;
+    tex_desc.addressMode[1] = cudaAddressModeWrap;
+    tex_desc.filterMode = cudaFilterModePoint;
+    tex_desc.readMode = cudaReadModeElementType;
+    tex_desc.normalizedCoords = 1;
 
-    cudaErrorCheck(cudaCreateTextureObject(&enviromentSettings.texObj, &resDesc, &texDesc, nullptr));
+    cudaErrorCheck(cudaCreateTextureObject(&enviroment_settings.tex_obj, &res_desc, &tex_desc, nullptr));
 
-    EnvironmentMap env_map{hdriEnvData, static_cast<uint32_t>(hdriEnvWidth), static_cast<uint32_t>(hdriEnvHeight)};
+    EnvironmentMap env_map{hdri_env_data,
+                           static_cast<uint32_t>(hdri_env_width),
+                           static_cast<uint32_t>(hdri_env_height)};
 
-    const auto& cdf = env_map.GetDistribution().GetCdf();
-    enviromentSettings.cdf_size = cdf.size();
-    cudaErrorCheck(cudaMalloc(&enviromentSettings.cdf, enviromentSettings.cdf_size * sizeof(float)));
-    cudaErrorCheck(cudaMemcpyAsync(enviromentSettings.cdf,
+    const auto& cdf = env_map.getDistribution().getCdf();
+    enviroment_settings.cdf_size = cdf.size();
+    cudaErrorCheck(cudaMalloc(&enviroment_settings.cdf, enviroment_settings.cdf_size * sizeof(float)));
+    cudaErrorCheck(cudaMemcpyAsync(enviroment_settings.cdf,
                                    &cdf[0],
-                                   enviromentSettings.cdf_size * sizeof(float),
+                                   enviroment_settings.cdf_size * sizeof(float),
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    const auto& pdf = env_map.GetPdf();
-    enviromentSettings.pdf_size = pdf.size();
-    cudaErrorCheck(cudaMalloc(&enviromentSettings.pdf, enviromentSettings.pdf_size * sizeof(float)));
-    cudaErrorCheck(cudaMemcpyAsync(enviromentSettings.pdf,
+    const auto& pdf = env_map.getPdf();
+    enviroment_settings.pdf_size = pdf.size();
+    cudaErrorCheck(cudaMalloc(&enviroment_settings.pdf, enviroment_settings.pdf_size * sizeof(float)));
+    cudaErrorCheck(cudaMemcpyAsync(enviroment_settings.pdf,
                                    &pdf[0],
-                                   enviromentSettings.pdf_size * sizeof(float),
+                                   enviroment_settings.pdf_size * sizeof(float),
                                    cudaMemcpyHostToDevice,
                                    stream));
 
     cudaErrorCheck(cudaStreamSynchronize(stream));
 
-    enviromentSettings.width = hdriEnvWidth;
-    enviromentSettings.height = hdriEnvHeight;
+    enviroment_settings.width = hdri_env_width;
+    enviroment_settings.height = hdri_env_height;
 
     reset();
 }
@@ -490,8 +495,8 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
 void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* sps,
                                             const std::vector<Material>& materials)
 {
-    SAFE_CUDA_FREE(dev_cudaTrianglesBVH);
-    SAFE_CUDA_FREE(dev_cudaLinearBVHNodes);
+    safeCudaFree(dev_cuda_triangles_bvh);
+    safeCudaFree(dev_cuda_linear_bvh_nodes);
 
     std::size_t free{0};
     std::size_t total{0};
@@ -500,27 +505,27 @@ void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* s
     std::cout << "Free memory: " << free / (1024 * 1024) << "MB" << std::endl;
     std::cout << "Total memory: " << total / (1024 * 1024) << "MB" << std::endl;
 
-    std::vector<CudaTriangle> cudaTrianglesBVH = SceneToCudaTrianglesBVH(sps, materials);
-    nCudaTrianglesBVH = cudaTrianglesBVH.size();
-    std::cout << "Triangles BVH: " << cudaTrianglesBVH.size() << std::endl;
-    std::cout << "Triangles BVH size: " << (cudaTrianglesBVH.size() * sizeof(CudaTriangle)) / (1024) << "KB"
+    std::vector<CudaTriangle> cuda_triangles_bvh = sceneToCudaTrianglesBvh(sps, materials);
+    n_cuda_triangles_bvh = cuda_triangles_bvh.size();
+    std::cout << "Triangles BVH: " << cuda_triangles_bvh.size() << std::endl;
+    std::cout << "Triangles BVH size: " << (cuda_triangles_bvh.size() * sizeof(CudaTriangle)) / (1024) << "KB"
               << std::endl;
-    cudaErrorCheck(cudaMalloc(&dev_cudaTrianglesBVH, cudaTrianglesBVH.size() * sizeof(CudaTriangle)));
-    cudaErrorCheck(cudaMemcpyAsync(dev_cudaTrianglesBVH,
-                                   &cudaTrianglesBVH[0],
-                                   cudaTrianglesBVH.size() * sizeof(CudaTriangle),
+    cudaErrorCheck(cudaMalloc(&dev_cuda_triangles_bvh, cuda_triangles_bvh.size() * sizeof(CudaTriangle)));
+    cudaErrorCheck(cudaMemcpyAsync(dev_cuda_triangles_bvh,
+                                   &cuda_triangles_bvh[0],
+                                   cuda_triangles_bvh.size() * sizeof(CudaTriangle),
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    std::vector<CudaLinearBvhNode> cudaLinearBVH = SceneToCudaLinearBvhNode(sps);
-    nCudaLinearBVHNodes = cudaLinearBVH.size();
-    std::cout << "CudaLinearBVHNodes: " << cudaLinearBVH.size() << std::endl;
-    std::cout << "CudaLinearBVHNodes size: " << (cudaLinearBVH.size() * sizeof(CudaLinearBvhNode)) / (1024) << "KB"
+    std::vector<CudaLinearBvhNode> cuda_linear_bvh = sceneToCudaLinearBvhNode(sps);
+    n_cuda_linear_bvh_nodes = cuda_linear_bvh.size();
+    std::cout << "CudaLinearBVHNodes: " << cuda_linear_bvh.size() << std::endl;
+    std::cout << "CudaLinearBVHNodes size: " << (cuda_linear_bvh.size() * sizeof(CudaLinearBvhNode)) / (1024) << "KB"
               << std::endl;
-    cudaErrorCheck(cudaMalloc(&dev_cudaLinearBVHNodes, cudaLinearBVH.size() * sizeof(CudaLinearBvhNode)));
-    cudaErrorCheck(cudaMemcpyAsync(dev_cudaLinearBVHNodes,
-                                   &cudaLinearBVH[0],
-                                   cudaLinearBVH.size() * sizeof(CudaLinearBvhNode),
+    cudaErrorCheck(cudaMalloc(&dev_cuda_linear_bvh_nodes, cuda_linear_bvh.size() * sizeof(CudaLinearBvhNode)));
+    cudaErrorCheck(cudaMemcpyAsync(dev_cuda_linear_bvh_nodes,
+                                   &cuda_linear_bvh[0],
+                                   cuda_linear_bvh.size() * sizeof(CudaLinearBvhNode),
                                    cudaMemcpyHostToDevice,
                                    stream));
 
@@ -534,41 +539,43 @@ void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* s
 
 void CudaPathTracer::Impl::setTargetImage(const Image& img)
 {
-    assert(img.textureID > 0);
+    assert(img.texture_id > 0);
     assert(img.getWidth() > 0 && img.getHeight() > 0);
 
-    if (registeredImage.changed(img))
+    if (registered_image.changed(img))
     {
-        SAFE_CUDA_FREE(dev_accuBuffer);
-        SAFE_CUDA_FREE(dev_pathIterationBuffer);
+        safeCudaFree(dev_accu_buffer);
+        safeCudaFree(dev_path_iteration_buffer);
 
-        cudaErrorCheck(cudaMalloc(&dev_accuBuffer, img.getWidth() * img.getHeight() * sizeof(glm::vec4)));
+        cudaErrorCheck(cudaMalloc(&dev_accu_buffer, img.getWidth() * img.getHeight() * sizeof(glm::vec4)));
         cudaErrorCheck(
-            cudaMalloc(&dev_pathIterationBuffer, img.getWidth() * img.getHeight() * sizeof(CudaPathIteration)));
+            cudaMalloc(&dev_path_iteration_buffer, img.getWidth() * img.getHeight() * sizeof(CudaPathIteration)));
 
         cudaErrorCheck(cudaDeviceSynchronize());
 
-        if (registeredImage.cudaTextureResource != nullptr)
+        if (registered_image.cuda_texture_resource != nullptr)
         {
-            cudaErrorCheck(cudaGraphicsUnregisterResource(registeredImage.cudaTextureResource));
+            cudaErrorCheck(cudaGraphicsUnregisterResource(registered_image.cuda_texture_resource));
         }
 
         // Only call Cuda/OpenGL interop stuff from within the OpenGL context thread!
-        cudaErrorCheck(cudaGraphicsGLRegisterImage(&registeredImage.cudaTextureResource,
-                                                   img.textureID,
+        cudaErrorCheck(cudaGraphicsGLRegisterImage(&registered_image.cuda_texture_resource,
+                                                   img.texture_id,
                                                    GL_TEXTURE_2D,
                                                    cudaGraphicsRegisterFlagsWriteDiscard));
 
-        registeredImage.width = img.getWidth();
-        registeredImage.height = img.getHeight();
-        registeredImage.texID = img.textureID;
+        registered_image.width = img.getWidth();
+        registered_image.height = img.getHeight();
+        registered_image.tex_id = img.texture_id;
     }
 
-    cudaErrorCheck(
-        cudaMemsetAsync(dev_accuBuffer, 0, registeredImage.width * registeredImage.height * sizeof(glm::vec4), stream));
-    cudaErrorCheck(cudaMemsetAsync(dev_pathIterationBuffer,
+    cudaErrorCheck(cudaMemsetAsync(dev_accu_buffer,
                                    0,
-                                   registeredImage.width * registeredImage.height * sizeof(CudaPathIteration),
+                                   registered_image.width * registered_image.height * sizeof(glm::vec4),
+                                   stream));
+    cudaErrorCheck(cudaMemsetAsync(dev_path_iteration_buffer,
+                                   0,
+                                   registered_image.width * registered_image.height * sizeof(CudaPathIteration),
                                    stream));
 
     cudaErrorCheck(cudaGetLastError());
@@ -579,21 +586,21 @@ void CudaPathTracer::Impl::setTargetImage(const Image& img)
 
 void CudaPathTracer::Impl::setCamera(const Camera& cam)
 {
-    cuda_cam = CameraToCudaCamera(cam);
+    cuda_cam = cameraToCudaCamera(cam);
     reset();
 }
 
 void CudaPathTracer::Impl::setMaterials(const std::vector<Material>& materials, const bool& sync)
 {
-    SAFE_CUDA_FREE(dev_cudaMaterials);
+    safeCudaFree(dev_cuda_materials);
 
-    const std::vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(materials);
-    const std::size_t size_in_bytes = cudaMaterials.size() * sizeof(CudaMaterial);
-    nCudaMaterials = static_cast<std::uint32_t>(cudaMaterials.size());
+    const std::vector<CudaMaterial> cuda_materials = sceneToCudaMaterials(materials);
+    const std::size_t size_in_bytes = cuda_materials.size() * sizeof(CudaMaterial);
+    n_cuda_materials = static_cast<std::uint32_t>(cuda_materials.size());
 
-    cudaErrorCheck(cudaMalloc(&dev_cudaMaterials, size_in_bytes));
+    cudaErrorCheck(cudaMalloc(&dev_cuda_materials, size_in_bytes));
     cudaErrorCheck(
-        cudaMemcpyAsync(dev_cudaMaterials, &cudaMaterials[0], size_in_bytes, cudaMemcpyHostToDevice, stream));
+        cudaMemcpyAsync(dev_cuda_materials, &cuda_materials[0], size_in_bytes, cudaMemcpyHostToDevice, stream));
 
     if (sync)
     {
@@ -605,36 +612,36 @@ void CudaPathTracer::Impl::setMaterials(const std::vector<Material>& materials, 
 
 void CudaPathTracer::Impl::setSettings(const RendererSettings& settings)
 {
-    targetSamplesPerPixel = settings.samplesperpixel;
+    target_samples_per_pixel = settings.samplesperpixel;
 }
 
 void CudaPathTracer::Impl::copyFrameToTexture()
 {
     cudaArray* aarray{nullptr};
 
-    cudaErrorCheck(cudaGraphicsMapResources(1, &registeredImage.cudaTextureResource, cpystream));
-    cudaErrorCheck(cudaGraphicsSubResourceGetMappedArray(&aarray, registeredImage.cudaTextureResource, 0, 0));
+    cudaErrorCheck(cudaGraphicsMapResources(1, &registered_image.cuda_texture_resource, cpystream));
+    cudaErrorCheck(cudaGraphicsSubResourceGetMappedArray(&aarray, registered_image.cuda_texture_resource, 0, 0));
 
     cudaErrorCheck(cudaMemcpyToArrayAsync(aarray,
                                           0,
                                           0,
-                                          dev_accuBuffer,
-                                          registeredImage.width * registeredImage.height * sizeof(glm::vec4),
+                                          dev_accu_buffer,
+                                          registered_image.width * registered_image.height * sizeof(glm::vec4),
                                           cudaMemcpyDeviceToDevice,
                                           cpystream));
 
-    cudaErrorCheck(cudaGraphicsUnmapResources(1, &registeredImage.cudaTextureResource, cpystream));
+    cudaErrorCheck(cudaGraphicsUnmapResources(1, &registered_image.cuda_texture_resource, cpystream));
 }
 
 float CudaPathTracer::Impl::getProgress() const
 {
-    return ((float)iteration / (float)targetSamplesPerPixel);
+    return ((float)iteration / (float)target_samples_per_pixel);
 }
 
 float CudaPathTracer::Impl::getInstantRaysPerSec() const
 {
-    return ((float)registeredImage.width * (float)registeredImage.height) /
-           ((float)lastIterationElapsedMillis.count() * 0.001f);
+    return ((float)registered_image.width * (float)registered_image.height) /
+           ((float)last_iteration_elapsed_millis.count() * 0.001f);
 }
 
 std::uint32_t CudaPathTracer::Impl::getFinishedSamples() const
@@ -644,10 +651,10 @@ std::uint32_t CudaPathTracer::Impl::getFinishedSamples() const
 
 std::uint32_t CudaPathTracer::Impl::getTargetSamplesPerPixel() const
 {
-    return targetSamplesPerPixel;
+    return target_samples_per_pixel;
 }
 
 bool CudaPathTracer::Impl::RegisteredImage::changed(const Image& img) const
 {
-    return img.getWidth() != width || img.getHeight() != height || img.textureID != texID;
+    return img.getWidth() != width || img.getHeight() != height || img.texture_id != tex_id;
 }

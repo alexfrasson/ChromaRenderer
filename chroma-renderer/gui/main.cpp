@@ -13,7 +13,7 @@
 
 namespace fs = std::filesystem;
 
-void term_func()
+void termFunc()
 {
     std::cout << "Terminate!" << std::endl;
     auto eptr = std::current_exception();
@@ -48,52 +48,52 @@ std::unique_ptr<ChromaRenderer> cr;
 #define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers // NOLINT
 #endif
 
-void CherryTheme()
+void cherryTheme()
 {
-    auto HI = [](const float v) { return ImVec4(0.502f, 0.075f, 0.256f, v); };
-    auto MED = [](const float v) { return ImVec4(0.455f, 0.198f, 0.301f, v); };
-    auto LOW = [](const float v) { return ImVec4(0.232f, 0.201f, 0.271f, v); };
-    auto BG = [](const float v) { return ImVec4(0.200f, 0.220f, 0.270f, v); };
-    auto TEXT_COLOR = [](const float v) { return ImVec4(0.860f, 0.930f, 0.890f, v); };
+    auto hi = [](const float v) { return ImVec4(0.502f, 0.075f, 0.256f, v); };
+    auto med = [](const float v) { return ImVec4(0.455f, 0.198f, 0.301f, v); };
+    auto low = [](const float v) { return ImVec4(0.232f, 0.201f, 0.271f, v); };
+    auto bg = [](const float v) { return ImVec4(0.200f, 0.220f, 0.270f, v); };
+    auto text_color = [](const float v) { return ImVec4(0.860f, 0.930f, 0.890f, v); };
 
     auto& style = ImGui::GetStyle();
-    style.Colors[ImGuiCol_Text] = TEXT_COLOR(0.78f);
-    style.Colors[ImGuiCol_TextDisabled] = TEXT_COLOR(0.28f);
+    style.Colors[ImGuiCol_Text] = text_color(0.78f);
+    style.Colors[ImGuiCol_TextDisabled] = text_color(0.28f);
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.14f, 0.17f, 1.00f);
     // style.Colors[ImGuiCol_ChildWindowBg] = BG(0.58f);
-    style.Colors[ImGuiCol_PopupBg] = BG(0.9f);
+    style.Colors[ImGuiCol_PopupBg] = bg(0.9f);
     style.Colors[ImGuiCol_Border] = ImVec4(0.31f, 0.31f, 1.00f, 0.00f);
     style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_FrameBg] = BG(1.00f);
-    style.Colors[ImGuiCol_FrameBgHovered] = MED(0.78f);
-    style.Colors[ImGuiCol_FrameBgActive] = MED(1.00f);
-    style.Colors[ImGuiCol_TitleBg] = LOW(1.00f);
-    style.Colors[ImGuiCol_TitleBgActive] = HI(1.00f);
-    style.Colors[ImGuiCol_TitleBgCollapsed] = BG(0.75f);
-    style.Colors[ImGuiCol_MenuBarBg] = BG(0.47f);
-    style.Colors[ImGuiCol_ScrollbarBg] = BG(1.00f);
+    style.Colors[ImGuiCol_FrameBg] = bg(1.00f);
+    style.Colors[ImGuiCol_FrameBgHovered] = med(0.78f);
+    style.Colors[ImGuiCol_FrameBgActive] = med(1.00f);
+    style.Colors[ImGuiCol_TitleBg] = low(1.00f);
+    style.Colors[ImGuiCol_TitleBgActive] = hi(1.00f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = bg(0.75f);
+    style.Colors[ImGuiCol_MenuBarBg] = bg(0.47f);
+    style.Colors[ImGuiCol_ScrollbarBg] = bg(1.00f);
     style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.09f, 0.15f, 0.16f, 1.00f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = MED(0.78f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = MED(1.00f);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = med(0.78f);
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = med(1.00f);
     style.Colors[ImGuiCol_CheckMark] = ImVec4(0.71f, 0.22f, 0.27f, 1.00f);
     style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.47f, 0.77f, 0.83f, 0.14f);
     style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.71f, 0.22f, 0.27f, 1.00f);
     style.Colors[ImGuiCol_Button] = ImVec4(0.47f, 0.77f, 0.83f, 0.14f);
-    style.Colors[ImGuiCol_ButtonHovered] = MED(0.86f);
-    style.Colors[ImGuiCol_ButtonActive] = MED(1.00f);
-    style.Colors[ImGuiCol_Header] = MED(0.76f);
-    style.Colors[ImGuiCol_HeaderHovered] = MED(0.86f);
-    style.Colors[ImGuiCol_HeaderActive] = HI(1.00f);
+    style.Colors[ImGuiCol_ButtonHovered] = med(0.86f);
+    style.Colors[ImGuiCol_ButtonActive] = med(1.00f);
+    style.Colors[ImGuiCol_Header] = med(0.76f);
+    style.Colors[ImGuiCol_HeaderHovered] = med(0.86f);
+    style.Colors[ImGuiCol_HeaderActive] = hi(1.00f);
     style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.47f, 0.77f, 0.83f, 0.04f);
-    style.Colors[ImGuiCol_ResizeGripHovered] = MED(0.78f);
-    style.Colors[ImGuiCol_ResizeGripActive] = MED(1.00f);
-    style.Colors[ImGuiCol_PlotLines] = TEXT_COLOR(0.63f);
-    style.Colors[ImGuiCol_PlotLinesHovered] = MED(1.00f);
-    style.Colors[ImGuiCol_PlotHistogram] = TEXT_COLOR(0.63f);
-    style.Colors[ImGuiCol_PlotHistogramHovered] = MED(1.00f);
-    style.Colors[ImGuiCol_TextSelectedBg] = MED(0.43f);
+    style.Colors[ImGuiCol_ResizeGripHovered] = med(0.78f);
+    style.Colors[ImGuiCol_ResizeGripActive] = med(1.00f);
+    style.Colors[ImGuiCol_PlotLines] = text_color(0.63f);
+    style.Colors[ImGuiCol_PlotLinesHovered] = med(1.00f);
+    style.Colors[ImGuiCol_PlotHistogram] = text_color(0.63f);
+    style.Colors[ImGuiCol_PlotHistogramHovered] = med(1.00f);
+    style.Colors[ImGuiCol_TextSelectedBg] = med(0.43f);
     // [...]
-    style.Colors[ImGuiCol_ModalWindowDarkening] = BG(0.73f);
+    style.Colors[ImGuiCol_ModalWindowDarkening] = bg(0.73f);
 
     style.WindowPadding = ImVec2(6, 4);
     style.WindowRounding = 0.0f;
@@ -115,7 +115,7 @@ void CherryTheme()
     style.WindowBorderSize = 1.0f;
 }
 
-bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
+bool initializeImGui(GLFWwindow* window, const char* glsl_version)
 {
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
@@ -174,27 +174,27 @@ bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
 
     // ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
-    CherryTheme();
+    cherryTheme();
 
     return true;
 }
 
-void ImGuiCleanup()
+void imGuiCleanup()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-static void glfw_error_callback(int error, const char* description)
+static void glfwErrorCallback(int error, const char* description)
 {
     std::cerr << "Glfw Error " << error << ": " << description << std::endl;
 }
 
-bool InitGLFW()
+bool initGlfw()
 {
     // Setup window
-    glfwSetErrorCallback(glfw_error_callback);
+    glfwSetErrorCallback(glfwErrorCallback);
     if (glfwInit() == GLFW_FALSE)
     {
         return false;
@@ -230,7 +230,7 @@ bool InitGLFW()
     return true;
 }
 
-void MainLoop()
+void mainLoop()
 {
     while (glfwWindowShouldClose(g_window) == 0)
     {
@@ -256,11 +256,11 @@ void MainLoop()
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            bool somethingChanged = chromagui::RenderGui(cr.get());
+            bool something_changed = chromagui::renderGui(cr.get());
 
             cr->update();
 
-            if (cr->isRunning() && somethingChanged)
+            if (cr->isRunning() && something_changed)
             {
                 cr->stopRender();
                 cr->startRender();
@@ -285,7 +285,7 @@ void MainLoop()
     }
 }
 
-bool ValidateArgs(argparse::ArgumentParser& program)
+bool validateArgs(argparse::ArgumentParser& program)
 {
     if (const auto& scene_file_path = program.present<std::string>("-s"))
     {
@@ -310,7 +310,7 @@ bool ValidateArgs(argparse::ArgumentParser& program)
 
 int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
 {
-    std::set_terminate(term_func);
+    std::set_terminate(termFunc);
 
     argparse::ArgumentParser program("chroma-renderer");
     program.add_argument("-r", "--render")
@@ -331,12 +331,12 @@ int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
         exit(0);
     }
 
-    if (!ValidateArgs(program))
+    if (!validateArgs(program))
     {
         return 1;
     }
 
-    if (!InitGLFW())
+    if (!initGlfw())
     {
         return 1;
     }
@@ -347,7 +347,7 @@ int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
         return 1;
     }
 
-    InitializeImGui(g_window, g_glsl_version);
+    initializeImGui(g_window, g_glsl_version);
 
     cr = std::make_unique<ChromaRenderer>();
 
@@ -366,11 +366,11 @@ int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
         cr->startRender();
     }
 
-    MainLoop();
+    mainLoop();
 
     cr.reset();
 
-    ImGuiCleanup();
+    imGuiCleanup();
 
     glfwDestroyWindow(g_window);
     glfwTerminate();

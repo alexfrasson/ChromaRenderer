@@ -12,9 +12,9 @@ class PostProcessor
     void process(const Camera& cam, const Image& src, const Image& dst, bool sync = true);
 
     bool tonemapping{true};
-    bool linearToSrbg{true};
-    bool adjustExposure{true};
+    bool linear_to_srbg{true};
+    bool adjust_exposure{true};
 
   private:
-    GLSLProgram computeShader;
+    GLSLProgram compute_shader_;
 };

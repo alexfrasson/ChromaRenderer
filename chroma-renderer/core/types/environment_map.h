@@ -14,17 +14,17 @@ class EnvironmentMap
     EnvironmentMap operator=(const EnvironmentMap&&) = delete;
     ~EnvironmentMap() = default;
 
-    const float* GetData()
+    const float* getData()
     {
         return data_.data();
     }
 
-    const Distribution& GetDistribution() const
+    const Distribution& getDistribution() const
     {
         return distribution_;
     }
 
-    const std::vector<float>& GetPdf() const
+    const std::vector<float>& getPdf() const
     {
         return pdf_;
     }

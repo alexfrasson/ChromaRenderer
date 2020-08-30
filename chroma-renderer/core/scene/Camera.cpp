@@ -9,10 +9,10 @@
 
 void Camera::setSize(int pwidth, int pheight)
 {
-    aspectRatio = (float)pwidth / static_cast<float>(pheight);
+    aspect_ratio = (float)pwidth / static_cast<float>(pheight);
     width = pwidth;
     height = pheight;
-    d = ((float)pwidth / 2.0f) / tanf(m_HorizontalFOV / 2.0f);
+    d = ((float)pwidth / 2.0f) / tanf(m_horizontal_fov / 2.0f);
 }
 
 void Camera::lookAt(glm::vec3 target)
@@ -23,7 +23,7 @@ void Camera::lookAt(glm::vec3 target)
     right = glm::normalize(right);
     up = glm::cross(forward, right);
 
-    if (AlmostEquals(eye.x, target.x) && AlmostEquals(eye.z, target.z) && eye.y > target.y)
+    if (almostEquals(eye.x, target.x) && almostEquals(eye.z, target.z) && eye.y > target.y)
     {
         // camera looking vertically down
         right = glm::vec3(0, 0, 1);
@@ -31,7 +31,7 @@ void Camera::lookAt(glm::vec3 target)
         forward = glm::vec3(0, 1, 0);
     }
 
-    if (AlmostEquals(eye.x, target.x) && AlmostEquals(eye.z, target.z) && eye.y < target.y)
+    if (almostEquals(eye.x, target.x) && almostEquals(eye.z, target.z) && eye.y < target.y)
     {
         // camera looking vertically up
         right = glm::vec3(1, 0, 0);

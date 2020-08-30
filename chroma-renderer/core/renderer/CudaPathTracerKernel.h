@@ -18,18 +18,18 @@ constexpr void cudaErrorCheck(const cudaError_t error_code)
 }
 
 // NOLINTNEXTLINE(clang-diagnostic-unused-const-variable)
-constexpr uint32_t MAX_PATH_DEPTH{3};
+constexpr uint32_t kMaxPathDepth{3};
 
-extern "C" void setTextureFilterMode(bool bLinearFilter);
+extern "C" void setTextureFilterMode(bool b_linear_filter);
 extern "C" void bindTextureToArray(cudaArray* aarray);
 
 extern "C" void trace(cudaStream_t& stream,
-                      CudaPathIteration* pathIterationBuffer,
-                      glm::vec4* accuBuffer,
-                      dim3 texDim,
+                      CudaPathIteration* path_iteration_buffer,
+                      glm::vec4* accu_buffer,
+                      dim3 tex_dim,
                       CudaCamera cam,
                       CudaTriangle* triangles,
                       CudaMaterial* materials,
                       unsigned int seed,
-                      CudaLinearBvhNode* linearBVH,
-                      CudaEnviromentSettings enviromentSettings);
+                      CudaLinearBvhNode* linear_bvh,
+                      CudaEnviromentSettings enviroment_settings);

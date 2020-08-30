@@ -7,7 +7,7 @@
 
 #include <cfloat>
 
-constexpr float EPSILON{0.000001f};
+constexpr float kEpsilon{0.000001f};
 
 __host__ __device__ inline int binarySearch(const float* cdf, const int cdf_size, const float rand_var)
 {
@@ -106,10 +106,10 @@ __device__ inline SampleDirection uniformSampleHemisphere(const float rand0,
 {
     // cos(theta) = rand0 = y
     // cos^2(theta) + sin^2(theta) = 1 -> sin(theta) = srtf(1 - cos^2(theta))
-    const float sinTheta = sqrtf(1 - rand0 * rand0);
+    const float sin_theta = sqrtf(1 - rand0 * rand0);
     const float phi = glm::two_pi<float>() * rand1;
-    const float x = sinTheta * cosf(phi);
-    const float z = sinTheta * sinf(phi);
+    const float x = sin_theta * cosf(phi);
+    const float z = sin_theta * sinf(phi);
     const glm::vec3 local_direction = glm::normalize(glm::vec3(x, z, rand0));
     const glm::vec3 wi = toWorld(local_direction, n);
     const float pdf = uniformSampleHemispherePdf(n, wo, wi);
@@ -134,13 +134,13 @@ __device__ inline SampleDirection uniformSampleCosineWeightedHemisphere(const fl
 {
     const float theta = asinf(sqrtf(rand0));
     const float phi = 2.0f * glm::pi<float>() * rand1;
-    const float sinTheta = sinf(theta);
-    const float cosTheta = cosf(theta);
-    const float sinPhi = sinf(phi);
-    const float cosPhi = cosf(phi);
-    const float x = sinTheta * cosPhi;
-    const float y = sinTheta * sinPhi;
-    const float z = cosTheta;
+    const float sin_theta = sinf(theta);
+    const float cos_theta = cosf(theta);
+    const float sin_phi = sinf(phi);
+    const float cos_phi = cosf(phi);
+    const float x = sin_theta * cos_phi;
+    const float y = sin_theta * sin_phi;
+    const float z = cos_theta;
 
     const glm::vec3 local_direction = glm::normalize(glm::vec3(x, y, z));
     const glm::vec3 wi = toWorld(local_direction, n);
@@ -191,11 +191,11 @@ __host__ __device__ inline glm::vec3 uvToUnitVector(const glm::vec2& uv)
 {
     const float phi = (2.0f * uv.x - 1.0f) * glm::pi<float>();
     const float theta = uv.y * glm::pi<float>();
-    const float cosTheta = cosf(theta);
-    const float sinTheta = sinf(theta);
-    const float sinPhi = sinf(phi);
-    const float cosPhi = cosf(phi);
-    return glm::vec3(cosPhi * sinTheta, cosTheta, sinPhi * sinTheta);
+    const float cos_theta = cosf(theta);
+    const float sin_theta = sinf(theta);
+    const float sin_phi = sinf(phi);
+    const float cos_phi = cosf(phi);
+    return glm::vec3(cos_phi * sin_theta, cos_theta, sin_phi * sin_theta);
 }
 
 // Computes ray direction given camera and pixel position
@@ -220,24 +220,24 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle,
     const glm::vec3 pvec = glm::cross(ray->direction, edge1);
     const float det = glm::dot(edge0, pvec);
 
-    if (det > -EPSILON && det < EPSILON)
+    if (det > -kEpsilon && det < kEpsilon)
     {
         return false;
     }
-    const float invDet = 1.0f / det;
+    const float inv_det = 1.0f / det;
     const glm::vec3 tvec = ray->origin - triangle->v[0];
-    const float u = glm::dot(tvec, pvec) * invDet;
+    const float u = glm::dot(tvec, pvec) * inv_det;
     if (u < 0.0f || u > 1.0f)
     {
         return false;
     }
     const glm::vec3 qvec = glm::cross(tvec, edge0);
-    const float v = glm::dot(ray->direction, qvec) * invDet;
+    const float v = glm::dot(ray->direction, qvec) * inv_det;
     if (v < 0.0f || u + v > 1.0f)
     {
         return false;
     }
-    const float t = glm::dot(edge1, qvec) * invDet;
+    const float t = glm::dot(edge1, qvec) * inv_det;
     if (t > ray->maxt || t < ray->mint)
     {
         return false;
@@ -249,7 +249,7 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle,
     intersection->p = ray->origin + intersection->distance * ray->direction;
     float gama = 1.0f - (u + v);
     intersection->n = u * triangle->n[1] + v * triangle->n[2] + gama * triangle->n[0];
-    const bool backface = det < -EPSILON;
+    const bool backface = det < -kEpsilon;
     intersection->n = (backface ? -1.0f : 1.0f) * glm::normalize(intersection->n);
     intersection->material = triangle->material;
 
@@ -263,24 +263,24 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle, 
     const glm::vec3 pvec = glm::cross(ray->direction, edge1);
     const float det = glm::dot(edge0, pvec);
 
-    if (det > -EPSILON && det < EPSILON)
+    if (det > -kEpsilon && det < kEpsilon)
     {
         return false;
     }
-    const float invDet = 1.0f / det;
+    const float inv_det = 1.0f / det;
     const glm::vec3 tvec = ray->origin - triangle->v[0];
-    const float u = glm::dot(tvec, pvec) * invDet;
+    const float u = glm::dot(tvec, pvec) * inv_det;
     if (u < 0.0f || u > 1.0f)
     {
         return false;
     }
     const glm::vec3 qvec = glm::cross(tvec, edge0);
-    const float v = glm::dot(ray->direction, qvec) * invDet;
+    const float v = glm::dot(ray->direction, qvec) * inv_det;
     if (v < 0.0f || u + v > 1.0f)
     {
         return false;
     }
-    const float t = glm::dot(edge1, qvec) * invDet;
+    const float t = glm::dot(edge1, qvec) * inv_det;
     if (t > ray->maxt || t < ray->mint)
     {
         return false;
@@ -294,15 +294,15 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle, 
 // intersection algorithm." In ACM SIGGRAPH 2005 Courses, p. 9. ACM, 2005.
 __host__ __device__ bool inline hitBoundingBoxSlab(const CudaBoundingBox& bb,
                                                    const CudaRay& ray,
-                                                   const glm::vec3& invRayDir,
-                                                   const glm::ivec3& dirIsNeg,
+                                                   const glm::vec3& inv_ray_dir,
+                                                   const glm::ivec3& dir_is_neg,
                                                    float& tmin,
                                                    float& tmax)
 {
-    float min = (bb[dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
-    float max = (bb[1 - dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
-    float tymin = (bb[dirIsNeg[1]].y - ray.origin.y) * invRayDir.y;
-    float tymax = (bb[1 - dirIsNeg[1]].y - ray.origin.y) * invRayDir.y;
+    float min = (bb[dir_is_neg[0]].x - ray.origin.x) * inv_ray_dir.x;
+    float max = (bb[1 - dir_is_neg[0]].x - ray.origin.x) * inv_ray_dir.x;
+    float tymin = (bb[dir_is_neg[1]].y - ray.origin.y) * inv_ray_dir.y;
+    float tymax = (bb[1 - dir_is_neg[1]].y - ray.origin.y) * inv_ray_dir.y;
     if ((min > tymax) || (tymin > max))
     {
         return false;
@@ -316,8 +316,8 @@ __host__ __device__ bool inline hitBoundingBoxSlab(const CudaBoundingBox& bb,
         max = tymax;
     }
 
-    tymin = (bb[dirIsNeg[2]].z - ray.origin.z) * invRayDir.z;
-    tymax = (bb[1 - dirIsNeg[2]].z - ray.origin.z) * invRayDir.z;
+    tymin = (bb[dir_is_neg[2]].z - ray.origin.z) * inv_ray_dir.z;
+    tymax = (bb[1 - dir_is_neg[2]].z - ray.origin.z) * inv_ray_dir.z;
 
     if ((min > tymax) || (tymin > max))
     {
@@ -336,65 +336,65 @@ __host__ __device__ bool inline hitBoundingBoxSlab(const CudaBoundingBox& bb,
 }
 
 __host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
-                                             const CudaLinearBvhNode* linearBVH,
+                                             const CudaLinearBvhNode* linear_bvh,
                                              CudaRay& ray,
                                              CudaIntersection& intersection)
 {
     bool hit = false;
-    const glm::vec3 invRayDir = 1.f / ray.direction;
-    const glm::ivec3 dirIsNeg{invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
+    const glm::vec3 inv_ray_dir = 1.f / ray.direction;
+    const glm::ivec3 dir_is_neg{inv_ray_dir.x < 0, inv_ray_dir.y < 0, inv_ray_dir.z < 0};
 
-    unsigned int todoOffset = 0;
-    unsigned int nodeNum = 0;
+    unsigned int todo_offset = 0;
+    unsigned int node_num = 0;
     unsigned int todo[64];
 
     intersection.distance = FLT_MAX;
     while (true)
     {
-        const CudaLinearBvhNode* node = &linearBVH[nodeNum];
+        const CudaLinearBvhNode* node = &linear_bvh[node_num];
 
         // Intersect BVH node
-        if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))
+        if (hitBoundingBoxSlab(node->bbox, ray, inv_ray_dir, dir_is_neg, ray.mint, ray.maxt))
         {
             // Leaf node
-            if (node->nPrimitives > 0)
+            if (node->n_primitives > 0)
             {
                 // Intersect primitives
-                for (unsigned int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                for (unsigned int i = node->primitives_offset; i < node->n_primitives + node->primitives_offset; i++)
                 {
                     if (intersectTriangle(&triangles[i], &ray, &intersection))
                     {
                         hit = true;
                     }
                 }
-                if (todoOffset == 0)
+                if (todo_offset == 0)
                 {
                     break;
                 }
-                nodeNum = todo[--todoOffset];
+                node_num = todo[--todo_offset];
             }
             // Internal node
             else
             {
-                if (dirIsNeg[node->axis] != 0)
+                if (dir_is_neg[node->axis] != 0)
                 {
-                    todo[todoOffset++] = nodeNum + 1;
-                    nodeNum = node->secondChildOffset;
+                    todo[todo_offset++] = node_num + 1;
+                    node_num = node->second_child_offset;
                 }
                 else
                 {
-                    todo[todoOffset++] = node->secondChildOffset;
-                    nodeNum = nodeNum + 1;
+                    todo[todo_offset++] = node->second_child_offset;
+                    node_num = node_num + 1;
                 }
             }
         }
         else
         {
-            if (todoOffset == 0)
+            if (todo_offset == 0)
             {
                 break;
             }
-            nodeNum = todo[--todoOffset];
+            node_num = todo[--todo_offset];
         }
     }
 
@@ -402,62 +402,62 @@ __host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
 }
 
 __host__ __device__ inline bool intersectBVH(const CudaTriangle* triangles,
-                                             const CudaLinearBvhNode* linearBVH,
+                                             const CudaLinearBvhNode* linear_bvh,
                                              CudaRay& ray)
 {
-    const glm::vec3 invRayDir = 1.f / ray.direction;
-    const glm::ivec3 dirIsNeg{invRayDir.x < 0, invRayDir.y < 0, invRayDir.z < 0};
+    const glm::vec3 inv_ray_dir = 1.f / ray.direction;
+    const glm::ivec3 dir_is_neg{inv_ray_dir.x < 0, inv_ray_dir.y < 0, inv_ray_dir.z < 0};
 
-    unsigned int todoOffset = 0;
-    unsigned int nodeNum = 0;
+    unsigned int todo_offset = 0;
+    unsigned int node_num = 0;
     unsigned int todo[64];
 
     while (true)
     {
-        const CudaLinearBvhNode* node = &linearBVH[nodeNum];
+        const CudaLinearBvhNode* node = &linear_bvh[node_num];
 
         // Intersect BVH node
-        if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))
+        if (hitBoundingBoxSlab(node->bbox, ray, inv_ray_dir, dir_is_neg, ray.mint, ray.maxt))
         {
             // Leaf node
-            if (node->nPrimitives > 0)
+            if (node->n_primitives > 0)
             {
                 // Intersect primitives
-                for (unsigned int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                for (unsigned int i = node->primitives_offset; i < node->n_primitives + node->primitives_offset; i++)
                 {
                     if (intersectTriangle(&triangles[i], &ray))
                     {
                         return true;
                     }
                 }
-                if (todoOffset == 0)
+                if (todo_offset == 0)
                 {
                     break;
                 }
-                nodeNum = todo[--todoOffset];
+                node_num = todo[--todo_offset];
             }
             // Internal node
             else
             {
-                if (dirIsNeg[node->axis] != 0)
+                if (dir_is_neg[node->axis] != 0)
                 {
-                    todo[todoOffset++] = nodeNum + 1;
-                    nodeNum = node->secondChildOffset;
+                    todo[todo_offset++] = node_num + 1;
+                    node_num = node->second_child_offset;
                 }
                 else
                 {
-                    todo[todoOffset++] = node->secondChildOffset;
-                    nodeNum = nodeNum + 1;
+                    todo[todo_offset++] = node->second_child_offset;
+                    node_num = node_num + 1;
                 }
             }
         }
         else
         {
-            if (todoOffset == 0)
+            if (todo_offset == 0)
             {
                 break;
             }
-            nodeNum = todo[--todoOffset];
+            node_num = todo[--todo_offset];
         }
     }
 

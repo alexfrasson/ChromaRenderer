@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-inline std::string OpenGlErrorToString(const GLenum error)
+inline std::string openGlErrorToString(const GLenum error)
 {
     switch (error)
     {
@@ -33,5 +33,5 @@ inline std::string OpenGlErrorToString(const GLenum error)
 #define CHECK_OPENGL_ERROR                                                                                     \
     if (GLenum err = glGetError(); err != GL_NO_ERROR)                                                         \
     {                                                                                                          \
-        std::cerr << __FILE__ << ":" << __LINE__ << " OpenGL error " << OpenGlErrorToString(err) << std::endl; \
+        std::cerr << __FILE__ << ":" << __LINE__ << " OpenGL error " << openGlErrorToString(err) << std::endl; \
     }

@@ -18,7 +18,7 @@ union Float {
     float value;
 };
 
-float NextDown(const float x)
+float nextDown(const float x)
 {
     if (std::isnan(x) || std::isinf(x))
     {
@@ -41,7 +41,7 @@ float NextDown(const float x)
     return f.value;
 }
 
-float NextUp(const float x)
+float nextUp(const float x)
 {
     if (std::isnan(x) || std::isinf(x))
     {
@@ -67,44 +67,44 @@ float NextUp(const float x)
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
 TEST(FloatingPointEqualsTest, ZeroesAreEqual)
 {
-    EXPECT_TRUE(AlmostEquals(+0.0f, +0.0f));
-    EXPECT_TRUE(AlmostEquals(+0.0f, -0.0f));
-    EXPECT_TRUE(AlmostEquals(-0.0f, -0.0f));
+    EXPECT_TRUE(almostEquals(+0.0f, +0.0f));
+    EXPECT_TRUE(almostEquals(+0.0f, -0.0f));
+    EXPECT_TRUE(almostEquals(-0.0f, -0.0f));
 }
 
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
 TEST(FloatingPointEqualsTest, ZeroAndNextRepresentableFloatAreEqual)
 {
     const float value{0.0f};
-    EXPECT_TRUE(AlmostEquals(value, NextUp(value)));
+    EXPECT_TRUE(almostEquals(value, nextUp(value)));
 }
 
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
 TEST(FloatingPointEqualsTest, ZeroAndPreviousRepresentableFloatAreEqual)
 {
     const float value{0.0f};
-    EXPECT_TRUE(AlmostEquals(value, NextDown(value)));
+    EXPECT_TRUE(almostEquals(value, nextDown(value)));
 }
 
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
 TEST(FloatingPointEqualsTest, NextAndPreviousRepresentableFloatAroundZeroAreEqual)
 {
     const float value{0.0f};
-    EXPECT_TRUE(AlmostEquals(NextDown(value), NextUp(value)));
+    EXPECT_TRUE(almostEquals(nextDown(value), nextUp(value)));
 }
 
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
 TEST(FloatingPointEqualsTest, TwoAndPreviousRepresentableFloatAreEqual)
 {
     const float value{2.0f};
-    EXPECT_TRUE(AlmostEquals(value, NextDown(value)));
+    EXPECT_TRUE(almostEquals(value, nextDown(value)));
 }
 
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
 TEST(FloatingPointEqualsTest, TwoIsEqualToItself)
 {
     const float value{2.0f};
-    EXPECT_TRUE(AlmostEquals(value, value));
+    EXPECT_TRUE(almostEquals(value, value));
 }
 
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
@@ -112,14 +112,14 @@ TEST(FloatingPointEqualsTest, TwoAndNextRepresentableFloatAreDifferent)
 {
     // This is were the function starts to report false unless the numbers are exactly the same
     const float value{2.0f};
-    EXPECT_FALSE(AlmostEquals(value, NextUp(value)));
+    EXPECT_FALSE(almostEquals(value, nextUp(value)));
 }
 
 // NOLINTNEXTLINE(hicpp-no-array-decay, cppcoreguidelines-owning-memory, hicpp-special-member-functions)
 TEST(FloatingPointEqualsTest, LargeNumberIsEqualToItself)
 {
     const float value{9999999.0f};
-    EXPECT_TRUE(AlmostEquals(value, value));
+    EXPECT_TRUE(almostEquals(value, value));
 }
 
 } // namespace

@@ -3,10 +3,11 @@
 #include "chroma-renderer/core/scene/Scene.h"
 
 #include <functional>
-namespace ModelImporter
+
+namespace model_importer
 {
 
-bool import(const std::string& fileName, Scene& s);
-void importcbscene(const std::string& fileName, Scene& s, const std::function<void()>& cb);
+bool import(const std::string& file_name, Scene& s);
+void importcbscene(const std::string& file_name, Scene& s, const std::function<void()>& cb);
 
-} // namespace ModelImporter
+} // namespace model_importer

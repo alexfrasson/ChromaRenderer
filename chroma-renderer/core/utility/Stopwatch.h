@@ -7,7 +7,7 @@
 class Stopwatch
 {
   public:
-    std::chrono::milliseconds elapsedMillis{0};
+    std::chrono::milliseconds elapsed_millis{0};
 
     // Starts the stopwatch.
     void start();
@@ -17,7 +17,7 @@ class Stopwatch
     void restart();
 
   private:
-    std::chrono::steady_clock::time_point begin;
+    std::chrono::steady_clock::time_point begin_;
 };
 
 class StopwatchOpenGL
@@ -35,6 +35,6 @@ class StopwatchOpenGL
     double elapsedMillis();
 
   private:
-    GLuint queries[2]{0, 0};
-    double _elapsedMillis{0.0};
+    GLuint queries_[2]{0, 0};
+    double elapsed_millis_{0.0};
 };

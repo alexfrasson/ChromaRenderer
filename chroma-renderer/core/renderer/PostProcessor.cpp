@@ -7,10 +7,10 @@ PostProcessor::PostProcessor()
 {
     try
     {
-        computeShader.compileShader("./chroma-renderer/shaders/convergence.glsl", GLSLShader::COMPUTE);
-        computeShader.link();
-        computeShader.validate();
-        computeShader.printActiveAttribs();
+        compute_shader_.compileShader("./chroma-renderer/shaders/convergence.glsl", glsl_shader::kCompute);
+        compute_shader_.link();
+        compute_shader_.validate();
+        compute_shader_.printActiveAttribs();
     }
     catch (GLSLProgramException& e)
     {
@@ -23,27 +23,27 @@ void PostProcessor::process(const Camera& cam, const Image& src, const Image& ds
     const std::int32_t src_image_unit = 0;
     const std::int32_t dst_image_unit = 1;
 
-    computeShader.use();
-    computeShader.setUniform("apperture", cam.apperture);
-    computeShader.setUniform("shutterTime", cam.shutterTime);
-    computeShader.setUniform("iso", cam.iso);
-    computeShader.setUniform("tonemapping", tonemapping);
-    computeShader.setUniform("linearToSrbg", linearToSrbg);
-    computeShader.setUniform("adjustExposure", adjustExposure);
-    computeShader.setUniform("srcImage", src_image_unit);
-    computeShader.setUniform("dstImage", dst_image_unit);
+    compute_shader_.use();
+    compute_shader_.setUniform("apperture", cam.apperture);
+    compute_shader_.setUniform("shutterTime", cam.shutter_time);
+    compute_shader_.setUniform("iso", cam.iso);
+    compute_shader_.setUniform("tonemapping", tonemapping);
+    compute_shader_.setUniform("linearToSrbg", linear_to_srbg);
+    compute_shader_.setUniform("adjustExposure", adjust_exposure);
+    compute_shader_.setUniform("srcImage", src_image_unit);
+    compute_shader_.setUniform("dstImage", dst_image_unit);
 
     CHECK_OPENGL_ERROR
 
-    glBindImageTexture(src_image_unit, src.textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-    glBindImageTexture(dst_image_unit, dst.textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    glBindImageTexture(src_image_unit, src.texture_id, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+    glBindImageTexture(dst_image_unit, dst.texture_id, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
     CHECK_OPENGL_ERROR
 
-    int nGroupsX = static_cast<int>(ceilf((float)src.getWidth() / 16.0f));
-    int nGroupsY = static_cast<int>(ceilf((float)src.getHeight() / 16.0f));
+    int n_groups_x = static_cast<int>(ceilf((float)src.getWidth() / 16.0f));
+    int n_groups_y = static_cast<int>(ceilf((float)src.getHeight() / 16.0f));
 
-    glDispatchCompute(nGroupsX, nGroupsY, 1);
+    glDispatchCompute(n_groups_x, n_groups_y, 1);
 
     if (sync)
     {

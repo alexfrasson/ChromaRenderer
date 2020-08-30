@@ -22,30 +22,30 @@ BoundingBox Scene::getBoundingBox()
 
     for (size_t i = 0; i < meshes.size(); i++)
     {
-        if (meshes[i]->boundingBox.max.x > bb.max.x)
+        if (meshes[i]->bounding_box.max.x > bb.max.x)
         {
-            bb.max.x = meshes[i]->boundingBox.max.x;
+            bb.max.x = meshes[i]->bounding_box.max.x;
         }
-        if (meshes[i]->boundingBox.max.z > bb.max.z)
+        if (meshes[i]->bounding_box.max.z > bb.max.z)
         {
-            bb.max.z = meshes[i]->boundingBox.max.z;
+            bb.max.z = meshes[i]->bounding_box.max.z;
         }
-        if (meshes[i]->boundingBox.max.y > bb.max.y)
+        if (meshes[i]->bounding_box.max.y > bb.max.y)
         {
-            bb.max.y = meshes[i]->boundingBox.max.y;
+            bb.max.y = meshes[i]->bounding_box.max.y;
         }
 
-        if (meshes[i]->boundingBox.min.x < bb.min.x)
+        if (meshes[i]->bounding_box.min.x < bb.min.x)
         {
-            bb.min.x = meshes[i]->boundingBox.min.x;
+            bb.min.x = meshes[i]->bounding_box.min.x;
         }
-        if (meshes[i]->boundingBox.min.z < bb.min.z)
+        if (meshes[i]->bounding_box.min.z < bb.min.z)
         {
-            bb.min.z = meshes[i]->boundingBox.min.z;
+            bb.min.z = meshes[i]->bounding_box.min.z;
         }
-        if (meshes[i]->boundingBox.min.y < bb.min.y)
+        if (meshes[i]->bounding_box.min.y < bb.min.y)
         {
-            bb.min.y = meshes[i]->boundingBox.min.y;
+            bb.min.y = meshes[i]->bounding_box.min.y;
         }
     }
 

@@ -11,10 +11,10 @@ class ChromaRenderer
   public:
     enum State
     {
-        RENDERING,
-        LOADINGSCENE,
-        PROCESSINGSCENE,
-        IDLE
+        kRendering,
+        kLoadingScene,
+        kProcessingScene,
+        kIdle
     };
 
     struct Progress

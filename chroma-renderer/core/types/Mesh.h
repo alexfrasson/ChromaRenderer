@@ -11,7 +11,7 @@
 class Mesh
 {
   public:
-    BoundingBox boundingBox{};
+    BoundingBox bounding_box{};
     std::vector<Triangle> t;
     std::vector<glm::vec3> v;
     std::vector<glm::vec3> n;

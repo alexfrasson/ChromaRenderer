@@ -50,83 +50,83 @@ class ChromaRenderer::Impl
     bool isIdle();
     void cbSceneLoadedScene();
 
-    RendererSettings settings;
-    Scene scene;
-    State state{State::IDLE};
-    CudaPathTracer cudaPathTracer;
-    PostProcessor post_processor;
-    Stopwatch stopwatch;
-    Image renderer_target;
-    Image final_target;
-    Image env_map;
-    bool running{false};
-    float invPixelCount{0.0f};
-    int pixelCount{0};
-    std::unique_ptr<ISpacePartitioningStructure> sps;
+    RendererSettings settings_;
+    Scene scene_;
+    State state_{State::kIdle};
+    CudaPathTracer cuda_path_tracer_;
+    PostProcessor post_processor_;
+    Stopwatch stopwatch_;
+    Image renderer_target_;
+    Image final_target_;
+    Image env_map_;
+    bool running_{false};
+    float inv_pixel_count_{0.0f};
+    int pixel_count_{0};
+    std::unique_ptr<ISpacePartitioningStructure> sps_;
 };
 
 ChromaRenderer::Impl::Impl()
 {
-    setSettings(settings);
+    setSettings(settings_);
 }
 
 void ChromaRenderer::Impl::updateMaterials()
 {
-    cudaPathTracer.setMaterials(scene.materials);
+    cuda_path_tracer_.setMaterials(scene_.materials);
 }
 
 void ChromaRenderer::Impl::setPostProcessingSettings(const PostProcessingSettings& a_settings)
 {
-    post_processor.adjustExposure = a_settings.adjust_exposure;
-    post_processor.linearToSrbg = a_settings.linear_to_srgb;
-    post_processor.tonemapping = a_settings.tonemapping;
+    post_processor_.adjust_exposure = a_settings.adjust_exposure;
+    post_processor_.linear_to_srbg = a_settings.linear_to_srgb;
+    post_processor_.tonemapping = a_settings.tonemapping;
 }
 
 ChromaRenderer::PostProcessingSettings ChromaRenderer::Impl::getPostProcessingSettings() const
 {
     PostProcessingSettings post_processing_settings{};
-    post_processing_settings.adjust_exposure = post_processor.adjustExposure;
-    post_processing_settings.linear_to_srgb = post_processor.linearToSrbg;
-    post_processing_settings.tonemapping = post_processor.tonemapping;
+    post_processing_settings.adjust_exposure = post_processor_.adjust_exposure;
+    post_processing_settings.linear_to_srgb = post_processor_.linear_to_srbg;
+    post_processing_settings.tonemapping = post_processor_.tonemapping;
     return post_processing_settings;
 }
 
 ChromaRenderer::Progress ChromaRenderer::Impl::getProgress()
 {
     Progress progress{};
-    progress.progress = cudaPathTracer.getProgress();
-    progress.instant_rays_per_sec = cudaPathTracer.getInstantRaysPerSec();
-    progress.finished_samples = cudaPathTracer.getFinishedSamples();
-    progress.target_samples_per_pixel = cudaPathTracer.getTargetSamplesPerPixel();
+    progress.progress = cuda_path_tracer_.getProgress();
+    progress.instant_rays_per_sec = cuda_path_tracer_.getInstantRaysPerSec();
+    progress.finished_samples = cuda_path_tracer_.getFinishedSamples();
+    progress.target_samples_per_pixel = cuda_path_tracer_.getTargetSamplesPerPixel();
     return progress;
 }
 
 Scene& ChromaRenderer::Impl::getScene()
 {
-    return scene;
+    return scene_;
 }
 
 Image& ChromaRenderer::Impl::getTarget()
 {
-    return final_target;
+    return final_target_;
 }
 
 bool ChromaRenderer::Impl::isIdle()
 {
-    if (state == State::RENDERING && !isRunning())
+    if (state_ == State::kRendering && !isRunning())
     {
-        state = State::IDLE;
+        state_ = State::kIdle;
     }
-    return (state == State::IDLE);
+    return (state_ == State::kIdle);
 }
 
 ChromaRenderer::State ChromaRenderer::Impl::getState()
 {
-    if (state == ChromaRenderer::RENDERING)
+    if (state_ == ChromaRenderer::kRendering)
     {
         if (!isRunning())
         {
-            state = ChromaRenderer::IDLE;
+            state_ = ChromaRenderer::kIdle;
         }
     }
     /*if (state == ChromaRenderer::PROCESSINGSCENE)
@@ -134,29 +134,29 @@ ChromaRenderer::State ChromaRenderer::Impl::getState()
         if (scene.ready)
             state = ChromaRenderer::IDLE;
     }*/
-    return state;
+    return state_;
 }
 
 void ChromaRenderer::Impl::setSize(int width, int height)
 {
-    renderer_target.setSize(static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
-    final_target.setSize(static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
-    scene.camera.setSize(width, height);
+    renderer_target_.setSize(static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
+    final_target_.setSize(static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
+    scene_.camera.setSize(width, height);
 }
 
 void ChromaRenderer::Impl::setSettings(const RendererSettings& psettings)
 {
-    settings = psettings;
-    scene.camera.horizontalFOV(settings.horizontalFOV);
-    setSize(settings.width, settings.height);
-    pixelCount = settings.width * settings.height;
-    invPixelCount = 1.f / (float)pixelCount;
-    cudaPathTracer.setSettings(settings);
+    settings_ = psettings;
+    scene_.camera.horizontalFOV(settings_.horizontal_fov);
+    setSize(settings_.width, settings_.height);
+    pixel_count_ = settings_.width * settings_.height;
+    inv_pixel_count_ = 1.f / (float)pixel_count_;
+    cuda_path_tracer_.setSettings(settings_);
 }
 
 RendererSettings ChromaRenderer::Impl::getSettings()
 {
-    return settings;
+    return settings_;
 }
 
 void ChromaRenderer::Impl::startRender()
@@ -166,22 +166,22 @@ void ChromaRenderer::Impl::startRender()
         return;
     }
 
-    renderer_target.clear();
-    final_target.clear();
+    renderer_target_.clear();
+    final_target_.clear();
 
-    cudaPathTracer.setTargetImage(renderer_target);
-    cudaPathTracer.setCamera(scene.camera);
+    cuda_path_tracer_.setTargetImage(renderer_target_);
+    cuda_path_tracer_.setCamera(scene_.camera);
 
-    stopwatch.restart();
+    stopwatch_.restart();
 
-    state = State::RENDERING;
-    running = true;
+    state_ = State::kRendering;
+    running_ = true;
 }
 
 void ChromaRenderer::Impl::stopRender()
 {
-    running = false;
-    state = State::IDLE;
+    running_ = false;
+    state_ = State::kIdle;
 }
 
 void ChromaRenderer::Impl::importScene(const std::string& filename)
@@ -191,8 +191,8 @@ void ChromaRenderer::Impl::importScene(const std::string& filename)
         return;
     }
 
-    state = State::LOADINGSCENE;
-    ModelImporter::importcbscene(filename, scene, [&]() { cbSceneLoadedScene(); });
+    state_ = State::kLoadingScene;
+    model_importer::importcbscene(filename, scene_, [&]() { cbSceneLoadedScene(); });
 }
 
 void ChromaRenderer::Impl::setEnvMap(const float* data,
@@ -200,8 +200,8 @@ void ChromaRenderer::Impl::setEnvMap(const float* data,
                                      const std::uint32_t height,
                                      const std::uint32_t channels)
 {
-    cudaPathTracer.setEnvMap(data, width, height, channels);
-    env_map.setData(data, width, height);
+    cuda_path_tracer_.setEnvMap(data, width, height, channels);
+    env_map_.setData(data, width, height);
 }
 
 void ChromaRenderer::Impl::importEnviromentMap(const std::string& filename)
@@ -227,48 +227,48 @@ void ChromaRenderer::Impl::importEnviromentMap(const std::string& filename)
 
 void ChromaRenderer::Impl::cbSceneLoadedScene()
 {
-    state = State::PROCESSINGSCENE;
-    sps = std::make_unique<BVH>();
-    sps->build(scene.meshes);
-    cudaPathTracer.setSceneGeometry(sps.get(), scene.materials);
+    state_ = State::kProcessingScene;
+    sps_ = std::make_unique<BVH>();
+    sps_->build(scene_.meshes);
+    cuda_path_tracer_.setSceneGeometry(sps_.get(), scene_.materials);
 
-    settings.width = scene.camera.width;
-    settings.height = scene.camera.height;
-    settings.horizontalFOV = scene.camera.horizontalFOV();
+    settings_.width = scene_.camera.width;
+    settings_.height = scene_.camera.height;
+    settings_.horizontal_fov = scene_.camera.horizontalFOV();
 
-    setSettings(settings);
+    setSettings(settings_);
 
-    cudaPathTracer.setTargetImage(renderer_target);
-    cudaPathTracer.setCamera(scene.camera);
+    cuda_path_tracer_.setTargetImage(renderer_target_);
+    cuda_path_tracer_.setCamera(scene_.camera);
 
-    state = State::IDLE;
+    state_ = State::kIdle;
 }
 
 void ChromaRenderer::Impl::update()
 {
-    if (state == State::RENDERING)
+    if (state_ == State::kRendering)
     {
-        cudaPathTracer.render();
-        post_processor.process(scene.camera, renderer_target, final_target, true);
-        if (cudaPathTracer.getProgress() >= 1.0f)
+        cuda_path_tracer_.render();
+        post_processor_.process(scene_.camera, renderer_target_, final_target_, true);
+        if (cuda_path_tracer_.getProgress() >= 1.0f)
         {
-            running = false;
-            state = State::IDLE;
+            running_ = false;
+            state_ = State::kIdle;
         }
     }
 }
 
 bool ChromaRenderer::Impl::isRunning()
 {
-    if (running)
+    if (running_)
     {
-        running = cudaPathTracer.getFinishedSamples() < cudaPathTracer.getTargetSamplesPerPixel();
-        if (!running)
+        running_ = cuda_path_tracer_.getFinishedSamples() < cuda_path_tracer_.getTargetSamplesPerPixel();
+        if (!running_)
         {
-            stopwatch.stop();
+            stopwatch_.stop();
         }
     }
-    return running;
+    return running_;
 }
 
 ChromaRenderer::ChromaRenderer() : impl_{std::make_unique<ChromaRenderer::Impl>()}

@@ -36,25 +36,25 @@ class GLSLProgramException : public std::runtime_error
     }
 };
 
-namespace GLSLShader
+namespace glsl_shader
 {
 enum GLSLShaderType
 {
-    VERTEX = GL_VERTEX_SHADER,
-    FRAGMENT = GL_FRAGMENT_SHADER,
-    GEOMETRY = GL_GEOMETRY_SHADER,
-    TESS_CONTROL = GL_TESS_CONTROL_SHADER,
-    TESS_EVALUATION = GL_TESS_EVALUATION_SHADER,
-    COMPUTE = GL_COMPUTE_SHADER
+    kVertex = GL_VERTEX_SHADER,
+    kFragment = GL_FRAGMENT_SHADER,
+    kGeometry = GL_GEOMETRY_SHADER,
+    kTessControl = GL_TESS_CONTROL_SHADER,
+    kTessEvaluation = GL_TESS_EVALUATION_SHADER,
+    kCompute = GL_COMPUTE_SHADER
 };
 }
 
 class GLSLProgram
 {
   private:
-    GLuint handle{0};
-    bool linked{false};
-    std::map<string, int> uniformLocations;
+    GLuint handle_{0};
+    bool linked_{false};
+    std::map<string, int> uniform_locations_;
 
     GLint getUniformLocation(const char* name);
 
@@ -66,16 +66,16 @@ class GLSLProgram
     GLSLProgram& operator=(GLSLProgram&&) = delete;
     ~GLSLProgram();
 
-    void compileShader(const std::string& fileName);
-    void compileShader(const std::string& fileName,
-                       GLSLShader::GLSLShaderType type,
+    void compileShader(const std::string& file_name);
+    void compileShader(const std::string& file_name,
+                       glsl_shader::GLSLShaderType type,
                        std::vector<string> defines = std::vector<string>(),
-                       const std::map<std::string, int>& definesINT = std::map<std::string, int>());
+                       const std::map<std::string, int>& defines_int = std::map<std::string, int>());
 
   private:
     void compileShaderInternal(const std::string& source,
-                               GLSLShader::GLSLShaderType type,
-                               const std::string& fileName = "");
+                               glsl_shader::GLSLShaderType type,
+                               const std::string& file_name = "");
 
   public:
     void link();

@@ -4,7 +4,7 @@
 bool RendererSettings::operator==(const RendererSettings& rs) const
 {
     return width == rs.width && height == rs.height && samplesperpixel == rs.samplesperpixel &&
-           AlmostEquals(horizontalFOV, rs.horizontalFOV);
+           almostEquals(horizontal_fov, rs.horizontal_fov);
 }
 
 bool RendererSettings::operator!=(const RendererSettings& rs) const
