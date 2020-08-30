@@ -559,13 +559,13 @@ bool convert(const aiScene* aiscene, Scene& s)
     return true;
 }
 
-void ModelImporter::importcbscene(const std::string& file_name, Scene& s, const std::function<void()>& cb)
+void model_importer::importcbscene(const std::string& file_name, Scene& s, const std::function<void()>& cb)
 {
     import(file_name, s);
     cb();
 }
 
-bool ModelImporter::import(const std::string& file_name, Scene& s)
+bool model_importer::import(const std::string& file_name, Scene& s)
 {
     std::cout << "----------------------------<Importer>---------------------------" << std::endl;
     std::cout << "Assimp " << aiGetVersionMajor() << "." << aiGetVersionMinor() << std::endl;

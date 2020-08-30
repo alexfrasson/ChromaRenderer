@@ -192,7 +192,7 @@ void ChromaRenderer::Impl::importScene(const std::string& filename)
     }
 
     state_ = State::kLoadingScene;
-    ModelImporter::importcbscene(filename, scene_, [&]() { cbSceneLoadedScene(); });
+    model_importer::importcbscene(filename, scene_, [&]() { cbSceneLoadedScene(); });
 }
 
 void ChromaRenderer::Impl::setEnvMap(const float* data,

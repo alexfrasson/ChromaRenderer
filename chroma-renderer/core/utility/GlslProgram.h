@@ -36,7 +36,7 @@ class GLSLProgramException : public std::runtime_error
     }
 };
 
-namespace GLSLShader
+namespace glsl_shader
 {
 enum GLSLShaderType
 {
@@ -68,13 +68,13 @@ class GLSLProgram
 
     void compileShader(const std::string& file_name);
     void compileShader(const std::string& file_name,
-                       GLSLShader::GLSLShaderType type,
+                       glsl_shader::GLSLShaderType type,
                        std::vector<string> defines = std::vector<string>(),
                        const std::map<std::string, int>& defines_int = std::map<std::string, int>());
 
   private:
     void compileShaderInternal(const std::string& source,
-                               GLSLShader::GLSLShaderType type,
+                               glsl_shader::GLSLShaderType type,
                                const std::string& file_name = "");
 
   public:

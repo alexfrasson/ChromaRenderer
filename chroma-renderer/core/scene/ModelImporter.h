@@ -3,7 +3,8 @@
 #include "chroma-renderer/core/scene/Scene.h"
 
 #include <functional>
-namespace ModelImporter
+
+namespace model_importer
 {
 
 bool import(const std::string& file_name, Scene& s);

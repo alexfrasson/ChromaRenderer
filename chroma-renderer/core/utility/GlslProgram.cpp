@@ -10,23 +10,23 @@
 using std::ifstream;
 using std::ios;
 
-namespace GLSLShaderInfo
+namespace glsl_shader_info
 {
 struct ShaderFileExtension
 {
     const char* ext;
-    GLSLShader::GLSLShaderType type;
+    glsl_shader::GLSLShaderType type;
 };
 
-struct ShaderFileExtension extensions[] = {{".vs", GLSLShader::kVertex},
-                                           {".vert", GLSLShader::kVertex},
-                                           {".gs", GLSLShader::kGeometry},
-                                           {".geom", GLSLShader::kGeometry},
-                                           {".tcs", GLSLShader::kTessControl},
-                                           {".tes", GLSLShader::kTessEvaluation},
-                                           {".fs", GLSLShader::kFragment},
-                                           {".frag", GLSLShader::kFragment},
-                                           {".cs", GLSLShader::kCompute}};
+struct ShaderFileExtension extensions[] = {{".vs", glsl_shader::kVertex},
+                                           {".vert", glsl_shader::kVertex},
+                                           {".gs", glsl_shader::kGeometry},
+                                           {".geom", glsl_shader::kGeometry},
+                                           {".tcs", glsl_shader::kTessControl},
+                                           {".tes", glsl_shader::kTessEvaluation},
+                                           {".fs", glsl_shader::kFragment},
+                                           {".frag", glsl_shader::kFragment},
+                                           {".cs", glsl_shader::kCompute}};
 } // namespace GLSLShaderInfo
 
 GLSLProgram::~GLSLProgram()
@@ -60,18 +60,18 @@ GLSLProgram::~GLSLProgram()
 
 void GLSLProgram::compileShader(const std::string& file_name)
 {
-    int num_exts = sizeof(GLSLShaderInfo::extensions) / sizeof(GLSLShaderInfo::ShaderFileExtension);
+    int num_exts = sizeof(glsl_shader_info::extensions) / sizeof(glsl_shader_info::ShaderFileExtension);
 
     // Check the file name's extension to determine the shader type
     std::string ext = std::filesystem::path(file_name).extension().string();
-    GLSLShader::GLSLShaderType type = GLSLShader::kVertex;
+    glsl_shader::GLSLShaderType type = glsl_shader::kVertex;
     bool match_found = false;
     for (int i = 0; i < num_exts; i++)
     {
-        if (ext == GLSLShaderInfo::extensions[i].ext)
+        if (ext == glsl_shader_info::extensions[i].ext)
         {
             match_found = true;
-            type = GLSLShaderInfo::extensions[i].type;
+            type = glsl_shader_info::extensions[i].type;
             break;
         }
     }
@@ -88,7 +88,7 @@ void GLSLProgram::compileShader(const std::string& file_name)
 }
 
 void GLSLProgram::compileShader(const std::string& file_name,
-                                GLSLShader::GLSLShaderType type,
+                                glsl_shader::GLSLShaderType type,
                                 std::vector<std::string> defines,
                                 const std::map<std::string, int>& defines_int)
 {
@@ -139,7 +139,7 @@ void GLSLProgram::compileShader(const std::string& file_name,
 }
 
 void GLSLProgram::compileShaderInternal(const std::string& source,
-                                        GLSLShader::GLSLShaderType type,
+                                        glsl_shader::GLSLShaderType type,
                                         const std::string& file_name)
 {
     if (handle_ <= 0)
