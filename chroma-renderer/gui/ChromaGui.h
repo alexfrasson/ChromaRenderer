@@ -5,12 +5,12 @@
 namespace chromagui
 {
 
-void MainMenu(ChromaRenderer* cr);
-void DockSpace();
-bool SettingsWindow(ChromaRenderer* cr);
-bool ViewportWindow(ChromaRenderer* cr);
-bool MaterialsWindow(ChromaRenderer* cr);
+void mainMenu(ChromaRenderer* cr);
+void dockSpace();
+bool settingsWindow(ChromaRenderer* cr);
+bool viewportWindow(ChromaRenderer* cr);
+bool materialsWindow(ChromaRenderer* cr);
 
-bool RenderGui(ChromaRenderer* cr);
+bool renderGui(ChromaRenderer* cr);
 
 } // namespace chromagui

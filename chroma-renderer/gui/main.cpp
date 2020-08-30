@@ -13,7 +13,7 @@
 
 namespace fs = std::filesystem;
 
-void term_func()
+void termFunc()
 {
     std::cout << "Terminate!" << std::endl;
     auto eptr = std::current_exception();
@@ -48,7 +48,7 @@ std::unique_ptr<ChromaRenderer> cr;
 #define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers // NOLINT
 #endif
 
-void CherryTheme()
+void cherryTheme()
 {
     auto HI = [](const float v) { return ImVec4(0.502f, 0.075f, 0.256f, v); };
     auto MED = [](const float v) { return ImVec4(0.455f, 0.198f, 0.301f, v); };
@@ -115,7 +115,7 @@ void CherryTheme()
     style.WindowBorderSize = 1.0f;
 }
 
-bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
+bool initializeImGui(GLFWwindow* window, const char* glsl_version)
 {
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
@@ -174,27 +174,27 @@ bool InitializeImGui(GLFWwindow* window, const char* glsl_version)
 
     // ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
-    CherryTheme();
+    cherryTheme();
 
     return true;
 }
 
-void ImGuiCleanup()
+void imGuiCleanup()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-static void glfw_error_callback(int error, const char* description)
+static void glfwErrorCallback(int error, const char* description)
 {
     std::cerr << "Glfw Error " << error << ": " << description << std::endl;
 }
 
-bool InitGLFW()
+bool initGlfw()
 {
     // Setup window
-    glfwSetErrorCallback(glfw_error_callback);
+    glfwSetErrorCallback(glfwErrorCallback);
     if (glfwInit() == GLFW_FALSE)
     {
         return false;
@@ -230,7 +230,7 @@ bool InitGLFW()
     return true;
 }
 
-void MainLoop()
+void mainLoop()
 {
     while (glfwWindowShouldClose(g_window) == 0)
     {
@@ -256,7 +256,7 @@ void MainLoop()
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            bool somethingChanged = chromagui::RenderGui(cr.get());
+            bool somethingChanged = chromagui::renderGui(cr.get());
 
             cr->update();
 
@@ -285,7 +285,7 @@ void MainLoop()
     }
 }
 
-bool ValidateArgs(argparse::ArgumentParser& program)
+bool validateArgs(argparse::ArgumentParser& program)
 {
     if (const auto& scene_file_path = program.present<std::string>("-s"))
     {
@@ -310,7 +310,7 @@ bool ValidateArgs(argparse::ArgumentParser& program)
 
 int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
 {
-    std::set_terminate(term_func);
+    std::set_terminate(termFunc);
 
     argparse::ArgumentParser program("chroma-renderer");
     program.add_argument("-r", "--render")
@@ -331,12 +331,12 @@ int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
         exit(0);
     }
 
-    if (!ValidateArgs(program))
+    if (!validateArgs(program))
     {
         return 1;
     }
 
-    if (!InitGLFW())
+    if (!initGlfw())
     {
         return 1;
     }
@@ -347,7 +347,7 @@ int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
         return 1;
     }
 
-    InitializeImGui(g_window, g_glsl_version);
+    initializeImGui(g_window, g_glsl_version);
 
     cr = std::make_unique<ChromaRenderer>();
 
@@ -366,11 +366,11 @@ int main(const int argc, const char** argv) // NOLINT(bugprone-exception-escape)
         cr->startRender();
     }
 
-    MainLoop();
+    mainLoop();
 
     cr.reset();
 
-    ImGuiCleanup();
+    imGuiCleanup();
 
     glfwDestroyWindow(g_window);
     glfwTerminate();

@@ -23,7 +23,7 @@ void Camera::lookAt(glm::vec3 target)
     right = glm::normalize(right);
     up = glm::cross(forward, right);
 
-    if (AlmostEquals(eye.x, target.x) && AlmostEquals(eye.z, target.z) && eye.y > target.y)
+    if (almostEquals(eye.x, target.x) && almostEquals(eye.z, target.z) && eye.y > target.y)
     {
         // camera looking vertically down
         right = glm::vec3(0, 0, 1);
@@ -31,7 +31,7 @@ void Camera::lookAt(glm::vec3 target)
         forward = glm::vec3(0, 1, 0);
     }
 
-    if (AlmostEquals(eye.x, target.x) && AlmostEquals(eye.z, target.z) && eye.y < target.y)
+    if (almostEquals(eye.x, target.x) && almostEquals(eye.z, target.z) && eye.y < target.y)
     {
         // camera looking vertically up
         right = glm::vec3(1, 0, 0);

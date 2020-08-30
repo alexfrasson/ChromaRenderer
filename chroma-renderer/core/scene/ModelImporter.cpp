@@ -158,7 +158,7 @@ void printMeshInfo(const aiScene* scene)
 }
 
 // Compute the absolute transformation matrices of each node
-void ComputeAbsoluteTransform(aiNode* pcNode)
+void computeAbsoluteTransform(aiNode* pcNode)
 {
     if (pcNode->mParent != nullptr)
     {
@@ -167,7 +167,7 @@ void ComputeAbsoluteTransform(aiNode* pcNode)
 
     for (std::uint32_t i = 0; i < pcNode->mNumChildren; ++i)
     {
-        ComputeAbsoluteTransform(pcNode->mChildren[i]);
+        computeAbsoluteTransform(pcNode->mChildren[i]);
     }
 }
 

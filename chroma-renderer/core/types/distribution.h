@@ -8,9 +8,9 @@ class Distribution
     Distribution() = default;
     explicit Distribution(const std::vector<double>& pdf);
 
-    size_t Sample(float value);
+    size_t sample(float value);
 
-    const std::vector<float>& GetCdf() const
+    const std::vector<float>& getCdf() const
     {
         return cdf;
     }

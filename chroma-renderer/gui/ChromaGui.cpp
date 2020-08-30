@@ -29,7 +29,7 @@ std::size_t currentFrameTimeIndex{0};
 
 float movementSpeed = 30.0f;
 
-void MainMenu(ChromaRenderer* cr)
+void mainMenu(ChromaRenderer* cr)
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -118,7 +118,7 @@ void MainMenu(ChromaRenderer* cr)
     }
 }
 
-void DockSpace()
+void dockSpace()
 {
     static bool opt_fullscreen_persistant = true;
     static ImGuiDockNodeFlags opt_flags =
@@ -193,7 +193,7 @@ void DockSpace()
     ImGui::End();
 }
 
-bool MaterialsWindow(ChromaRenderer* cr)
+bool materialsWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
@@ -291,7 +291,7 @@ bool MaterialsWindow(ChromaRenderer* cr)
     return somethingChanged;
 }
 
-bool SettingsWindow(ChromaRenderer* cr)
+bool settingsWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
@@ -383,7 +383,7 @@ bool SettingsWindow(ChromaRenderer* cr)
     return somethingChanged;
 }
 
-ImVec2 GetAvailableRegionForImage(const float aspect_ratio)
+ImVec2 getAvailableRegionForImage(const float aspect_ratio)
 {
     const ImVec2 availableRegion = ImGui::GetContentRegionAvail();
     const float windowAspectRatio = availableRegion.x / (float)availableRegion.y;
@@ -407,9 +407,9 @@ ImVec2 GetAvailableRegionForImage(const float aspect_ratio)
     return ImVec2(width, height);
 }
 
-void DrawImage(const Image& img, const bool flip_vert = false)
+void drawImage(const Image& img, const bool flip_vert = false)
 {
-    const ImVec2 img_region = GetAvailableRegionForImage(img.getAspectRatio());
+    const ImVec2 img_region = getAvailableRegionForImage(img.getAspectRatio());
     ImGui::Image((ImTextureID)img.textureID,
                  img_region,
                  ImVec2(0.0f, flip_vert ? 0.0f : 1.0f),
@@ -418,7 +418,7 @@ void DrawImage(const Image& img, const bool flip_vert = false)
                  ImColor(255, 255, 255, 200));
 }
 
-bool ViewportWindow(ChromaRenderer* cr)
+bool viewportWindow(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
@@ -445,7 +445,7 @@ bool ViewportWindow(ChromaRenderer* cr)
             somethingChanged = true;
         }
 
-        DrawImage(cr->getTarget());
+        drawImage(cr->getTarget());
 
         Camera& camera = cr->getScene().camera;
 
@@ -476,8 +476,8 @@ bool ViewportWindow(ChromaRenderer* cr)
                     somethingChanged = true;
                 }
 
-                if (!AlmostEquals(ImGui::GetIO().MouseDelta.x, 0.0f) ||
-                    !AlmostEquals(ImGui::GetIO().MouseDelta.y, 0.0f))
+                if (!almostEquals(ImGui::GetIO().MouseDelta.x, 0.0f) ||
+                    !almostEquals(ImGui::GetIO().MouseDelta.y, 0.0f))
                 {
                     glm::vec2 angle = glm::vec2(ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y) *
                                       ImGui::GetIO().DeltaTime * lookSens;
@@ -505,31 +505,31 @@ bool ViewportWindow(ChromaRenderer* cr)
     return somethingChanged;
 }
 
-bool RenderGui(ChromaRenderer* cr)
+bool renderGui(ChromaRenderer* cr)
 {
     bool somethingChanged = false;
 
     currentFrameTimeIndex = (currentFrameTimeIndex + 1) % frameTimes.size();
     frameTimes[currentFrameTimeIndex] = ImGui::GetIO().DeltaTime * 1000.0f;
 
-    MainMenu(cr);
+    mainMenu(cr);
 
-    DockSpace();
+    dockSpace();
 
     // ImGui::ShowDemoWindow();
 
-    if (MaterialsWindow(cr))
+    if (materialsWindow(cr))
     {
         cr->updateMaterials();
         somethingChanged = true;
     }
 
-    if (SettingsWindow(cr))
+    if (settingsWindow(cr))
     {
         somethingChanged = true;
     }
 
-    if (ViewportWindow(cr))
+    if (viewportWindow(cr))
     {
         somethingChanged = true;
     }

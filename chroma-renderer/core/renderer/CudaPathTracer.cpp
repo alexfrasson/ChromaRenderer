@@ -17,14 +17,14 @@
 #include <thread>
 
 template <typename T>
-constexpr inline void SAFE_CUDA_FREE(T& x)
+constexpr inline void safeCudaFree(T& x)
 {
     cudaErrorCheck(cudaFree(x));
     x = nullptr;
 }
 
 template <typename T>
-constexpr inline void SAFE_CUDA_FREE_ARRAY(T& x)
+constexpr inline void safeCudaFreeArray(T& x)
 {
     cudaErrorCheck(cudaFreeArray(x));
     x = nullptr;
@@ -191,7 +191,7 @@ void printDevProp(cudaDeviceProp devProp)
               << std::endl;
 }
 
-CudaCamera CameraToCudaCamera(Camera cam)
+CudaCamera cameraToCudaCamera(Camera cam)
 {
     CudaCamera cudaCam{};
     cudaCam.width = cam.width;
@@ -212,7 +212,7 @@ CudaCamera CameraToCudaCamera(Camera cam)
     return cudaCam;
 }
 
-std::vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& materials)
+std::vector<CudaMaterial> sceneToCudaMaterials(const std::vector<Material>& materials)
 {
     std::vector<CudaMaterial> cudaMaterials;
 
@@ -234,7 +234,7 @@ std::vector<CudaMaterial> SceneToCudaMaterials(const std::vector<Material>& mate
     return cudaMaterials;
 }
 
-std::vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioningStructure* sps)
+std::vector<CudaLinearBvhNode> sceneToCudaLinearBvhNode(const ISpacePartitioningStructure* sps)
 {
     // Lets assume this is a bvh :)
     const BVH* bvh = dynamic_cast<const BVH*>(sps);
@@ -261,7 +261,7 @@ std::vector<CudaLinearBvhNode> SceneToCudaLinearBvhNode(const ISpacePartitioning
     return cudaLinearBVH;
 }
 
-std::vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStructure* sps,
+std::vector<CudaTriangle> sceneToCudaTrianglesBvh(const ISpacePartitioningStructure* sps,
                                                   const std::vector<Material>& materials)
 {
     // Lets assume this is a bvh :)
@@ -303,7 +303,7 @@ std::vector<CudaTriangle> SceneToCudaTrianglesBVH(const ISpacePartitioningStruct
 }
 
 // this hash function calculates a new random number generator seed for each frame, based on framenumber
-unsigned int WangHash(unsigned int a)
+unsigned int wangHash(unsigned int a)
 {
     a = (a ^ 61u) ^ (a >> 16u);
     a = a + (a << 3u);
@@ -347,17 +347,17 @@ CudaPathTracer::Impl::~Impl()
         cudaErrorCheck(cudaGraphicsUnregisterResource(registeredImage.cudaTextureResource));
     }
 
-    SAFE_CUDA_FREE(dev_cudaTrianglesBVH);
-    SAFE_CUDA_FREE(dev_cudaLinearBVHNodes);
-    SAFE_CUDA_FREE(dev_cudaMaterials);
-    SAFE_CUDA_FREE(dev_accuBuffer);
-    SAFE_CUDA_FREE(dev_pathIterationBuffer);
+    safeCudaFree(dev_cudaTrianglesBVH);
+    safeCudaFree(dev_cudaLinearBVHNodes);
+    safeCudaFree(dev_cudaMaterials);
+    safeCudaFree(dev_accuBuffer);
+    safeCudaFree(dev_pathIterationBuffer);
 
     cudaErrorCheck(cudaDestroyTextureObject(enviromentSettings.texObj));
 
-    SAFE_CUDA_FREE_ARRAY(envArray);
-    SAFE_CUDA_FREE(enviromentSettings.cdf);
-    SAFE_CUDA_FREE(enviromentSettings.pdf);
+    safeCudaFreeArray(envArray);
+    safeCudaFree(enviromentSettings.cdf);
+    safeCudaFree(enviromentSettings.pdf);
 
     cudaErrorCheck(cudaStreamDestroy(stream));
     cudaErrorCheck(cudaStreamDestroy(cpystream));
@@ -397,7 +397,7 @@ void CudaPathTracer::Impl::render()
     }
 
     // calculate a new seed for the random number generator, based on the framenumber
-    unsigned int hashedframes = WangHash(iteration);
+    unsigned int hashedframes = wangHash(iteration);
 
     trace(stream,
           dev_pathIterationBuffer,
@@ -433,9 +433,9 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
                                      const std::size_t channels)
 {
     cudaErrorCheck(cudaDestroyTextureObject(enviromentSettings.texObj));
-    SAFE_CUDA_FREE_ARRAY(envArray);
-    SAFE_CUDA_FREE(enviromentSettings.cdf);
-    SAFE_CUDA_FREE(enviromentSettings.pdf);
+    safeCudaFreeArray(envArray);
+    safeCudaFree(enviromentSettings.cdf);
+    safeCudaFree(enviromentSettings.pdf);
 
     std::size_t size = hdriEnvWidth * hdriEnvHeight * channels * sizeof(float);
 
@@ -461,7 +461,7 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
 
     EnvironmentMap env_map{hdriEnvData, static_cast<uint32_t>(hdriEnvWidth), static_cast<uint32_t>(hdriEnvHeight)};
 
-    const auto& cdf = env_map.GetDistribution().GetCdf();
+    const auto& cdf = env_map.getDistribution().getCdf();
     enviromentSettings.cdf_size = cdf.size();
     cudaErrorCheck(cudaMalloc(&enviromentSettings.cdf, enviromentSettings.cdf_size * sizeof(float)));
     cudaErrorCheck(cudaMemcpyAsync(enviromentSettings.cdf,
@@ -470,7 +470,7 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    const auto& pdf = env_map.GetPdf();
+    const auto& pdf = env_map.getPdf();
     enviromentSettings.pdf_size = pdf.size();
     cudaErrorCheck(cudaMalloc(&enviromentSettings.pdf, enviromentSettings.pdf_size * sizeof(float)));
     cudaErrorCheck(cudaMemcpyAsync(enviromentSettings.pdf,
@@ -490,8 +490,8 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
 void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* sps,
                                             const std::vector<Material>& materials)
 {
-    SAFE_CUDA_FREE(dev_cudaTrianglesBVH);
-    SAFE_CUDA_FREE(dev_cudaLinearBVHNodes);
+    safeCudaFree(dev_cudaTrianglesBVH);
+    safeCudaFree(dev_cudaLinearBVHNodes);
 
     std::size_t free{0};
     std::size_t total{0};
@@ -500,7 +500,7 @@ void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* s
     std::cout << "Free memory: " << free / (1024 * 1024) << "MB" << std::endl;
     std::cout << "Total memory: " << total / (1024 * 1024) << "MB" << std::endl;
 
-    std::vector<CudaTriangle> cudaTrianglesBVH = SceneToCudaTrianglesBVH(sps, materials);
+    std::vector<CudaTriangle> cudaTrianglesBVH = sceneToCudaTrianglesBvh(sps, materials);
     nCudaTrianglesBVH = cudaTrianglesBVH.size();
     std::cout << "Triangles BVH: " << cudaTrianglesBVH.size() << std::endl;
     std::cout << "Triangles BVH size: " << (cudaTrianglesBVH.size() * sizeof(CudaTriangle)) / (1024) << "KB"
@@ -512,7 +512,7 @@ void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* s
                                    cudaMemcpyHostToDevice,
                                    stream));
 
-    std::vector<CudaLinearBvhNode> cudaLinearBVH = SceneToCudaLinearBvhNode(sps);
+    std::vector<CudaLinearBvhNode> cudaLinearBVH = sceneToCudaLinearBvhNode(sps);
     nCudaLinearBVHNodes = cudaLinearBVH.size();
     std::cout << "CudaLinearBVHNodes: " << cudaLinearBVH.size() << std::endl;
     std::cout << "CudaLinearBVHNodes size: " << (cudaLinearBVH.size() * sizeof(CudaLinearBvhNode)) / (1024) << "KB"
@@ -539,8 +539,8 @@ void CudaPathTracer::Impl::setTargetImage(const Image& img)
 
     if (registeredImage.changed(img))
     {
-        SAFE_CUDA_FREE(dev_accuBuffer);
-        SAFE_CUDA_FREE(dev_pathIterationBuffer);
+        safeCudaFree(dev_accuBuffer);
+        safeCudaFree(dev_pathIterationBuffer);
 
         cudaErrorCheck(cudaMalloc(&dev_accuBuffer, img.getWidth() * img.getHeight() * sizeof(glm::vec4)));
         cudaErrorCheck(
@@ -579,15 +579,15 @@ void CudaPathTracer::Impl::setTargetImage(const Image& img)
 
 void CudaPathTracer::Impl::setCamera(const Camera& cam)
 {
-    cuda_cam = CameraToCudaCamera(cam);
+    cuda_cam = cameraToCudaCamera(cam);
     reset();
 }
 
 void CudaPathTracer::Impl::setMaterials(const std::vector<Material>& materials, const bool& sync)
 {
-    SAFE_CUDA_FREE(dev_cudaMaterials);
+    safeCudaFree(dev_cudaMaterials);
 
-    const std::vector<CudaMaterial> cudaMaterials = SceneToCudaMaterials(materials);
+    const std::vector<CudaMaterial> cudaMaterials = sceneToCudaMaterials(materials);
     const std::size_t size_in_bytes = cudaMaterials.size() * sizeof(CudaMaterial);
     nCudaMaterials = static_cast<std::uint32_t>(cudaMaterials.size());
 
