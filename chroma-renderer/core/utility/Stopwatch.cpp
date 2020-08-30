@@ -53,12 +53,12 @@ double StopwatchOpenGL::elapsedMillis()
             glGetQueryObjectiv(queries_[1], GL_QUERY_RESULT_AVAILABLE, &available);
         }
 
-        GLuint64 timeStamp0 = 0;
-        GLuint64 timeStamp1 = 0;
-        glGetQueryObjectui64v(queries_[0], GL_QUERY_RESULT, &timeStamp0);
-        glGetQueryObjectui64v(queries_[1], GL_QUERY_RESULT, &timeStamp1);
+        GLuint64 time_stamp0 = 0;
+        GLuint64 time_stamp1 = 0;
+        glGetQueryObjectui64v(queries_[0], GL_QUERY_RESULT, &time_stamp0);
+        glGetQueryObjectui64v(queries_[1], GL_QUERY_RESULT, &time_stamp1);
         // OpenGL returns time in nanoseconds.
-        elapsed_millis_ = (double)(timeStamp1 - timeStamp0) / 1000000.0;
+        elapsed_millis_ = (double)(time_stamp1 - time_stamp0) / 1000000.0;
     }
     return elapsed_millis_;
 }

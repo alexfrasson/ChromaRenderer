@@ -8,9 +8,9 @@
 
 #define WIDEST_AXIS_SPLIT_ONLY
 
-constexpr std::int32_t NUM_BINS = 8;
-constexpr float EPSILON = 0.000001f;
-constexpr std::int32_t MIN_LEAF_SIZE = 10;
+constexpr std::int32_t num_bins = 8;
+constexpr float epsilon = 0.000001f;
+constexpr std::int32_t min_leaf_size = 10;
 // constexpr float KT = 1.0f; // Node traversal cost
 // constexpr float KI = 1.5f; // Triangle intersection cost
 
@@ -40,21 +40,21 @@ void BVH::clear()
 std::uint32_t BVH::flattenBvh(const BvhNode& node, std::uint32_t& offset)
 {
     lroot[offset].bbox = node.bbox;
-    std::uint32_t myOffset{offset};
+    std::uint32_t my_offset{offset};
     offset++;
     if (node.is_leaf)
     {
-        lroot[myOffset].n_primitives = static_cast<uint8_t>(node.end_id - node.start_id);
-        lroot[myOffset].primitives_offset = static_cast<std::uint32_t>(node.start_id);
+        lroot[my_offset].n_primitives = static_cast<uint8_t>(node.end_id - node.start_id);
+        lroot[my_offset].primitives_offset = static_cast<std::uint32_t>(node.start_id);
     }
     else
     {
-        lroot[myOffset].axis = node.axis;
-        lroot[myOffset].n_primitives = 0;
+        lroot[my_offset].axis = node.axis;
+        lroot[my_offset].n_primitives = 0;
         flattenBvh(*node.child[0], offset);
-        lroot[myOffset].second_child_offset = flattenBvh(*node.child[1], offset);
+        lroot[my_offset].second_child_offset = flattenBvh(*node.child[1], offset);
     }
-    return myOffset;
+    return my_offset;
 }
 
 std::size_t BVH::countPrim(LinearBvhNode* node, std::size_t n)
@@ -173,7 +173,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
 
     // Check if we should make this node a leaf
     std::size_t size = end_id - start_id;
-    if (size <= MIN_LEAF_SIZE)
+    if (size <= min_leaf_size)
     {
         node->bbox = trianglesbbox;
         node->start_id = static_cast<std::int32_t>(start_id);
@@ -186,77 +186,77 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
 #ifdef WIDEST_AXIS_SPLIT_ONLY
 
     // Find widest axis
-    std::int32_t widestDim = 0;
+    std::int32_t widest_dim = 0;
     {
         float widest = centroidsbbox.max.x - centroidsbbox.min.x;
         if (centroidsbbox.max.y - centroidsbbox.min.y > widest)
         {
             widest = centroidsbbox.max.y - centroidsbbox.min.y;
-            widestDim = 1;
+            widest_dim = 1;
         }
         if (centroidsbbox.max.z - centroidsbbox.min.z > widest)
         {
-            widestDim = 2;
+            widest_dim = 2;
         }
     }
 
     // Precompute constants. This constants will be used to calculate the each centroid's binid.
     // BinID[i] = k1[i] * (tsc[n][i] - k0[i])
-    float k1 = (NUM_BINS * (1 - EPSILON)) / (centroidsbbox.max[widestDim] - centroidsbbox.min[widestDim]);
-    float k0 = centroidsbbox.min[widestDim];
+    float k1 = (num_bins * (1 - epsilon)) / (centroidsbbox.max[widest_dim] - centroidsbbox.min[widest_dim]);
+    float k0 = centroidsbbox.min[widest_dim];
 
     // Bins for each axis
-    std::int32_t bin[NUM_BINS];
-    for (std::int32_t j = 0; j < NUM_BINS; j++)
+    std::int32_t bin[num_bins];
+    for (std::int32_t j = 0; j < num_bins; j++)
     {
         bin[j] = 0;
     }
 
     // Bin's bounds
-    BoundingBox binbound[NUM_BINS];
+    BoundingBox binbound[num_bins];
 
     for (std::size_t i = start_id; i < end_id; i++)
     {
         // Find the centroid'i''s binid on the axis 'j'
-        auto binid = static_cast<std::int32_t>(truncf(k1 * (centroids[id[i]][widestDim] - k0)));
+        auto binid = static_cast<std::int32_t>(truncf(k1 * (centroids[id[i]][widest_dim] - k0)));
         bin[binid]++;
         // binbound[dim][binid].expand(centroids[id[i]]);
         binbound[binid].expand(bboxes[id[i]].max);
         binbound[binid].expand(bboxes[id[i]].min);
     }
 
-    float minCost = std::numeric_limits<float>::infinity();
-    std::int32_t minCostDim = widestDim;
-    std::int32_t minCostBin = -1;
+    float min_cost = std::numeric_limits<float>::infinity();
+    std::int32_t min_cost_dim = widest_dim;
+    std::int32_t min_cost_bin = -1;
 
-    for (std::int32_t i = 0; i < NUM_BINS; i++)
+    for (std::int32_t i = 0; i < num_bins; i++)
     {
-        std::int32_t NL{0};
-        std::int32_t NR{0};
+        std::int32_t nl{0};
+        std::int32_t nr{0};
         BoundingBox bbl;
         BoundingBox bbr;
         for (std::int32_t j = 0; j <= i; j++)
         {
             if (bin[j] > 0)
             {
-                NL += bin[j];
+                nl += bin[j];
                 bbl.expand(binbound[j]);
             }
         }
-        for (std::int32_t j = i + 1; j < NUM_BINS; j++)
+        for (std::int32_t j = i + 1; j < num_bins; j++)
         {
             if (bin[j] > 0)
             {
-                NR += bin[j];
+                nr += bin[j];
                 bbr.expand(binbound[j]);
             }
         }
 
-        float c = cost(bbl.surfaceArea(), static_cast<float>(NL), bbr.surfaceArea(), static_cast<float>(NR));
-        if (c < minCost)
+        float c = cost(bbl.surfaceArea(), static_cast<float>(nl), bbr.surfaceArea(), static_cast<float>(nr));
+        if (c < min_cost)
         {
-            minCost = c;
-            minCostBin = i;
+            min_cost = c;
+            min_cost_bin = i;
         }
 
         bbl = BoundingBox();
@@ -346,7 +346,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
 #endif
 
     // Check if not splitting is a better option
-    if (minCost > cost(trianglesbbox.surfaceArea(), static_cast<float>(size)))
+    if (min_cost > cost(trianglesbbox.surfaceArea(), static_cast<float>(size)))
     {
         node->bbox = trianglesbbox;
         node->start_id = static_cast<std::int32_t>(start_id);
@@ -362,14 +362,14 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
     for (std::size_t i = start_id, j = end_id - 1; i < end_id && j >= start_id && i <= j;)
     {
         // Find a triangle that is on the left but should be on the right
-        for (std::int32_t binID = minCostBin - 1; i < end_id && binID <= minCostBin && i != j; i++)
+        for (std::int32_t bin_id = min_cost_bin - 1; i < end_id && bin_id <= min_cost_bin && i != j; i++)
         {
-            binID = static_cast<std::int32_t>(truncf(k1 * (centroids[id[i]][minCostDim] - k0)));
+            bin_id = static_cast<std::int32_t>(truncf(k1 * (centroids[id[i]][min_cost_dim] - k0)));
         }
         // Find a triangle that is on the right but should be on the left
-        for (std::int32_t binID = minCostBin + 1; j >= start_id && binID > minCostBin && j != i; j--)
+        for (std::int32_t bin_id = min_cost_bin + 1; j >= start_id && bin_id > min_cost_bin && j != i; j--)
         {
-            binID = static_cast<std::int32_t>(truncf(k1 * (centroids[id[j]][minCostDim] - k0)));
+            bin_id = static_cast<std::int32_t>(truncf(k1 * (centroids[id[j]][min_cost_dim] - k0)));
         }
         // Where done
         if (i == j)
@@ -404,7 +404,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
     }
 #endif
 
-    node->axis = static_cast<uint8_t>(minCostDim);
+    node->axis = static_cast<uint8_t>(min_cost_dim);
     node->bbox = trianglesbbox;
     node->start_id = static_cast<std::int32_t>(start_id);
     node->end_id = static_cast<std::int32_t>(end_id);
@@ -441,7 +441,7 @@ std::unique_ptr<BvhNode> BVH::buildnode(std::int32_t depth,
 
     // Check if we should make this node a leaf
     std::size_t size = end_id - start_id;
-    if (size <= MIN_LEAF_SIZE)
+    if (size <= min_leaf_size)
     {
         node->bbox = trianglesbbox;
         node->start_id = static_cast<std::int32_t>(start_id);
@@ -479,34 +479,34 @@ bool BVH::splitMidpoint(std::vector<BVHPrimitiveInfo>& primitive,
                         std::int32_t& splitdim)
 {
     // Find widest axis
-    std::int32_t widestDim = 0;
+    std::int32_t widest_dim = 0;
     {
         float widest = trianglesbbox.max.x - trianglesbbox.min.x;
         if (trianglesbbox.max.y - trianglesbbox.min.y > widest)
         {
             widest = trianglesbbox.max.y - trianglesbbox.min.y;
-            widestDim = 1;
+            widest_dim = 1;
         }
         if (trianglesbbox.max.z - trianglesbbox.min.z > widest)
         {
-            widestDim = 2;
+            widest_dim = 2;
         }
     }
 
     // Find midpoint
-    float midpoint = (trianglesbbox.max[widestDim] + trianglesbbox.min[widestDim]) / 2.0f;
+    float midpoint = (trianglesbbox.max[widest_dim] + trianglesbbox.min[widest_dim]) / 2.0f;
 
     // Reorganize array
     std::size_t mid = 0;
     for (std::size_t i = start_id, j = end_id - 1; i < end_id && j >= start_id && i <= j;)
     {
         // Find a triangle that is on the left but should be on the right
-        while (primitive[i].centroid[widestDim] <= midpoint && i < j)
+        while (primitive[i].centroid[widest_dim] <= midpoint && i < j)
         {
             i++;
         }
         // Find a triangle that is on the right but should be on the left
-        while (primitive[j].centroid[widestDim] > midpoint && i < j)
+        while (primitive[j].centroid[widest_dim] > midpoint && i < j)
         {
             j--;
         }
@@ -527,7 +527,7 @@ bool BVH::splitMidpoint(std::vector<BVHPrimitiveInfo>& primitive,
     //	std::cout << "OOPS" << std::endl;
 
     splitindex = mid;
-    splitdim = widestDim;
+    splitdim = widest_dim;
 
     return true;
 }
@@ -540,17 +540,17 @@ bool BVH::splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
                       std::int32_t& splitdim)
 {
     // Find widest axis
-    std::int32_t widestDim = 0;
+    std::int32_t widest_dim = 0;
     {
         float widest = trianglesbbox.max.x - trianglesbbox.min.x;
         if (trianglesbbox.max.y - trianglesbbox.min.y > widest)
         {
             widest = trianglesbbox.max.y - trianglesbbox.min.y;
-            widestDim = 1;
+            widest_dim = 1;
         }
         if (trianglesbbox.max.z - trianglesbbox.min.z > widest)
         {
-            widestDim = 2;
+            widest_dim = 2;
         }
     }
 
@@ -559,15 +559,15 @@ bool BVH::splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
     std::advance(begin, start_id);
     auto end = primitive.begin();
     std::advance(end, end_id);
-    if (widestDim == 0)
+    if (widest_dim == 0)
     {
         std::sort(begin, end, primitiveCmpX);
     }
-    else if (widestDim == 1)
+    else if (widest_dim == 1)
     {
         std::sort(begin, end, primitiveCmpY);
     }
-    else if (widestDim == 2)
+    else if (widest_dim == 2)
     {
         std::sort(begin, end, primitiveCmpZ);
     }
@@ -575,7 +575,7 @@ bool BVH::splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
     std::size_t mid = (start_id + end_id) / 2;
 
     splitindex = mid;
-    splitdim = widestDim;
+    splitdim = widest_dim;
 
     return true;
 }

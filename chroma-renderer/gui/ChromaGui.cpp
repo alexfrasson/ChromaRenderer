@@ -13,27 +13,27 @@
 #include <filesystem>
 #include <iostream>
 
-constexpr auto RADTODEGREE = 57.295779513082320876798154814105f;
-constexpr auto DEGREETORAD = 0.01745329251994329576923690768489f;
+constexpr auto radtodegree = 57.295779513082320876798154814105f;
+constexpr auto degreetorad = 0.01745329251994329576923690768489f;
 
 namespace fs = std::filesystem;
 
-ImVec2 mainMenuBarSize;
+ImVec2 main_menu_bar_size;
 
 namespace chromagui
 {
 
 constexpr std::size_t max_frames{32};
-std::vector<float> frameTimes{max_frames};
-std::size_t currentFrameTimeIndex{0};
+std::vector<float> frame_times{max_frames};
+std::size_t current_frame_time_index{0};
 
-float movementSpeed = 30.0f;
+float movement_speed = 30.0f;
 
 void mainMenu(ChromaRenderer* cr)
 {
     if (ImGui::BeginMainMenuBar())
     {
-        mainMenuBarSize = ImGui::GetWindowSize();
+        main_menu_bar_size = ImGui::GetWindowSize();
 
         if (ImGui::BeginMenu("File"))
         {
@@ -48,11 +48,11 @@ void mainMenu(ChromaRenderer* cr)
                 {
                     path.clear();
 
-                    nfdchar_t* outPath = nullptr;
-                    nfdresult_t result = NFD_OpenDialog("obj,dae,gltf", nullptr, &outPath);
+                    nfdchar_t* out_path = nullptr;
+                    nfdresult_t result = NFD_OpenDialog("obj,dae,gltf", nullptr, &out_path);
                     if (result == NFD_OKAY)
                     {
-                        path = std::string(outPath);
+                        path = std::string(out_path);
                         if (fs::exists(path))
                         {
                             if (cr->isRunning())
@@ -63,7 +63,7 @@ void mainMenu(ChromaRenderer* cr)
                             std::cout << path << std::endl;
                             cr->importScene(path);
                         }
-                        free(outPath); // NOLINT
+                        free(out_path); // NOLINT
                     }
                     // else if (result == NFD_CANCEL)
                     // {
@@ -78,15 +78,15 @@ void mainMenu(ChromaRenderer* cr)
                 {
                     path.clear();
 
-                    nfdchar_t* outPath = nullptr;
-                    nfdresult_t result = NFD_OpenDialog("hdr,jpg,png", nullptr, &outPath);
+                    nfdchar_t* out_path = nullptr;
+                    nfdresult_t result = NFD_OpenDialog("hdr,jpg,png", nullptr, &out_path);
                     if (result == NFD_OKAY)
                     {
-                        path = std::string(outPath);
+                        path = std::string(out_path);
                         if (fs::exists(path))
                         {
-                            bool wasRendering = cr->isRunning();
-                            if (wasRendering)
+                            bool was_rendering = cr->isRunning();
+                            if (was_rendering)
                             {
                                 cr->stopRender();
                             }
@@ -94,12 +94,12 @@ void mainMenu(ChromaRenderer* cr)
                             std::cout << path << std::endl;
                             cr->importEnviromentMap(path);
 
-                            if (wasRendering)
+                            if (was_rendering)
                             {
                                 cr->startRender();
                             }
                         }
-                        free(outPath); // NOLINT
+                        free(out_path); // NOLINT
                     }
                     // else if (result == NFD_CANCEL)
                     // {
@@ -195,7 +195,7 @@ void dockSpace()
 
 bool materialsWindow(ChromaRenderer* cr)
 {
-    bool somethingChanged = false;
+    bool something_changed = false;
 
     if (!ImGui::Begin("Material Editor"))
     {
@@ -280,7 +280,7 @@ bool materialsWindow(ChromaRenderer* cr)
 
     for (Material& mat : cr->getScene().materials)
     {
-        somethingChanged |= show_material(mat);
+        something_changed |= show_material(mat);
     }
 
     ImGui::Columns(1);
@@ -288,12 +288,12 @@ bool materialsWindow(ChromaRenderer* cr)
     ImGui::PopStyleVar();
     ImGui::End();
 
-    return somethingChanged;
+    return something_changed;
 }
 
 bool settingsWindow(ChromaRenderer* cr)
 {
-    bool somethingChanged = false;
+    bool something_changed = false;
 
     RendererSettings rs = cr->getSettings();
 
@@ -307,9 +307,9 @@ bool settingsWindow(ChromaRenderer* cr)
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         ImGui::PlotLines("",
-                         &frameTimes[0],
-                         (int)frameTimes.size(),
-                         static_cast<int>(currentFrameTimeIndex),
+                         &frame_times[0],
+                         (int)frame_times.size(),
+                         static_cast<int>(current_frame_time_index),
                          "",
                          0.0f,
                          150.0f,
@@ -331,12 +331,12 @@ bool settingsWindow(ChromaRenderer* cr)
 
             Scene& scene = cr->getScene();
 
-            float hfov = rs.horizontal_fov * RADTODEGREE;
+            float hfov = rs.horizontal_fov * radtodegree;
             if (ImGui::DragFloat("HFov", &hfov, 1, 5, 360))
             {
-                rs.horizontal_fov = hfov * DEGREETORAD;
+                rs.horizontal_fov = hfov * degreetorad;
                 scene.camera.horizontalFOV(rs.horizontal_fov);
-                somethingChanged = true;
+                something_changed = true;
             }
 
             ImGui::DragFloat("Apperture", &scene.camera.apperture, 0.01f, 0.0001f, 1000.0f);
@@ -349,7 +349,7 @@ bool settingsWindow(ChromaRenderer* cr)
             ImGui::Checkbox("Linear to sRGB", &settings.linear_to_srgb);
             cr->setPostProcessingSettings(settings);
 
-            ImGui::DragFloat("Movement Speed", &movementSpeed, 1.0f, 0.0f, 10000.0f);
+            ImGui::DragFloat("Movement Speed", &movement_speed, 1.0f, 0.0f, 10000.0f);
 
             ImGui::PopItemWidth();
         }
@@ -380,28 +380,28 @@ bool settingsWindow(ChromaRenderer* cr)
     }
     ImGui::End();
 
-    return somethingChanged;
+    return something_changed;
 }
 
 ImVec2 getAvailableRegionForImage(const float aspect_ratio)
 {
-    const ImVec2 availableRegion = ImGui::GetContentRegionAvail();
-    const float windowAspectRatio = availableRegion.x / (float)availableRegion.y;
+    const ImVec2 available_region = ImGui::GetContentRegionAvail();
+    const float window_aspect_ratio = available_region.x / (float)available_region.y;
 
     float height{0};
     float width{0};
 
-    if (windowAspectRatio < aspect_ratio)
+    if (window_aspect_ratio < aspect_ratio)
     {
-        width = availableRegion.x - 2;
+        width = available_region.x - 2;
         height = width * 1.0f / aspect_ratio;
-        ImGui::SetCursorPosY(ImGui::GetCursorPos().y + (availableRegion.y - height) / 2.0f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPos().y + (available_region.y - height) / 2.0f);
     }
     else
     {
-        height = availableRegion.y - 2;
+        height = available_region.y - 2;
         width = height * aspect_ratio;
-        ImGui::SetCursorPosX(ImGui::GetCursorPos().x + (availableRegion.x - width) / 2.0f);
+        ImGui::SetCursorPosX(ImGui::GetCursorPos().x + (available_region.x - width) / 2.0f);
     }
 
     return ImVec2(width, height);
@@ -420,7 +420,7 @@ void drawImage(const Image& img, const bool flip_vert = false)
 
 bool viewportWindow(ChromaRenderer* cr)
 {
-    bool somethingChanged = false;
+    bool something_changed = false;
 
     ImGui::Begin("Viewport");
     {
@@ -442,7 +442,7 @@ bool viewportWindow(ChromaRenderer* cr)
         if (rs != cr->getSettings())
         {
             cr->setSettings(rs);
-            somethingChanged = true;
+            something_changed = true;
         }
 
         drawImage(cr->getTarget());
@@ -453,34 +453,34 @@ bool viewportWindow(ChromaRenderer* cr)
         {
             if (ImGui::IsMouseDragging(1))
             {
-                const float lookSens = 0.4f;
+                const float look_sens = 0.4f;
 
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_W])
                 {
-                    camera.eye += camera.forward * ImGui::GetIO().DeltaTime * movementSpeed;
-                    somethingChanged = true;
+                    camera.eye += camera.forward * ImGui::GetIO().DeltaTime * movement_speed;
+                    something_changed = true;
                 }
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_S])
                 {
-                    camera.eye -= camera.forward * ImGui::GetIO().DeltaTime * movementSpeed;
-                    somethingChanged = true;
+                    camera.eye -= camera.forward * ImGui::GetIO().DeltaTime * movement_speed;
+                    something_changed = true;
                 }
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_D])
                 {
-                    camera.eye += camera.right * ImGui::GetIO().DeltaTime * movementSpeed;
-                    somethingChanged = true;
+                    camera.eye += camera.right * ImGui::GetIO().DeltaTime * movement_speed;
+                    something_changed = true;
                 }
                 if (ImGui::GetIO().KeysDown[GLFW_KEY_A])
                 {
-                    camera.eye -= camera.right * ImGui::GetIO().DeltaTime * movementSpeed;
-                    somethingChanged = true;
+                    camera.eye -= camera.right * ImGui::GetIO().DeltaTime * movement_speed;
+                    something_changed = true;
                 }
 
                 if (!almostEquals(ImGui::GetIO().MouseDelta.x, 0.0f) ||
                     !almostEquals(ImGui::GetIO().MouseDelta.y, 0.0f))
                 {
                     glm::vec2 angle = glm::vec2(ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y) *
-                                      ImGui::GetIO().DeltaTime * lookSens;
+                                      ImGui::GetIO().DeltaTime * look_sens;
 
                     camera.forward = glm::normalize(rotateY(camera.forward, -angle.x));
                     camera.right = glm::normalize(glm::cross(camera.forward, glm::vec3(0, -1, 0)));
@@ -490,7 +490,7 @@ bool viewportWindow(ChromaRenderer* cr)
                     camera.right = glm::normalize(glm::cross(camera.forward, glm::vec3(0, 1, 0)));
                     camera.up = -glm::normalize(glm::cross(camera.forward, camera.right));
 
-                    somethingChanged = true;
+                    something_changed = true;
                 }
             }
         }
@@ -502,15 +502,15 @@ bool viewportWindow(ChromaRenderer* cr)
     ImGui::LabelText("Image", "Image (%d, %d)", (int)cr->getTarget().getWidth(), (int)cr->getTarget().getHeight());
     ImGui::End();
 
-    return somethingChanged;
+    return something_changed;
 }
 
 bool renderGui(ChromaRenderer* cr)
 {
-    bool somethingChanged = false;
+    bool something_changed = false;
 
-    currentFrameTimeIndex = (currentFrameTimeIndex + 1) % frameTimes.size();
-    frameTimes[currentFrameTimeIndex] = ImGui::GetIO().DeltaTime * 1000.0f;
+    current_frame_time_index = (current_frame_time_index + 1) % frame_times.size();
+    frame_times[current_frame_time_index] = ImGui::GetIO().DeltaTime * 1000.0f;
 
     mainMenu(cr);
 
@@ -521,20 +521,20 @@ bool renderGui(ChromaRenderer* cr)
     if (materialsWindow(cr))
     {
         cr->updateMaterials();
-        somethingChanged = true;
+        something_changed = true;
     }
 
     if (settingsWindow(cr))
     {
-        somethingChanged = true;
+        something_changed = true;
     }
 
     if (viewportWindow(cr))
     {
-        somethingChanged = true;
+        something_changed = true;
     }
 
-    return somethingChanged;
+    return something_changed;
 }
 
 } // namespace chromagui

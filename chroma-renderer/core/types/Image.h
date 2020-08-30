@@ -18,14 +18,14 @@ class Image
   public:
     GLuint texture_id{0};
 
-    Color getColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos);
-    void setColor(std::uint32_t widthPixelPos,
-                  std::uint32_t heightPixelPos,
+    Color getColor(std::uint32_t width_pixel_pos, std::uint32_t height_pixel_pos);
+    void setColor(std::uint32_t width_pixel_pos,
+                  std::uint32_t height_pixel_pos,
                   std::uint32_t r,
                   std::uint32_t g,
                   std::uint32_t b,
                   std::uint32_t a);
-    void setColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos, const Color& color);
+    void setColor(std::uint32_t width_pixel_pos, std::uint32_t height_pixel_pos, const Color& color);
     void clear();
     void setSize(std::uint32_t width, std::uint32_t height);
     void setData(const float* data, std::uint32_t width, std::uint32_t height, std::uint8_t components = 4);

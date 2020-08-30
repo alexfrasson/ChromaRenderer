@@ -62,14 +62,14 @@ std::unique_ptr<aiScene> importAssimpScene(const std::string& file_name)
                       //| aiProcess_ImproveCacheLocality
     );
 
-    std::unique_ptr<aiScene> assimpScene{importer.GetOrphanedScene()};
-    if (assimpScene == nullptr)
+    std::unique_ptr<aiScene> assimp_scene{importer.GetOrphanedScene()};
+    if (assimp_scene == nullptr)
     {
         std::cout << importer.GetErrorString() << std::endl;
         return {nullptr};
     }
 
-    return assimpScene;
+    return assimp_scene;
 }
 
 aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
@@ -82,11 +82,13 @@ aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
         node = node->mParent;
     }
 
-    aiMatrix4x4 localToWorld{};
+    aiMatrix4x4 local_to_world{};
 
-    std::for_each(transforms.rbegin(), transforms.rend(), [&](const auto& transform) { localToWorld *= transform; });
+    std::for_each(transforms.rbegin(), transforms.rend(), [&](const auto& transform) {
+        local_to_world *= transform;
+    });
 
-    return localToWorld;
+    return local_to_world;
 }
 
 void getTotalNumvberOfTrianglesAndVertices(const aiScene* scene,
@@ -174,9 +176,9 @@ void computeAbsoluteTransform(aiNode* pc_node)
 // If nodes have been transformed before hand
 void convertToMeshRecursive(Scene& s, const aiScene* scene, const aiNode* node, Mesh* m, std::uint32_t& offset)
 {
-    aiMatrix4x4 mWorldIT = node->mTransformation;
-    mWorldIT.Inverse().Transpose();
-    aiMatrix3x3 m3x3{mWorldIT};
+    aiMatrix4x4 m_world_it = node->mTransformation;
+    m_world_it.Inverse().Transpose();
+    aiMatrix3x3 m3x3{m_world_it};
 
     for (std::size_t i = 0; i < node->mNumMeshes; i++)
     {
@@ -248,9 +250,9 @@ void convertToMeshRecursive(Scene& s,
 {
     transform = transform * node->mTransformation;
 
-    aiMatrix4x4 mWorldIT = transform;
-    mWorldIT.Inverse().Transpose();
-    aiMatrix3x3 m3x3{mWorldIT};
+    aiMatrix4x4 m_world_it = transform;
+    m_world_it.Inverse().Transpose();
+    aiMatrix3x3 m3x3{m_world_it};
 
     /*aiQuaternion quat;
     aiVector3D scale;
@@ -494,7 +496,7 @@ bool convert(const aiScene* aiscene, Scene& s)
 
         const aiNode* nd = aiscene->mRootNode->FindNode(cam->mName);
 
-        aiMatrix4x4 nodeTransform = getLocalToWorldTransform(nd);
+        aiMatrix4x4 node_transform = getLocalToWorldTransform(nd);
 
         // multiply all properties of the camera with the absolute
         // transformation of the corresponding node
@@ -502,15 +504,15 @@ bool convert(const aiScene* aiscene, Scene& s)
         aiVector3D camLookAt = aiMatrix3x3(nodeTransform) * cam->mLookAt;
         aiVector3D camUp = aiMatrix3x3(nodeTransform) * cam->mUp;*/
 
-        aiMatrix4x4 mWorldIT = nodeTransform;
-        mWorldIT.Inverse().Transpose();
-        aiMatrix3x3 m3x3{mWorldIT};
+        aiMatrix4x4 m_world_it = node_transform;
+        m_world_it.Inverse().Transpose();
+        aiMatrix3x3 m3x3{m_world_it};
 
         // multiply all properties of the camera with the absolute
         // transformation of the corresponding node
-        aiVector3D camPos = nodeTransform * cam->mPosition;
-        aiVector3D camLookAt = m3x3 * cam->mLookAt;
-        aiVector3D camUp = m3x3 * cam->mUp;
+        aiVector3D cam_pos = node_transform * cam->mPosition;
+        aiVector3D cam_look_at = m3x3 * cam->mLookAt;
+        aiVector3D cam_up = m3x3 * cam->mUp;
 
         // aiMatrix4x4 mat;
 
@@ -532,9 +534,9 @@ bool convert(const aiScene* aiscene, Scene& s)
         aiVector3D camLookAt = cam->mLookAt;
         aiVector3D camUp = cam->mUp;*/
 
-        s.camera.eye = glm::vec3(camPos.x, camPos.y, camPos.z);
-        s.camera.forward = glm::normalize(glm::vec3(camLookAt.x, camLookAt.y, camLookAt.z));
-        s.camera.up = glm::normalize(glm::vec3(camUp.x, camUp.y, camUp.z));
+        s.camera.eye = glm::vec3(cam_pos.x, cam_pos.y, cam_pos.z);
+        s.camera.forward = glm::normalize(glm::vec3(cam_look_at.x, cam_look_at.y, cam_look_at.z));
+        s.camera.up = glm::normalize(glm::vec3(cam_up.x, cam_up.y, cam_up.z));
         s.camera.right = glm::normalize(glm::cross(s.camera.forward, s.camera.up));
 
         // tan(FOV/2) = (screenSize/2) / screenPlaneDistance
@@ -569,8 +571,8 @@ bool ModelImporter::import(const std::string& file_name, Scene& s)
     std::cout << "Assimp " << aiGetVersionMajor() << "." << aiGetVersionMinor() << std::endl;
     std::cout << "Loading scene..." << std::endl;
 
-    const std::unique_ptr<aiScene> assimpScene = importAssimpScene(file_name);
-    if (assimpScene == nullptr)
+    const std::unique_ptr<aiScene> assimp_scene = importAssimpScene(file_name);
+    if (assimp_scene == nullptr)
     {
         std::cout << "Assimp failed to load the file!" << std::endl;
         std::cout << "---------------------------</Importer>---------------------------" << std::endl;
@@ -578,10 +580,10 @@ bool ModelImporter::import(const std::string& file_name, Scene& s)
     }
     std::cout << "Done!" << std::endl << std::endl;
 
-    printSceneInfo(assimpScene.get());
+    printSceneInfo(assimp_scene.get());
 
     std::cout << "Converting scene..." << std::endl;
-    convert(assimpScene.get(), s);
+    convert(assimp_scene.get(), s);
     std::cout << "Done!" << std::endl << std::endl;
 
     std::cout << "Import of scene " << file_name.c_str() << " succeeded." << std::endl;
