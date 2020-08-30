@@ -357,10 +357,10 @@ __host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
         if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))
         {
             // Leaf node
-            if (node->nPrimitives > 0)
+            if (node->n_primitives > 0)
             {
                 // Intersect primitives
-                for (unsigned int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                for (unsigned int i = node->primitives_offset; i < node->n_primitives + node->primitives_offset; i++)
                 {
                     if (intersectTriangle(&triangles[i], &ray, &intersection))
                     {
@@ -379,11 +379,11 @@ __host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
                 if (dirIsNeg[node->axis] != 0)
                 {
                     todo[todoOffset++] = nodeNum + 1;
-                    nodeNum = node->secondChildOffset;
+                    nodeNum = node->second_child_offset;
                 }
                 else
                 {
-                    todo[todoOffset++] = node->secondChildOffset;
+                    todo[todoOffset++] = node->second_child_offset;
                     nodeNum = nodeNum + 1;
                 }
             }
@@ -420,10 +420,10 @@ __host__ __device__ inline bool intersectBVH(const CudaTriangle* triangles,
         if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))
         {
             // Leaf node
-            if (node->nPrimitives > 0)
+            if (node->n_primitives > 0)
             {
                 // Intersect primitives
-                for (unsigned int i = node->primitivesOffset; i < node->nPrimitives + node->primitivesOffset; i++)
+                for (unsigned int i = node->primitives_offset; i < node->n_primitives + node->primitives_offset; i++)
                 {
                     if (intersectTriangle(&triangles[i], &ray))
                     {
@@ -442,11 +442,11 @@ __host__ __device__ inline bool intersectBVH(const CudaTriangle* triangles,
                 if (dirIsNeg[node->axis] != 0)
                 {
                     todo[todoOffset++] = nodeNum + 1;
-                    nodeNum = node->secondChildOffset;
+                    nodeNum = node->second_child_offset;
                 }
                 else
                 {
-                    todo[todoOffset++] = node->secondChildOffset;
+                    todo[todoOffset++] = node->second_child_offset;
                     nodeNum = nodeNum + 1;
                 }
             }

@@ -7,10 +7,10 @@ PostProcessor::PostProcessor()
 {
     try
     {
-        computeShader.compileShader("./chroma-renderer/shaders/convergence.glsl", GLSLShader::kCompute);
-        computeShader.link();
-        computeShader.validate();
-        computeShader.printActiveAttribs();
+        computeShader_.compileShader("./chroma-renderer/shaders/convergence.glsl", GLSLShader::kCompute);
+        computeShader_.link();
+        computeShader_.validate();
+        computeShader_.printActiveAttribs();
     }
     catch (GLSLProgramException& e)
     {
@@ -23,15 +23,15 @@ void PostProcessor::process(const Camera& cam, const Image& src, const Image& ds
     const std::int32_t src_image_unit = 0;
     const std::int32_t dst_image_unit = 1;
 
-    computeShader.use();
-    computeShader.setUniform("apperture", cam.apperture);
-    computeShader.setUniform("shutterTime", cam.shutter_time);
-    computeShader.setUniform("iso", cam.iso);
-    computeShader.setUniform("tonemapping", tonemapping);
-    computeShader.setUniform("linearToSrbg", linearToSrbg);
-    computeShader.setUniform("adjustExposure", adjustExposure);
-    computeShader.setUniform("srcImage", src_image_unit);
-    computeShader.setUniform("dstImage", dst_image_unit);
+    computeShader_.use();
+    computeShader_.setUniform("apperture", cam.apperture);
+    computeShader_.setUniform("shutterTime", cam.shutter_time);
+    computeShader_.setUniform("iso", cam.iso);
+    computeShader_.setUniform("tonemapping", tonemapping);
+    computeShader_.setUniform("linearToSrbg", linear_to_srbg);
+    computeShader_.setUniform("adjustExposure", adjust_exposure);
+    computeShader_.setUniform("srcImage", src_image_unit);
+    computeShader_.setUniform("dstImage", dst_image_unit);
 
     CHECK_OPENGL_ERROR
 

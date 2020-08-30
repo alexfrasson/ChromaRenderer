@@ -7,8 +7,8 @@
 
 struct CudaPathIteration
 {
-    glm::vec3 rayOrigin;
-    glm::vec3 rayDir;
+    glm::vec3 ray_origin;
+    glm::vec3 ray_dir;
     glm::vec3 mask;
     glm::vec3 color;
     std::uint32_t bounce;
@@ -17,7 +17,7 @@ struct CudaPathIteration
 
 struct CudaEnviromentSettings
 {
-    cudaTextureObject_t texObj{};
+    cudaTextureObject_t tex_obj{};
     std::size_t cdf_size{0};
     std::size_t pdf_size{0};
     float* cdf{nullptr};
@@ -114,9 +114,9 @@ struct CudaLinearBvhNode
 {
     CudaBoundingBox bbox{};
     union {
-        unsigned int primitivesOffset;  // Leaf
-        unsigned int secondChildOffset; // Interior
+        unsigned int primitives_offset;   // Leaf
+        unsigned int second_child_offset; // Interior
     };
-    unsigned char nPrimitives{0}; // 0 -> interior node
+    unsigned char n_primitives{0}; // 0 -> interior node
     unsigned char axis{0};
 };

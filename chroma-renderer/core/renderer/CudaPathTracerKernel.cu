@@ -87,7 +87,7 @@ __device__ glm::vec3 envColor(const EnvSample& env_sample,
         CudaIntersection intersection;
         if (!intersectBVH(triangles, linearBVH, env_ray, intersection))
         {
-            const float4 env = tex2D<float4>(enviromentSettings.texObj, u, v);
+            const float4 env = tex2D<float4>(enviromentSettings.tex_obj, u, v);
             return glm::vec3(env.x, env.y, env.z);
         }
     }
@@ -148,8 +148,8 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
     {
         ray.mint = 0;
         ray.maxt = FLT_MAX;
-        ray.direction = pathIteration.rayDir;
-        ray.origin = pathIteration.rayOrigin;
+        ray.direction = pathIteration.ray_dir;
+        ray.origin = pathIteration.ray_origin;
     }
 
     CudaIntersection intersection;
@@ -158,7 +158,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
         if (pathIteration.bounce == 0)
         {
             const glm::vec2 uv = unitVectorToUv(ray.direction);
-            const float4 env = tex2D<float4>(enviromentSettings.texObj, uv.x, uv.y);
+            const float4 env = tex2D<float4>(enviromentSettings.tex_obj, uv.x, uv.y);
             pathIteration.color = glm::vec3(env.x, env.y, env.z);
         }
         finishSample(pos, accuBuffer, &pathIteration);
@@ -190,7 +190,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
             if (!intersectBVH(triangles, linearBVH, brdf_ray))
             {
                 const glm::vec2 uv = unitVectorToUv(brdf_sample.direction);
-                const float4 env = tex2D<float4>(enviromentSettings.texObj, uv.x, uv.y);
+                const float4 env = tex2D<float4>(enviromentSettings.tex_obj, uv.x, uv.y);
                 const glm::vec3 li{env.x, env.y, env.z};
                 const float env_pdf = envMapPdf(brdf_sample.direction, enviromentSettings);
                 const float brdf_weight = misPowerHeuristic(1.0f, brdf_sample.pdf, 1.0f, env_pdf);
@@ -215,7 +215,7 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
                 const float brdf_pdf =
                     uniformSampleCosineWeightedHemispherePdf(hitpointNormal, wo, env_sample.direction);
                 const float env_weight = misPowerHeuristic(1.0f, env_sample.pdf, 1.0f, brdf_pdf);
-                const float4 env = tex2D<float4>(enviromentSettings.texObj, env_sample.uv.x, env_sample.uv.y);
+                const float4 env = tex2D<float4>(enviromentSettings.tex_obj, env_sample.uv.x, env_sample.uv.y);
                 const glm::vec3 li{env.x, env.y, env.z};
                 direct_light += (material.f() * li * env_cos_theta * env_weight) / env_sample.pdf;
             }
@@ -223,8 +223,8 @@ __global__ void traceKernel(CudaPathIteration* pathIterationBuffer,
 
         pathIteration.color += pathIteration.mask * direct_light;
         pathIteration.mask *= (material.f() * brdf_cos_theta) / brdf_sample.pdf;
-        pathIteration.rayDir = brdf_sample.direction;
-        pathIteration.rayOrigin = hitpoint;
+        pathIteration.ray_dir = brdf_sample.direction;
+        pathIteration.ray_origin = hitpoint;
         pathIteration.bounce++;
 
         if (pathIteration.bounce == MAX_PATH_DEPTH || brdf_sample.pdf <= 0.0f || brdf_cos_theta <= 0.0f)

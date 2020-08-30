@@ -331,11 +331,11 @@ bool settingsWindow(ChromaRenderer* cr)
 
             Scene& scene = cr->getScene();
 
-            float hfov = rs.horizontalFOV * RADTODEGREE;
+            float hfov = rs.horizontal_fov * RADTODEGREE;
             if (ImGui::DragFloat("HFov", &hfov, 1, 5, 360))
             {
-                rs.horizontalFOV = hfov * DEGREETORAD;
-                scene.camera.horizontalFOV(rs.horizontalFOV);
+                rs.horizontal_fov = hfov * DEGREETORAD;
+                scene.camera.horizontalFOV(rs.horizontal_fov);
                 somethingChanged = true;
             }
 
