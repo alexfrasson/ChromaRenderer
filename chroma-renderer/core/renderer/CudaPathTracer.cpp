@@ -534,7 +534,7 @@ void CudaPathTracer::Impl::setSceneGeometry(const ISpacePartitioningStructure* s
 
 void CudaPathTracer::Impl::setTargetImage(const Image& img)
 {
-    assert(img.textureID > 0);
+    assert(img.texture_id > 0);
     assert(img.getWidth() > 0 && img.getHeight() > 0);
 
     if (registeredImage.changed(img))
@@ -555,13 +555,13 @@ void CudaPathTracer::Impl::setTargetImage(const Image& img)
 
         // Only call Cuda/OpenGL interop stuff from within the OpenGL context thread!
         cudaErrorCheck(cudaGraphicsGLRegisterImage(&registeredImage.cudaTextureResource,
-                                                   img.textureID,
+                                                   img.texture_id,
                                                    GL_TEXTURE_2D,
                                                    cudaGraphicsRegisterFlagsWriteDiscard));
 
         registeredImage.width = img.getWidth();
         registeredImage.height = img.getHeight();
-        registeredImage.texID = img.textureID;
+        registeredImage.texID = img.texture_id;
     }
 
     cudaErrorCheck(
@@ -649,5 +649,5 @@ std::uint32_t CudaPathTracer::Impl::getTargetSamplesPerPixel() const
 
 bool CudaPathTracer::Impl::RegisteredImage::changed(const Image& img) const
 {
-    return img.getWidth() != width || img.getHeight() != height || img.textureID != texID;
+    return img.getWidth() != width || img.getHeight() != height || img.texture_id != texID;
 }

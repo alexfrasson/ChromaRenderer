@@ -18,29 +18,29 @@ void Mesh::genBoundingBox()
     {
         for (size_t j = 0; j < 3; j++)
         {
-            if (v[t[i].v[j]].x > boundingBox.max.x)
+            if (v[t[i].v[j]].x > bounding_box.max.x)
             {
-                boundingBox.max.x = v[t[i].v[j]].x;
+                bounding_box.max.x = v[t[i].v[j]].x;
             }
-            if (v[t[i].v[j]].y > boundingBox.max.y)
+            if (v[t[i].v[j]].y > bounding_box.max.y)
             {
-                boundingBox.max.y = v[t[i].v[j]].y;
+                bounding_box.max.y = v[t[i].v[j]].y;
             }
-            if (v[t[i].v[j]].z > boundingBox.max.z)
+            if (v[t[i].v[j]].z > bounding_box.max.z)
             {
-                boundingBox.max.z = v[t[i].v[j]].z;
+                bounding_box.max.z = v[t[i].v[j]].z;
             }
-            if (v[t[i].v[j]].x < boundingBox.min.x)
+            if (v[t[i].v[j]].x < bounding_box.min.x)
             {
-                boundingBox.min.x = v[t[i].v[j]].x;
+                bounding_box.min.x = v[t[i].v[j]].x;
             }
-            if (v[t[i].v[j]].y < boundingBox.min.y)
+            if (v[t[i].v[j]].y < bounding_box.min.y)
             {
-                boundingBox.min.y = v[t[i].v[j]].y;
+                bounding_box.min.y = v[t[i].v[j]].y;
             }
-            if (v[t[i].v[j]].z < boundingBox.min.z)
+            if (v[t[i].v[j]].z < bounding_box.min.z)
             {
-                boundingBox.min.z = v[t[i].v[j]].z;
+                bounding_box.min.z = v[t[i].v[j]].z;
             }
         }
     }

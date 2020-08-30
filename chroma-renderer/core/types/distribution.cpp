@@ -30,18 +30,18 @@ Distribution::Distribution(const std::vector<double>& pdf)
 {
     assert(pdf.size() > 0);
 
-    cdf = computeCdf(pdf);
+    cdf_ = computeCdf(pdf);
 
-    assert(cdf.size() == pdf.size() + 1);
+    assert(cdf_.size() == pdf.size() + 1);
 
-    normalizeCdf(cdf, cdf.back());
+    normalizeCdf(cdf_, cdf_.back());
 }
 
 size_t Distribution::sample(float value)
 {
-    for (size_t i = 0; i < cdf.size(); i++)
+    for (std::size_t i = 0; i < cdf_.size(); i++)
     {
-        if (cdf[i] > value)
+        if (cdf_[i] > value)
         {
             return i - 1;
         }

@@ -35,8 +35,8 @@ void PostProcessor::process(const Camera& cam, const Image& src, const Image& ds
 
     CHECK_OPENGL_ERROR
 
-    glBindImageTexture(src_image_unit, src.textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-    glBindImageTexture(dst_image_unit, dst.textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    glBindImageTexture(src_image_unit, src.texture_id, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+    glBindImageTexture(dst_image_unit, dst.texture_id, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
     CHECK_OPENGL_ERROR
 

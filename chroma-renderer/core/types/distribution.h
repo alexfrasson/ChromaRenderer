@@ -12,9 +12,9 @@ class Distribution
 
     const std::vector<float>& getCdf() const
     {
-        return cdf;
+        return cdf_;
     }
 
   private:
-    std::vector<float> cdf;
+    std::vector<float> cdf_;
 };

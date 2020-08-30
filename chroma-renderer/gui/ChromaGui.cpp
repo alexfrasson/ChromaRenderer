@@ -410,7 +410,7 @@ ImVec2 getAvailableRegionForImage(const float aspect_ratio)
 void drawImage(const Image& img, const bool flip_vert = false)
 {
     const ImVec2 img_region = getAvailableRegionForImage(img.getAspectRatio());
-    ImGui::Image((ImTextureID)img.textureID,
+    ImGui::Image((ImTextureID)img.texture_id,
                  img_region,
                  ImVec2(0.0f, flip_vert ? 0.0f : 1.0f),
                  ImVec2(1.0f, flip_vert ? 1.0f : 0.0f),
