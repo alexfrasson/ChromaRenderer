@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 config_setting(
     name = "on_linux",
     constraint_values = [
@@ -10,4 +12,9 @@ config_setting(
     constraint_values = [
         "@platforms//os:windows",
     ],
+)
+
+filegroup(
+    name = "clang-tidy-config",
+    srcs = [".clang-tidy"],
 )

@@ -54,7 +54,7 @@ def _get_compiler_flags(ctx):
     _filter_gcc_flags(flags)
     return flags
 
-def _print_aspect_impl(target, ctx):
+def _clang_tidy_aspect_impl(target, ctx):
     if "cc_" not in ctx.rule.kind:
         return []
 
@@ -101,10 +101,15 @@ def _print_aspect_impl(target, ctx):
 
         command = "set -o pipefail\n{} \"$@\" |& tee {}".format(ctx.file._clangtidy.path, log_file.path)
 
+        direct_inputs = [src]
+        direct_inputs.extend(rule_hdrs)
+        direct_inputs.append(ctx.file._clangtidyconfig)
+        transitive_inputs = deps_headers
+
         ctx.actions.run_shell(
             progress_message = "Running clang-tidy on {}".format(src.basename),
             command = command,
-            inputs = depset(items = [src] + rule_hdrs, transitive = deps_headers),
+            inputs = depset(direct = direct_inputs, transitive = transitive_inputs),
             outputs = [log_file],
             arguments = [args],
             use_default_shell_env = True,
@@ -115,8 +120,8 @@ def _print_aspect_impl(target, ctx):
         OutputGroupInfo(report = depset(log_files)),
     ]
 
-print_aspect = aspect(
-    implementation = _print_aspect_impl,
+clang_tidy_aspect = aspect(
+    implementation = _clang_tidy_aspect_impl,
     attr_aspects = [],
     attrs = {
         "_cc_toolchain": attr.label(
@@ -127,6 +132,11 @@ print_aspect = aspect(
             cfg = "host",
             allow_single_file = True,
             default = Label("@clang_tidy//:clang-tidy"),
+        ),
+        "_clangtidyconfig": attr.label(
+            executable = False,
+            allow_single_file = True,
+            default = Label("@//:clang-tidy-config"),
         ),
     },
     fragments = ["cpp"],
