@@ -84,9 +84,7 @@ aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
 
     aiMatrix4x4 local_to_world{};
 
-    std::for_each(transforms.rbegin(), transforms.rend(), [&](const auto& transform) {
-        local_to_world *= transform;
-    });
+    std::for_each(transforms.rbegin(), transforms.rend(), [&](const auto& transform) { local_to_world *= transform; });
 
     return local_to_world;
 }

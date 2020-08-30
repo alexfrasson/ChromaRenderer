@@ -27,7 +27,7 @@ struct ShaderFileExtension extensions[] = {{".vs", glsl_shader::kVertex},
                                            {".fs", glsl_shader::kFragment},
                                            {".frag", glsl_shader::kFragment},
                                            {".cs", glsl_shader::kCompute}};
-} // namespace GLSLShaderInfo
+} // namespace glsl_shader_info
 
 GLSLProgram::~GLSLProgram()
 {
