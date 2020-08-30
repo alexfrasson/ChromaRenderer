@@ -6,7 +6,7 @@
 namespace ModelImporter
 {
 
-bool import(const std::string& fileName, Scene& s);
-void importcbscene(const std::string& fileName, Scene& s, const std::function<void()>& cb);
+bool import(const std::string& file_name, Scene& s);
+void importcbscene(const std::string& file_name, Scene& s, const std::function<void()>& cb);
 
 } // namespace ModelImporter

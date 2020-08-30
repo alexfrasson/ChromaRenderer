@@ -102,51 +102,51 @@ void Image::updateOpenGLTexture()
     has_data_changed_ = false;
 }
 
-void Image::setColor(std::uint32_t widthPixelPos,
-                     std::uint32_t heightPixelPos,
+void Image::setColor(std::uint32_t width_pixel_pos,
+                     std::uint32_t height_pixel_pos,
                      std::uint32_t r,
                      std::uint32_t g,
                      std::uint32_t b,
                      std::uint32_t a)
 {
-    if (widthPixelPos >= width_ || heightPixelPos >= height_)
+    if (width_pixel_pos >= width_ || height_pixel_pos >= height_)
     {
         return;
     }
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 0] = std::max(0.0f, std::min(255.0f, (float)r));
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 1] = std::max(0.0f, std::min(255.0f, (float)g));
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 2] = std::max(0.0f, std::min(255.0f, (float)b));
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 3] = std::max(0.0f, std::min(255.0f, (float)a));
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 0] = std::max(0.0f, std::min(255.0f, (float)r));
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 1] = std::max(0.0f, std::min(255.0f, (float)g));
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 2] = std::max(0.0f, std::min(255.0f, (float)b));
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 3] = std::max(0.0f, std::min(255.0f, (float)a));
 
     has_data_changed_ = true;
 }
 
-void Image::setColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos, const Color& color)
+void Image::setColor(std::uint32_t width_pixel_pos, std::uint32_t height_pixel_pos, const Color& color)
 {
-    if (widthPixelPos >= width_ || heightPixelPos >= height_)
+    if (width_pixel_pos >= width_ || height_pixel_pos >= height_)
     {
         return;
     }
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 0] = 255 * std::max(0.0f, std::min(1.0f, color.r));
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 1] = 255 * std::max(0.0f, std::min(1.0f, color.g));
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 2] = 255 * std::max(0.0f, std::min(1.0f, color.b));
-    buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 3] = 255;
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 0] = 255 * std::max(0.0f, std::min(1.0f, color.r));
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 1] = 255 * std::max(0.0f, std::min(1.0f, color.g));
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 2] = 255 * std::max(0.0f, std::min(1.0f, color.b));
+    buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 3] = 255;
 
     has_data_changed_ = true;
 }
 
-Color Image::getColor(std::uint32_t widthPixelPos, std::uint32_t heightPixelPos)
+Color Image::getColor(std::uint32_t width_pixel_pos, std::uint32_t height_pixel_pos)
 {
-    if (widthPixelPos >= width_ || heightPixelPos >= height_)
+    if (width_pixel_pos >= width_ || height_pixel_pos >= height_)
     {
         return Color(0.0f);
     }
 
     Color c;
 
-    c.r = buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 0];
-    c.g = buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 1];
-    c.b = buffer_[mapPosToArray(widthPixelPos, heightPixelPos) + 2];
+    c.r = buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 0];
+    c.g = buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 1];
+    c.b = buffer_[mapPosToArray(width_pixel_pos, height_pixel_pos) + 2];
     return c;
 }
 
@@ -156,27 +156,27 @@ void Image::clear()
     has_data_changed_ = true;
 }
 
-void Image::setSize(std::uint32_t _width, std::uint32_t _height)
+void Image::setSize(std::uint32_t width, std::uint32_t height)
 {
-    if (_width == width_ && _height == height_)
+    if (width == width_ && height == height_)
     {
         return;
     }
 
-    width_ = _width;
-    height_ = _height;
+    width_ = width;
+    height_ = height;
 
     createBuffer();
     genOpenGLTexture();
 }
 
 void Image::setData(const float* data,
-                    const std::uint32_t _width,
-                    const std::uint32_t _height,
+                    const std::uint32_t width,
+                    const std::uint32_t height,
                     const std::uint8_t components)
 {
     color_components_ = components;
-    setSize(_width, _height);
+    setSize(width, height);
     memcpy(&buffer_[0], data, color_components_ * width_ * height_ * 4);
     genOpenGLTexture();
     updateOpenGLTexture();

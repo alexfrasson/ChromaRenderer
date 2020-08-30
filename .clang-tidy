@@ -393,3 +393,5 @@ CheckOptions:
     value: lower_case
   - key: readability-identifier-naming.PrivateMemberSuffix
     value: _
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case

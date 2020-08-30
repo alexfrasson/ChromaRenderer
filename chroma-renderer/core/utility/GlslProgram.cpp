@@ -58,12 +58,12 @@ GLSLProgram::~GLSLProgram()
     glDeleteProgram(handle_);
 }
 
-void GLSLProgram::compileShader(const std::string& fileName)
+void GLSLProgram::compileShader(const std::string& file_name)
 {
     int numExts = sizeof(GLSLShaderInfo::extensions) / sizeof(GLSLShaderInfo::ShaderFileExtension);
 
     // Check the file name's extension to determine the shader type
-    std::string ext = std::filesystem::path(fileName).extension().string();
+    std::string ext = std::filesystem::path(file_name).extension().string();
     GLSLShader::GLSLShaderType type = GLSLShader::kVertex;
     bool matchFound = false;
     for (int i = 0; i < numExts; i++)
@@ -84,17 +84,17 @@ void GLSLProgram::compileShader(const std::string& fileName)
     }
 
     // Pass the discovered shader type along
-    compileShader(fileName, type);
+    compileShader(file_name, type);
 }
 
-void GLSLProgram::compileShader(const std::string& fileName,
+void GLSLProgram::compileShader(const std::string& file_name,
                                 GLSLShader::GLSLShaderType type,
                                 std::vector<std::string> defines,
-                                const std::map<std::string, int>& definesINT)
+                                const std::map<std::string, int>& defines_int)
 {
-    if (!std::filesystem::exists(fileName))
+    if (!std::filesystem::exists(file_name))
     {
-        std::string message = std::string("Shader: ") + fileName + " not found.";
+        std::string message = std::string("Shader: ") + file_name + " not found.";
         throw GLSLProgramException(message);
     }
 
@@ -107,10 +107,10 @@ void GLSLProgram::compileShader(const std::string& fileName,
         }
     }
 
-    ifstream inFile(fileName, ios::in);
+    ifstream inFile(file_name, ios::in);
     if (!inFile)
     {
-        std::string message = std::string("Unable to open: ") + fileName;
+        std::string message = std::string("Unable to open: ") + file_name;
         throw GLSLProgramException(message);
     }
 
@@ -125,7 +125,7 @@ void GLSLProgram::compileShader(const std::string& fileName,
     std::string strcode = code.str();
     size_t pos = strcode.find('\n');
 
-    for (const auto& x : definesINT)
+    for (const auto& x : defines_int)
     {
         strcode.insert(pos, std::string("\n#define ") + x.first + std::string(" ") + std::to_string(x.second));
     }
@@ -135,12 +135,12 @@ void GLSLProgram::compileShader(const std::string& fileName,
         strcode.insert(pos, std::string("\n#define ") + defines[i]);
     }
 
-    compileShaderInternal(strcode, type, fileName);
+    compileShaderInternal(strcode, type, file_name);
 }
 
 void GLSLProgram::compileShaderInternal(const std::string& source,
                                         GLSLShader::GLSLShaderType type,
-                                        const std::string& fileName)
+                                        const std::string& file_name)
 {
     if (handle_ <= 0)
     {
@@ -179,7 +179,7 @@ void GLSLProgram::compileShaderInternal(const std::string& source,
             int written = 0;
             glGetShaderInfoLog(shaderHandle, length, &written, logString.data());
         }
-        std::string msg = fileName + ": shader compliation failed\n";
+        std::string msg = file_name + ": shader compliation failed\n";
         msg += logString;
 
         throw GLSLProgramException(msg);

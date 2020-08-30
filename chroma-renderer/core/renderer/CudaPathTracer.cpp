@@ -44,7 +44,10 @@ class CudaPathTracer::Impl
     void reset();
 
     void setSceneGeometry(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
-    void setEnvMap(const float* hdriEnvData, std::size_t hdriEnvWidth, std::size_t hdriEnvHeight, std::size_t channels);
+    void setEnvMap(const float* hdri_env_data,
+                   std::size_t hdri_env_width,
+                   std::size_t hdri_env_height,
+                   std::size_t channels);
     void setTargetImage(const Image& img);
     void setCamera(const Camera& cam);
     void setMaterials(const std::vector<Material>& materials, const bool& sync);
@@ -104,12 +107,12 @@ CudaPathTracer::CudaPathTracer() : impl_{std::make_unique<CudaPathTracer::Impl>(
 
 CudaPathTracer::~CudaPathTracer() = default;
 
-void CudaPathTracer::setEnvMap(const float* hdriEnvData,
-                               const std::size_t hdriEnvWidth,
-                               const std::size_t hdriEnvHeight,
+void CudaPathTracer::setEnvMap(const float* hdri_env_data,
+                               const std::size_t hdri_env_width,
+                               const std::size_t hdri_env_height,
                                const std::size_t channels)
 {
-    impl_->setEnvMap(hdriEnvData, hdriEnvWidth, hdriEnvHeight, channels);
+    impl_->setEnvMap(hdri_env_data, hdri_env_width, hdri_env_height, channels);
 }
 
 void CudaPathTracer::setSceneGeometry(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials)
@@ -163,31 +166,31 @@ float CudaPathTracer::getInstantRaysPerSec() const
 }
 
 // Print device properties
-void printDevProp(cudaDeviceProp devProp)
+void printDevProp(cudaDeviceProp dev_prop)
 {
-    std::cout << "Major revision number:         " << (int)devProp.major << std::endl;
-    std::cout << "Minor revision number:         " << (int)devProp.minor << std::endl;
-    std::cout << "Name:                          " << devProp.name << std::endl; // NOLINT
-    std::cout << "Total global memory:           " << (int)devProp.totalGlobalMem << std::endl;
-    std::cout << "Total shared memory per block: " << (int)devProp.sharedMemPerBlock << std::endl;
-    std::cout << "Total registers per block:     " << (int)devProp.regsPerBlock << std::endl;
-    std::cout << "Warp size:                     " << (int)devProp.warpSize << std::endl;
-    std::cout << "Maximum memory pitch:          " << (int)devProp.memPitch << std::endl;
-    std::cout << "Maximum threads per block:     " << (int)devProp.maxThreadsPerBlock << std::endl;
+    std::cout << "Major revision number:         " << (int)dev_prop.major << std::endl;
+    std::cout << "Minor revision number:         " << (int)dev_prop.minor << std::endl;
+    std::cout << "Name:                          " << dev_prop.name << std::endl; // NOLINT
+    std::cout << "Total global memory:           " << (int)dev_prop.totalGlobalMem << std::endl;
+    std::cout << "Total shared memory per block: " << (int)dev_prop.sharedMemPerBlock << std::endl;
+    std::cout << "Total registers per block:     " << (int)dev_prop.regsPerBlock << std::endl;
+    std::cout << "Warp size:                     " << (int)dev_prop.warpSize << std::endl;
+    std::cout << "Maximum memory pitch:          " << (int)dev_prop.memPitch << std::endl;
+    std::cout << "Maximum threads per block:     " << (int)dev_prop.maxThreadsPerBlock << std::endl;
     for (int i = 0; i < 3; ++i)
     {
-        std::cout << "Maximum dimension " << i << " of block:  " << (int)devProp.maxThreadsDim[i] << std::endl;
+        std::cout << "Maximum dimension " << i << " of block:  " << (int)dev_prop.maxThreadsDim[i] << std::endl;
     }
     for (int i = 0; i < 3; ++i)
     {
-        std::cout << "Maximum dimension " << i << " of grid:   " << (int)devProp.maxGridSize[i] << std::endl;
+        std::cout << "Maximum dimension " << i << " of grid:   " << (int)dev_prop.maxGridSize[i] << std::endl;
     }
-    std::cout << "Clock rate:                    " << (int)devProp.clockRate << std::endl;
-    std::cout << "Total constant memory:         " << (int)devProp.totalConstMem << std::endl;
-    std::cout << "Texture alignment:             " << (int)devProp.textureAlignment << std::endl;
-    std::cout << "Concurrent copy and execution: " << (devProp.deviceOverlap == 1 ? "Yes" : "No") << std::endl;
-    std::cout << "Number of multiprocessors:     " << (int)devProp.multiProcessorCount << std::endl;
-    std::cout << "Kernel execution timeout:      " << (devProp.kernelExecTimeoutEnabled == 1 ? "Yes" : "No")
+    std::cout << "Clock rate:                    " << (int)dev_prop.clockRate << std::endl;
+    std::cout << "Total constant memory:         " << (int)dev_prop.totalConstMem << std::endl;
+    std::cout << "Texture alignment:             " << (int)dev_prop.textureAlignment << std::endl;
+    std::cout << "Concurrent copy and execution: " << (dev_prop.deviceOverlap == 1 ? "Yes" : "No") << std::endl;
+    std::cout << "Number of multiprocessors:     " << (int)dev_prop.multiProcessorCount << std::endl;
+    std::cout << "Kernel execution timeout:      " << (dev_prop.kernelExecTimeoutEnabled == 1 ? "Yes" : "No")
               << std::endl;
 }
 
@@ -427,9 +430,9 @@ void CudaPathTracer::Impl::reset()
     iteration = 0;
 }
 
-void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
-                                     const std::size_t hdriEnvWidth,
-                                     const std::size_t hdriEnvHeight,
+void CudaPathTracer::Impl::setEnvMap(const float* hdri_env_data,
+                                     const std::size_t hdri_env_width,
+                                     const std::size_t hdri_env_height,
                                      const std::size_t channels)
 {
     cudaErrorCheck(cudaDestroyTextureObject(enviroment_settings.tex_obj));
@@ -437,12 +440,12 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
     safeCudaFree(enviroment_settings.cdf);
     safeCudaFree(enviroment_settings.pdf);
 
-    std::size_t size = hdriEnvWidth * hdriEnvHeight * channels * sizeof(float);
+    std::size_t size = hdri_env_width * hdri_env_height * channels * sizeof(float);
 
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
 
-    cudaErrorCheck(cudaMallocArray(&env_array, &channelDesc, hdriEnvWidth, hdriEnvHeight));
-    cudaErrorCheck(cudaMemcpyToArray(env_array, 0, 0, hdriEnvData, size, cudaMemcpyHostToDevice));
+    cudaErrorCheck(cudaMallocArray(&env_array, &channelDesc, hdri_env_width, hdri_env_height));
+    cudaErrorCheck(cudaMemcpyToArray(env_array, 0, 0, hdri_env_data, size, cudaMemcpyHostToDevice));
 
     cudaResourceDesc resDesc{};
     memset(&resDesc, 0, sizeof(resDesc));
@@ -459,7 +462,9 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
 
     cudaErrorCheck(cudaCreateTextureObject(&enviroment_settings.tex_obj, &resDesc, &texDesc, nullptr));
 
-    EnvironmentMap env_map{hdriEnvData, static_cast<uint32_t>(hdriEnvWidth), static_cast<uint32_t>(hdriEnvHeight)};
+    EnvironmentMap env_map{hdri_env_data,
+                           static_cast<uint32_t>(hdri_env_width),
+                           static_cast<uint32_t>(hdri_env_height)};
 
     const auto& cdf = env_map.getDistribution().getCdf();
     enviroment_settings.cdf_size = cdf.size();
@@ -481,8 +486,8 @@ void CudaPathTracer::Impl::setEnvMap(const float* hdriEnvData,
 
     cudaErrorCheck(cudaStreamSynchronize(stream));
 
-    enviroment_settings.width = hdriEnvWidth;
-    enviroment_settings.height = hdriEnvHeight;
+    enviroment_settings.width = hdri_env_width;
+    enviroment_settings.height = hdri_env_height;
 
     reset();
 }

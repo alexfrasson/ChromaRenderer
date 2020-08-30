@@ -23,7 +23,10 @@ class CudaPathTracer
     void render();
 
     void setSceneGeometry(const ISpacePartitioningStructure* sps, const std::vector<Material>& materials);
-    void setEnvMap(const float* hdriEnvData, std::size_t hdriEnvWidth, std::size_t hdriEnvHeight, std::size_t channels);
+    void setEnvMap(const float* hdri_env_data,
+                   std::size_t hdri_env_width,
+                   std::size_t hdri_env_height,
+                   std::size_t channels);
     void setCamera(const Camera& cam);
     void setSettings(const RendererSettings& settings);
     void setMaterials(const std::vector<Material>& materials);

@@ -46,13 +46,13 @@ class AssimpLogging
         Assimp::Logger::Debugging | Assimp::Logger::Info | Assimp::Logger::Err | Assimp::Logger::Warn; // NOLINT
 };
 
-std::unique_ptr<aiScene> importAssimpScene(const std::string& fileName)
+std::unique_ptr<aiScene> importAssimpScene(const std::string& file_name)
 {
     AssimpLogging assimp_logging{};
 
     Assimp::Importer importer;
     importer.SetExtraVerbose(true);
-    importer.ReadFile(fileName, aiProcess_Triangulate
+    importer.ReadFile(file_name, aiProcess_Triangulate
                       //| aiProcess_JoinIdenticalVertices
                       //| aiProcess_SortByPType
                       //| aiProcess_PreTransformVertices
@@ -91,19 +91,19 @@ aiMatrix4x4 getLocalToWorldTransform(const aiNode* node)
 
 void getTotalNumvberOfTrianglesAndVertices(const aiScene* scene,
                                            const aiNode* node,
-                                           std::uint64_t* nTriangles,
-                                           std::uint64_t* nVertices)
+                                           std::uint64_t* n_triangles,
+                                           std::uint64_t* n_vertices)
 {
     for (std::uint32_t i = 0; i < node->mNumChildren; i++)
     {
-        getTotalNumvberOfTrianglesAndVertices(scene, node->mChildren[i], nTriangles, nVertices);
+        getTotalNumvberOfTrianglesAndVertices(scene, node->mChildren[i], n_triangles, n_vertices);
     }
 
     for (std::uint32_t i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        *nTriangles += mesh->mNumFaces;
-        *nVertices += mesh->mNumVertices;
+        *n_triangles += mesh->mNumFaces;
+        *n_vertices += mesh->mNumVertices;
     }
 }
 
@@ -158,16 +158,16 @@ void printMeshInfo(const aiScene* scene)
 }
 
 // Compute the absolute transformation matrices of each node
-void computeAbsoluteTransform(aiNode* pcNode)
+void computeAbsoluteTransform(aiNode* pc_node)
 {
-    if (pcNode->mParent != nullptr)
+    if (pc_node->mParent != nullptr)
     {
-        pcNode->mTransformation = pcNode->mParent->mTransformation * pcNode->mTransformation;
+        pc_node->mTransformation = pc_node->mParent->mTransformation * pc_node->mTransformation;
     }
 
-    for (std::uint32_t i = 0; i < pcNode->mNumChildren; ++i)
+    for (std::uint32_t i = 0; i < pc_node->mNumChildren; ++i)
     {
-        computeAbsoluteTransform(pcNode->mChildren[i]);
+        computeAbsoluteTransform(pc_node->mChildren[i]);
     }
 }
 
@@ -557,19 +557,19 @@ bool convert(const aiScene* aiscene, Scene& s)
     return true;
 }
 
-void ModelImporter::importcbscene(const std::string& fileName, Scene& s, const std::function<void()>& cb)
+void ModelImporter::importcbscene(const std::string& file_name, Scene& s, const std::function<void()>& cb)
 {
-    import(fileName, s);
+    import(file_name, s);
     cb();
 }
 
-bool ModelImporter::import(const std::string& fileName, Scene& s)
+bool ModelImporter::import(const std::string& file_name, Scene& s)
 {
     std::cout << "----------------------------<Importer>---------------------------" << std::endl;
     std::cout << "Assimp " << aiGetVersionMajor() << "." << aiGetVersionMinor() << std::endl;
     std::cout << "Loading scene..." << std::endl;
 
-    const std::unique_ptr<aiScene> assimpScene = importAssimpScene(fileName);
+    const std::unique_ptr<aiScene> assimpScene = importAssimpScene(file_name);
     if (assimpScene == nullptr)
     {
         std::cout << "Assimp failed to load the file!" << std::endl;
@@ -584,7 +584,7 @@ bool ModelImporter::import(const std::string& fileName, Scene& s)
     convert(assimpScene.get(), s);
     std::cout << "Done!" << std::endl << std::endl;
 
-    std::cout << "Import of scene " << fileName.c_str() << " succeeded." << std::endl;
+    std::cout << "Import of scene " << file_name.c_str() << " succeeded." << std::endl;
     std::cout << "---------------------------</Importer>---------------------------" << std::endl;
     return true;
 }

@@ -51,28 +51,28 @@ class BVH : public ISpacePartitioningStructure
     bool build(std::vector<std::unique_ptr<Mesh>>& m) override;
     std::unique_ptr<BvhNode> buildnode(std::int32_t depth,
                                        std::vector<BVHPrimitiveInfo>& primitive,
-                                       std::size_t startID,
-                                       std::size_t endID);
+                                       std::size_t start_id,
+                                       std::size_t end_id);
     std::unique_ptr<BvhNode> buildNode(std::int32_t depth,
                                        std::vector<glm::vec3>& centroids,
                                        std::vector<BoundingBox>& bboxes,
-                                       std::size_t startID,
-                                       std::size_t endID);
-    static float cost(float saL, float nL, float saR, float nR);
+                                       std::size_t start_id,
+                                       std::size_t end_id);
+    static float cost(float sa_l, float n_l, float sa_r, float n_r);
     static float cost(float sa, float n);
 
     size_t sizeInBytes() override;
 
     static bool splitMidpoint(std::vector<BVHPrimitiveInfo>& primitive,
                               BoundingBox& trianglesbbox,
-                              std::size_t startID,
-                              std::size_t endID,
+                              std::size_t start_id,
+                              std::size_t end_id,
                               std::size_t& splitindex,
                               std::int32_t& splitdim);
     static bool splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
                             BoundingBox& trianglesbbox,
-                            std::size_t startID,
-                            std::size_t endID,
+                            std::size_t start_id,
+                            std::size_t end_id,
                             std::size_t& splitindex,
                             std::int32_t& splitdim);
 

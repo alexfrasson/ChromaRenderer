@@ -294,15 +294,15 @@ __host__ __device__ inline bool intersectTriangle(const CudaTriangle* triangle, 
 // intersection algorithm." In ACM SIGGRAPH 2005 Courses, p. 9. ACM, 2005.
 __host__ __device__ bool inline hitBoundingBoxSlab(const CudaBoundingBox& bb,
                                                    const CudaRay& ray,
-                                                   const glm::vec3& invRayDir,
-                                                   const glm::ivec3& dirIsNeg,
+                                                   const glm::vec3& inv_ray_dir,
+                                                   const glm::ivec3& dir_is_neg,
                                                    float& tmin,
                                                    float& tmax)
 {
-    float min = (bb[dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
-    float max = (bb[1 - dirIsNeg[0]].x - ray.origin.x) * invRayDir.x;
-    float tymin = (bb[dirIsNeg[1]].y - ray.origin.y) * invRayDir.y;
-    float tymax = (bb[1 - dirIsNeg[1]].y - ray.origin.y) * invRayDir.y;
+    float min = (bb[dir_is_neg[0]].x - ray.origin.x) * inv_ray_dir.x;
+    float max = (bb[1 - dir_is_neg[0]].x - ray.origin.x) * inv_ray_dir.x;
+    float tymin = (bb[dir_is_neg[1]].y - ray.origin.y) * inv_ray_dir.y;
+    float tymax = (bb[1 - dir_is_neg[1]].y - ray.origin.y) * inv_ray_dir.y;
     if ((min > tymax) || (tymin > max))
     {
         return false;
@@ -316,8 +316,8 @@ __host__ __device__ bool inline hitBoundingBoxSlab(const CudaBoundingBox& bb,
         max = tymax;
     }
 
-    tymin = (bb[dirIsNeg[2]].z - ray.origin.z) * invRayDir.z;
-    tymax = (bb[1 - dirIsNeg[2]].z - ray.origin.z) * invRayDir.z;
+    tymin = (bb[dir_is_neg[2]].z - ray.origin.z) * inv_ray_dir.z;
+    tymax = (bb[1 - dir_is_neg[2]].z - ray.origin.z) * inv_ray_dir.z;
 
     if ((min > tymax) || (tymin > max))
     {
@@ -336,7 +336,7 @@ __host__ __device__ bool inline hitBoundingBoxSlab(const CudaBoundingBox& bb,
 }
 
 __host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
-                                             const CudaLinearBvhNode* linearBVH,
+                                             const CudaLinearBvhNode* linear_bvh,
                                              CudaRay& ray,
                                              CudaIntersection& intersection)
 {
@@ -351,7 +351,7 @@ __host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
     intersection.distance = FLT_MAX;
     while (true)
     {
-        const CudaLinearBvhNode* node = &linearBVH[nodeNum];
+        const CudaLinearBvhNode* node = &linear_bvh[nodeNum];
 
         // Intersect BVH node
         if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))
@@ -402,7 +402,7 @@ __host__ __device__ bool inline intersectBVH(const CudaTriangle* triangles,
 }
 
 __host__ __device__ inline bool intersectBVH(const CudaTriangle* triangles,
-                                             const CudaLinearBvhNode* linearBVH,
+                                             const CudaLinearBvhNode* linear_bvh,
                                              CudaRay& ray)
 {
     const glm::vec3 invRayDir = 1.f / ray.direction;
@@ -414,7 +414,7 @@ __host__ __device__ inline bool intersectBVH(const CudaTriangle* triangles,
 
     while (true)
     {
-        const CudaLinearBvhNode* node = &linearBVH[nodeNum];
+        const CudaLinearBvhNode* node = &linear_bvh[nodeNum];
 
         // Intersect BVH node
         if (hitBoundingBoxSlab(node->bbox, ray, invRayDir, dirIsNeg, ray.mint, ray.maxt))

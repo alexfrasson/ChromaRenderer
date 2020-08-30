@@ -66,16 +66,16 @@ class GLSLProgram
     GLSLProgram& operator=(GLSLProgram&&) = delete;
     ~GLSLProgram();
 
-    void compileShader(const std::string& fileName);
-    void compileShader(const std::string& fileName,
+    void compileShader(const std::string& file_name);
+    void compileShader(const std::string& file_name,
                        GLSLShader::GLSLShaderType type,
                        std::vector<string> defines = std::vector<string>(),
-                       const std::map<std::string, int>& definesINT = std::map<std::string, int>());
+                       const std::map<std::string, int>& defines_int = std::map<std::string, int>());
 
   private:
     void compileShaderInternal(const std::string& source,
                                GLSLShader::GLSLShaderType type,
-                               const std::string& fileName = "");
+                               const std::string& file_name = "");
 
   public:
     void link();

@@ -150,8 +150,8 @@ bool BVH::build(std::vector<std::unique_ptr<Mesh>>& m)
 std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
                                         std::vector<glm::vec3>& centroids,
                                         std::vector<BoundingBox>& bboxes,
-                                        std::size_t startID,
-                                        std::size_t endID)
+                                        std::size_t start_id,
+                                        std::size_t end_id)
 {
     std::unique_ptr<BvhNode> node = std::make_unique<BvhNode>();
     n_nodes++;
@@ -164,7 +164,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
     // Find bbox for the whole set of triangles and for the whole set of centroids
     BoundingBox centroidsbbox;
     BoundingBox trianglesbbox;
-    for (std::size_t i = startID; i < endID; i++)
+    for (std::size_t i = start_id; i < end_id; i++)
     {
         centroidsbbox.expand(centroids[id[i]]);
         trianglesbbox.expand(bboxes[id[i]].min);
@@ -172,12 +172,12 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
     }
 
     // Check if we should make this node a leaf
-    std::size_t size = endID - startID;
+    std::size_t size = end_id - start_id;
     if (size <= MIN_LEAF_SIZE)
     {
         node->bbox = trianglesbbox;
-        node->start_id = static_cast<std::int32_t>(startID);
-        node->end_id = static_cast<std::int32_t>(endID);
+        node->start_id = static_cast<std::int32_t>(start_id);
+        node->end_id = static_cast<std::int32_t>(end_id);
         node->is_leaf = true;
         n_leafs++;
         return node;
@@ -215,7 +215,7 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
     // Bin's bounds
     BoundingBox binbound[NUM_BINS];
 
-    for (std::size_t i = startID; i < endID; i++)
+    for (std::size_t i = start_id; i < end_id; i++)
     {
         // Find the centroid'i''s binid on the axis 'j'
         auto binid = static_cast<std::int32_t>(truncf(k1 * (centroids[id[i]][widestDim] - k0)));
@@ -349,8 +349,8 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
     if (minCost > cost(trianglesbbox.surfaceArea(), static_cast<float>(size)))
     {
         node->bbox = trianglesbbox;
-        node->start_id = static_cast<std::int32_t>(startID);
-        node->end_id = static_cast<std::int32_t>(endID);
+        node->start_id = static_cast<std::int32_t>(start_id);
+        node->end_id = static_cast<std::int32_t>(end_id);
         node->is_leaf = true;
         n_leafs++;
         return node;
@@ -359,15 +359,15 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
 #ifdef WIDEST_AXIS_SPLIT_ONLY
     // Reorganize id array
     std::size_t mid = 0;
-    for (std::size_t i = startID, j = endID - 1; i < endID && j >= startID && i <= j;)
+    for (std::size_t i = start_id, j = end_id - 1; i < end_id && j >= start_id && i <= j;)
     {
         // Find a triangle that is on the left but should be on the right
-        for (std::int32_t binID = minCostBin - 1; i < endID && binID <= minCostBin && i != j; i++)
+        for (std::int32_t binID = minCostBin - 1; i < end_id && binID <= minCostBin && i != j; i++)
         {
             binID = static_cast<std::int32_t>(truncf(k1 * (centroids[id[i]][minCostDim] - k0)));
         }
         // Find a triangle that is on the right but should be on the left
-        for (std::int32_t binID = minCostBin + 1; j >= startID && binID > minCostBin && j != i; j--)
+        for (std::int32_t binID = minCostBin + 1; j >= start_id && binID > minCostBin && j != i; j--)
         {
             binID = static_cast<std::int32_t>(truncf(k1 * (centroids[id[j]][minCostDim] - k0)));
         }
@@ -406,20 +406,20 @@ std::unique_ptr<BvhNode> BVH::buildNode(std::int32_t depth,
 
     node->axis = static_cast<uint8_t>(minCostDim);
     node->bbox = trianglesbbox;
-    node->start_id = static_cast<std::int32_t>(startID);
-    node->end_id = static_cast<std::int32_t>(endID);
+    node->start_id = static_cast<std::int32_t>(start_id);
+    node->end_id = static_cast<std::int32_t>(end_id);
     node->is_leaf = false;
 
-    node->child[0] = buildNode(depth + 1, centroids, bboxes, startID, mid);
-    node->child[1] = buildNode(depth + 1, centroids, bboxes, mid, endID);
+    node->child[0] = buildNode(depth + 1, centroids, bboxes, start_id, mid);
+    node->child[1] = buildNode(depth + 1, centroids, bboxes, mid, end_id);
 
     return node;
 }
 
 std::unique_ptr<BvhNode> BVH::buildnode(std::int32_t depth,
                                         std::vector<BVHPrimitiveInfo>& primitive,
-                                        std::size_t startID,
-                                        std::size_t endID)
+                                        std::size_t start_id,
+                                        std::size_t end_id)
 {
     std::unique_ptr<BvhNode> node = std::make_unique<BvhNode>();
     n_nodes++;
@@ -432,7 +432,7 @@ std::unique_ptr<BvhNode> BVH::buildnode(std::int32_t depth,
     // Find bbox for the whole set of triangles and for the whole set of centroids
     BoundingBox trianglesbbox;
     BoundingBox centroidsbbox;
-    for (std::size_t i = startID; i < endID; i++)
+    for (std::size_t i = start_id; i < end_id; i++)
     {
         centroidsbbox.expand(primitive[i].centroid);
         trianglesbbox.expand(primitive[i].bbox.min);
@@ -440,12 +440,12 @@ std::unique_ptr<BvhNode> BVH::buildnode(std::int32_t depth,
     }
 
     // Check if we should make this node a leaf
-    std::size_t size = endID - startID;
+    std::size_t size = end_id - start_id;
     if (size <= MIN_LEAF_SIZE)
     {
         node->bbox = trianglesbbox;
-        node->start_id = static_cast<std::int32_t>(startID);
-        node->end_id = static_cast<std::int32_t>(endID);
+        node->start_id = static_cast<std::int32_t>(start_id);
+        node->end_id = static_cast<std::int32_t>(end_id);
         node->is_leaf = true;
         n_leafs++;
         return node;
@@ -455,26 +455,26 @@ std::unique_ptr<BvhNode> BVH::buildnode(std::int32_t depth,
     std::int32_t splitdim{0};
     std::size_t splitindex{0};
 
-    splitMidpoint(primitive, centroidsbbox, startID, endID, splitindex, splitdim);
+    splitMidpoint(primitive, centroidsbbox, start_id, end_id, splitindex, splitdim);
     // splitMidpoint(primitive, trianglesbbox, startID, endID, splitindex, splitdim);
     // splitMedian(primitive, trianglesbbox, startID, endID, splitindex, splitdim);
 
     node->axis = static_cast<uint8_t>(splitdim);
     node->bbox = trianglesbbox;
-    node->start_id = static_cast<std::int32_t>(startID);
-    node->end_id = static_cast<std::int32_t>(endID);
+    node->start_id = static_cast<std::int32_t>(start_id);
+    node->end_id = static_cast<std::int32_t>(end_id);
     node->is_leaf = false;
 
-    node->child[0] = buildnode(depth + 1, primitive, startID, splitindex);
-    node->child[1] = buildnode(depth + 1, primitive, splitindex, endID);
+    node->child[0] = buildnode(depth + 1, primitive, start_id, splitindex);
+    node->child[1] = buildnode(depth + 1, primitive, splitindex, end_id);
 
     return node;
 }
 
 bool BVH::splitMidpoint(std::vector<BVHPrimitiveInfo>& primitive,
                         BoundingBox& trianglesbbox,
-                        std::size_t startID,
-                        std::size_t endID,
+                        std::size_t start_id,
+                        std::size_t end_id,
                         std::size_t& splitindex,
                         std::int32_t& splitdim)
 {
@@ -498,7 +498,7 @@ bool BVH::splitMidpoint(std::vector<BVHPrimitiveInfo>& primitive,
 
     // Reorganize array
     std::size_t mid = 0;
-    for (std::size_t i = startID, j = endID - 1; i < endID && j >= startID && i <= j;)
+    for (std::size_t i = start_id, j = end_id - 1; i < end_id && j >= start_id && i <= j;)
     {
         // Find a triangle that is on the left but should be on the right
         while (primitive[i].centroid[widestDim] <= midpoint && i < j)
@@ -534,8 +534,8 @@ bool BVH::splitMidpoint(std::vector<BVHPrimitiveInfo>& primitive,
 
 bool BVH::splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
                       BoundingBox& trianglesbbox,
-                      std::size_t startID,
-                      std::size_t endID,
+                      std::size_t start_id,
+                      std::size_t end_id,
                       std::size_t& splitindex,
                       std::int32_t& splitdim)
 {
@@ -556,9 +556,9 @@ bool BVH::splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
 
     // Find median
     auto begin = primitive.begin();
-    std::advance(begin, startID);
+    std::advance(begin, start_id);
     auto end = primitive.begin();
-    std::advance(end, endID);
+    std::advance(end, end_id);
     if (widestDim == 0)
     {
         std::sort(begin, end, primitiveCmpX);
@@ -572,7 +572,7 @@ bool BVH::splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
         std::sort(begin, end, primitiveCmpZ);
     }
 
-    std::size_t mid = (startID + endID) / 2;
+    std::size_t mid = (start_id + end_id) / 2;
 
     splitindex = mid;
     splitdim = widestDim;
@@ -580,9 +580,9 @@ bool BVH::splitMedian(std::vector<BVHPrimitiveInfo>& primitive,
     return true;
 }
 
-float BVH::cost(float saL, float nL, float saR, float nR)
+float BVH::cost(float sa_l, float n_l, float sa_r, float n_r)
 {
-    return (saL * nL + saR * nR);
+    return (sa_l * n_l + sa_r * n_r);
     // return (KT + KI * (saL * nL + saR * nR));
 }
 
