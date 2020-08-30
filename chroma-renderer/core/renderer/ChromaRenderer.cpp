@@ -52,7 +52,7 @@ class ChromaRenderer::Impl
 
     RendererSettings settings;
     Scene scene;
-    State state{State::IDLE};
+    State state{State::kIdle};
     CudaPathTracer cudaPathTracer;
     PostProcessor post_processor;
     Stopwatch stopwatch;
@@ -113,20 +113,20 @@ Image& ChromaRenderer::Impl::getTarget()
 
 bool ChromaRenderer::Impl::isIdle()
 {
-    if (state == State::RENDERING && !isRunning())
+    if (state == State::kRendering && !isRunning())
     {
-        state = State::IDLE;
+        state = State::kIdle;
     }
-    return (state == State::IDLE);
+    return (state == State::kIdle);
 }
 
 ChromaRenderer::State ChromaRenderer::Impl::getState()
 {
-    if (state == ChromaRenderer::RENDERING)
+    if (state == ChromaRenderer::kRendering)
     {
         if (!isRunning())
         {
-            state = ChromaRenderer::IDLE;
+            state = ChromaRenderer::kIdle;
         }
     }
     /*if (state == ChromaRenderer::PROCESSINGSCENE)
@@ -174,14 +174,14 @@ void ChromaRenderer::Impl::startRender()
 
     stopwatch.restart();
 
-    state = State::RENDERING;
+    state = State::kRendering;
     running = true;
 }
 
 void ChromaRenderer::Impl::stopRender()
 {
     running = false;
-    state = State::IDLE;
+    state = State::kIdle;
 }
 
 void ChromaRenderer::Impl::importScene(const std::string& filename)
@@ -191,7 +191,7 @@ void ChromaRenderer::Impl::importScene(const std::string& filename)
         return;
     }
 
-    state = State::LOADINGSCENE;
+    state = State::kLoadingScene;
     ModelImporter::importcbscene(filename, scene, [&]() { cbSceneLoadedScene(); });
 }
 
@@ -227,7 +227,7 @@ void ChromaRenderer::Impl::importEnviromentMap(const std::string& filename)
 
 void ChromaRenderer::Impl::cbSceneLoadedScene()
 {
-    state = State::PROCESSINGSCENE;
+    state = State::kProcessingScene;
     sps = std::make_unique<BVH>();
     sps->build(scene.meshes);
     cudaPathTracer.setSceneGeometry(sps.get(), scene.materials);
@@ -241,19 +241,19 @@ void ChromaRenderer::Impl::cbSceneLoadedScene()
     cudaPathTracer.setTargetImage(renderer_target);
     cudaPathTracer.setCamera(scene.camera);
 
-    state = State::IDLE;
+    state = State::kIdle;
 }
 
 void ChromaRenderer::Impl::update()
 {
-    if (state == State::RENDERING)
+    if (state == State::kRendering)
     {
         cudaPathTracer.render();
         post_processor.process(scene.camera, renderer_target, final_target, true);
         if (cudaPathTracer.getProgress() >= 1.0f)
         {
             running = false;
-            state = State::IDLE;
+            state = State::kIdle;
         }
     }
 }

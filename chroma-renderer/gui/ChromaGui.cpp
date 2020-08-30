@@ -44,7 +44,7 @@ void mainMenu(ChromaRenderer* cr)
                 if (ImGui::MenuItem("Scene...",
                                     nullptr,
                                     nullptr,
-                                    !(cr->getState() == ChromaRenderer::State::LOADINGSCENE)))
+                                    !(cr->getState() == ChromaRenderer::State::kLoadingScene)))
                 {
                     path.clear();
 
@@ -359,7 +359,7 @@ bool settingsWindow(ChromaRenderer* cr)
             cr->setSettings(rs);
         }
 
-        if (!(cr->getState() == ChromaRenderer::State::LOADINGSCENE) &&
+        if (!(cr->getState() == ChromaRenderer::State::kLoadingScene) &&
             ImGui::Button(cr->isRunning() ? "Stop" : "Render"))
         {
             if (cr->isRunning())

@@ -7,7 +7,7 @@ PostProcessor::PostProcessor()
 {
     try
     {
-        computeShader.compileShader("./chroma-renderer/shaders/convergence.glsl", GLSLShader::COMPUTE);
+        computeShader.compileShader("./chroma-renderer/shaders/convergence.glsl", GLSLShader::kCompute);
         computeShader.link();
         computeShader.validate();
         computeShader.printActiveAttribs();

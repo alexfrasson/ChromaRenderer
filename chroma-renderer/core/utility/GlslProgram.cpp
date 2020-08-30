@@ -18,15 +18,15 @@ struct ShaderFileExtension
     GLSLShader::GLSLShaderType type;
 };
 
-struct ShaderFileExtension extensions[] = {{".vs", GLSLShader::VERTEX},
-                                           {".vert", GLSLShader::VERTEX},
-                                           {".gs", GLSLShader::GEOMETRY},
-                                           {".geom", GLSLShader::GEOMETRY},
-                                           {".tcs", GLSLShader::TESS_CONTROL},
-                                           {".tes", GLSLShader::TESS_EVALUATION},
-                                           {".fs", GLSLShader::FRAGMENT},
-                                           {".frag", GLSLShader::FRAGMENT},
-                                           {".cs", GLSLShader::COMPUTE}};
+struct ShaderFileExtension extensions[] = {{".vs", GLSLShader::kVertex},
+                                           {".vert", GLSLShader::kVertex},
+                                           {".gs", GLSLShader::kGeometry},
+                                           {".geom", GLSLShader::kGeometry},
+                                           {".tcs", GLSLShader::kTessControl},
+                                           {".tes", GLSLShader::kTessEvaluation},
+                                           {".fs", GLSLShader::kFragment},
+                                           {".frag", GLSLShader::kFragment},
+                                           {".cs", GLSLShader::kCompute}};
 } // namespace GLSLShaderInfo
 
 GLSLProgram::~GLSLProgram()
@@ -64,7 +64,7 @@ void GLSLProgram::compileShader(const std::string& fileName)
 
     // Check the file name's extension to determine the shader type
     std::string ext = std::filesystem::path(fileName).extension().string();
-    GLSLShader::GLSLShaderType type = GLSLShader::VERTEX;
+    GLSLShader::GLSLShaderType type = GLSLShader::kVertex;
     bool matchFound = false;
     for (int i = 0; i < numExts; i++)
     {
