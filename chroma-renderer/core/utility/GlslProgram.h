@@ -54,7 +54,7 @@ class GLSLProgram
   private:
     GLuint handle_{0};
     bool linked_{false};
-    std::map<string, int> uniformLocations_;
+    std::map<string, int> uniform_locations_;
 
     GLint getUniformLocation(const char* name);
 

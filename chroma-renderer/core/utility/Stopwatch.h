@@ -36,5 +36,5 @@ class StopwatchOpenGL
 
   private:
     GLuint queries_[2]{0, 0};
-    double elapsedMillis_{0.0};
+    double elapsed_millis_{0.0};
 };

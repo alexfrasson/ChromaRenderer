@@ -203,7 +203,7 @@ void GLSLProgram::link()
     glGetProgramiv(handle_, GL_LINK_STATUS, &status);
     if (GL_FALSE != status)
     {
-        uniformLocations_.clear();
+        uniform_locations_.clear();
         linked_ = true;
     }
     else
@@ -479,12 +479,12 @@ void GLSLProgram::validate() const
 int GLSLProgram::getUniformLocation(const char* name)
 {
     std::map<std::string, int>::iterator pos;
-    pos = uniformLocations_.find(name);
+    pos = uniform_locations_.find(name);
 
-    if (pos == uniformLocations_.end())
+    if (pos == uniform_locations_.end())
     {
-        uniformLocations_[name] = glGetUniformLocation(handle_, name);
+        uniform_locations_[name] = glGetUniformLocation(handle_, name);
     }
 
-    return uniformLocations_[name];
+    return uniform_locations_[name];
 }

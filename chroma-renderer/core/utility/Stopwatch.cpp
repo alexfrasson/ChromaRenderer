@@ -33,7 +33,7 @@ StopwatchOpenGL::~StopwatchOpenGL()
 
 void StopwatchOpenGL::start()
 {
-    elapsedMillis_ = -1.0;
+    elapsed_millis_ = -1.0;
     glQueryCounter(queries_[0], GL_TIMESTAMP);
 }
 
@@ -44,7 +44,7 @@ void StopwatchOpenGL::stop()
 
 double StopwatchOpenGL::elapsedMillis()
 {
-    if (elapsedMillis_ < 0)
+    if (elapsed_millis_ < 0)
     {
         GLint available = 0;
         // Wait for all results to become available
@@ -58,7 +58,7 @@ double StopwatchOpenGL::elapsedMillis()
         glGetQueryObjectui64v(queries_[0], GL_QUERY_RESULT, &timeStamp0);
         glGetQueryObjectui64v(queries_[1], GL_QUERY_RESULT, &timeStamp1);
         // OpenGL returns time in nanoseconds.
-        elapsedMillis_ = (double)(timeStamp1 - timeStamp0) / 1000000.0;
+        elapsed_millis_ = (double)(timeStamp1 - timeStamp0) / 1000000.0;
     }
     return elapsedMillis();
 }
