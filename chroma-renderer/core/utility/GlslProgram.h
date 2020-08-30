@@ -52,9 +52,9 @@ enum GLSLShaderType
 class GLSLProgram
 {
   private:
-    GLuint handle{0};
-    bool linked{false};
-    std::map<string, int> uniformLocations;
+    GLuint handle_{0};
+    bool linked_{false};
+    std::map<string, int> uniformLocations_;
 
     GLint getUniformLocation(const char* name);
 

@@ -382,7 +382,7 @@ void CudaPathTracer::Impl::render()
         if (err == cudaSuccess)
         {
             stopwatch.stop();
-            lastIterationElapsedMillis = stopwatch.elapsedMillis;
+            lastIterationElapsedMillis = stopwatch.elapsed_millis;
             stopwatch.start();
             copyFrameToTexture();
         }

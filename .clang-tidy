@@ -387,3 +387,7 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.EnumConstantPrefix
     value: k
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: _

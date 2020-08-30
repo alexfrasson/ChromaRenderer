@@ -128,7 +128,7 @@ bool BVH::build(std::vector<std::unique_ptr<Mesh>>& m)
               << "    Total:       " << nNodes << std::endl
               << "Max depth:       " << maxDepth << std::endl
               << "Avg. tris/leaf:  " << (float)triangles.size() / (float)nLeafs << std::endl
-              << "Building time:   " << (float)stopwatch.elapsedMillis.count() / 1000.0f << "s" << std::endl
+              << "Building time:   " << (float)stopwatch.elapsed_millis.count() / 1000.0f << "s" << std::endl
               << "Size:            " << sizeInBytes() / 1024 << "KB" << std::endl
               << "Done!" << std::endl;
 
