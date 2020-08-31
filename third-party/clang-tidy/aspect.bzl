@@ -44,9 +44,12 @@ def _get_toolchain_compiler_flags(ctx):
     return flags
 
 def _filter_gcc_flags(flags):
-    flags.remove("-fno-canonical-system-headers")
-    flags.remove("-Wno-free-nonheap-object")
-    flags.remove("-Wunused-but-set-parameter")
+    if "-fno-canonical-system-headers" in flags:
+        flags.remove("-fno-canonical-system-headers")
+    if "-Wno-free-nonheap-object" in flags:
+        flags.remove("-Wno-free-nonheap-object")
+    if "-Wunused-but-set-parameter" in flags:
+        flags.remove("-Wunused-but-set-parameter")
 
 def _get_compiler_flags(ctx):
     flags = _get_toolchain_compiler_flags(ctx)

@@ -16,14 +16,13 @@ On Windows 10:
 - See [Build C++ with MSVC](https://docs.bazel.build/versions/master/windows.html#build-c-with-msvc) in case you have multiple MSVC++ versions installed on your system
 
 On Ubuntu 18.04:
-- gcc-8
-- g++-8
+- g++-8 or clang-8
 - libgtk-3-dev
 
 ## Building
 
-Simply run the following command from within the workspace. It should fetch all dependencies, build, and run the application. Choose the correct configuration based on your OS.
+Simply run the following command from within the workspace. It should fetch all dependencies, build, and run the application. Choose the correct configuration based on your OS/compiler.
 
-`bazel run --config=[windows|linux] //chroma-renderer/gui`
+`bazel run --config=[windows|gcc|clang] //chroma-renderer/gui`
 
 An example scene and several unclipped environment maps can be found in `chroma-renderer/resources`.

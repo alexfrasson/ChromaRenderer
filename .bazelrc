@@ -16,29 +16,32 @@ build:windows_dbg --config=windows
 build:windows_dbg --compilation_mode=dbg
 build:windows_dbg --cxxopt=/MDd
 
-build:linux --client_env=CC=/usr/bin/gcc-8
-build:linux --client_env=CXX=/usr/bin/g++-8
-build:linux --copt=-Werror
-build:linux --copt=-Wall
-build:linux --copt=-Wpedantic
-build:linux --copt=-Wextra
-build:linux --copt=-Wconversion
-build:linux --copt=-Wfloat-conversion
-build:linux --copt=-Wfloat-equal
-build:linux --copt=-Wsign-compare
-build:linux --copt=-Wshadow
-build:linux --copt=-Wno-deprecated-declarations
-build:linux --copt=-fdiagnostics-color=always
-build:linux --per_file_copt=third-party/.*@-w
-build:linux --per_file_copt=external/.*@-w
-build:linux --cxxopt=-std=c++17
-build:linux --cxxopt=-mavx
-build:linux --linkopt=-lstdc++fs
+build:gcc_clang_base --copt=-Werror
+build:gcc_clang_base --copt=-Wall
+build:gcc_clang_base --copt=-Wpedantic
+build:gcc_clang_base --copt=-Wextra
+build:gcc_clang_base --copt=-Wconversion
+build:gcc_clang_base --copt=-Wfloat-conversion
+build:gcc_clang_base --copt=-Wfloat-equal
+build:gcc_clang_base --copt=-Wsign-compare
+build:gcc_clang_base --copt=-Wshadow
+build:gcc_clang_base --copt=-Wno-deprecated-declarations
+build:gcc_clang_base --copt=-fdiagnostics-color=always
+build:gcc_clang_base --per_file_copt=third-party/.*@-w
+build:gcc_clang_base --per_file_copt=external/.*@-w
+build:gcc_clang_base --cxxopt=-std=c++17
+build:gcc_clang_base --cxxopt=-mavx
+build:gcc_clang_base --linkopt=-lstdc++fs
 
-build:linux_dbg --config=linux
-build:linux_dbg --compilation_mode=dbg
+build:gcc --config=gcc_clang_base
+build:gcc --client_env=CC=/usr/bin/gcc-8
+build:gcc --client_env=CXX=/usr/bin/g++-8
 
-build:clang_tidy --config=linux
+build:clang --config=gcc_clang_base
+build:clang --client_env=CC=/usr/bin/clang-8
+build:clang --client_env=CXX=/usr/bin/clang++-8
+
+build:clang_tidy --config=clang
 build:clang_tidy --cxxopt=-Wno-pragma-once-outside-header
 build:clang_tidy --cxxopt=--language=c++
 build:clang_tidy --aspects //third-party/clang-tidy:aspect.bzl%clang_tidy_aspect --output_groups=report
