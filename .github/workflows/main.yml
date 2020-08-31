@@ -32,7 +32,7 @@ jobs:
         run: |
           call ./scripts/build.cmd
 
-  ubuntu:
+  gcc:
     needs: format
     runs-on: ubuntu-latest
     env:
@@ -48,8 +48,27 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          bazelisk build --config=linux --verbose_failures //...
-          bazelisk test --config=linux --verbose_failures //...
+          bazelisk build --config=gcc --verbose_failures //...
+          bazelisk test --config=gcc --verbose_failures //...
+
+  clang:
+    needs: format
+    runs-on: ubuntu-latest
+    env:
+      CUDA_PATH: /usr/local/cuda-10.2
+      CC_CONFIGURE_DEBUG: 1
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        shell: bash
+        run: |
+          ./scripts/install_deps.sh
+
+      - name: Build
+        shell: bash
+        run: |
+          bazelisk build --config=clang --verbose_failures //...
+          bazelisk test --config=clang --verbose_failures //...
 
       - name: Static code analysis
         shell: bash

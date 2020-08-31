@@ -21,8 +21,10 @@ function install_deps() {
     install_cuda
 
     echo "Installing other dependencies..."
-    sudo apt-get -y -qq install libgtk-3-dev >/dev/null
-    sudo apt-get -y -qq install clang-tidy-10 >/dev/null
+    sudo apt-get -y -qq install libgtk-3-dev \
+        clang-tidy-10 \
+        clang-8 \
+        >/dev/null
 }
 
 install_deps

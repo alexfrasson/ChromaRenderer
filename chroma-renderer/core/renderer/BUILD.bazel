@@ -39,7 +39,10 @@ cuda_library(
         "cuda_path_tracer_kernel_types.h",
         "cuda_path_tracer_kernel_utils.h",
     ],
-    deps = ["//third-party/glm"],
+    deps = [
+        "//third-party/glm",
+        "@cuda//:cuda_headers",
+    ],
 )
 
 cc_test(

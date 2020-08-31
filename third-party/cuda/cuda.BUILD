@@ -23,7 +23,7 @@ cc_library(
             "cuda/include/**/*.h",
             "cuda/include/**/*.hpp",
         ],
-        #allow_empty = False,
+        allow_empty = False,
     ),
     includes = ["cuda/include"],
 )
