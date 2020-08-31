@@ -7,13 +7,13 @@ cc_library(
     name = "renderer",
     srcs = glob(["*.cpp"]) + [":path-tracer-kernel"],
     hdrs = [
-        "ChromaRenderer.h",
-        "CudaPathTracer.h",
-        "CudaPathTracerKernel.h",
-        "CudaPathTracerKernelTypes.h",
-        "OpenGlErrorCheck.h",
-        "PostProcessor.h",
-        "RendererSettings.h",
+        "chroma_renderer.h",
+        "cuda_path_tracer.h",
+        "cuda_path_tracer_kernel.h",
+        "cuda_path_tracer_kernel_types.h",
+        "opengl_error_check.h",
+        "post_processor.h",
+        "renderer_settings.h",
     ],
     linkstatic = True,
     deps = [
@@ -33,11 +33,11 @@ cc_library(
 
 cuda_library(
     name = "path-tracer-kernel",
-    srcs = ["CudaPathTracerKernel.cu"],
+    srcs = ["cuda_path_tracer_kernel.cu"],
     hdrs = [
-        "CudaPathTracerKernel.h",
-        "CudaPathTracerKernelTypes.h",
-        "CudaPathTracerKernelUtils.h",
+        "cuda_path_tracer_kernel.h",
+        "cuda_path_tracer_kernel_types.h",
+        "cuda_path_tracer_kernel_utils.h",
     ],
     deps = ["//third-party/glm"],
 )
@@ -45,10 +45,10 @@ cuda_library(
 cc_test(
     name = "cuda-path-tracer-kernel-test",
     srcs = [
-        "CudaPathTracerKernel.h",
-        "CudaPathTracerKernelTypes.h",
-        "CudaPathTracerKernelUtils.h",
-        "test/CudaPathTracerKernelUtils_test.cpp",
+        "cuda_path_tracer_kernel.h",
+        "cuda_path_tracer_kernel_types.h",
+        "cuda_path_tracer_kernel_utils.h",
+        "test/cuda_path_tracer_kernel_utils_test.cpp",
     ],
     deps = [
         ":path-tracer-kernel",

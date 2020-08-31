@@ -15,6 +15,7 @@ jobs:
         shell: bash
         run: |
           ./scripts/formatting-checks.sh
+          python3.7 ./scripts/file_naming.py
 
   windows:
     needs: format

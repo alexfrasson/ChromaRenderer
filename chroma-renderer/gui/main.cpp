@@ -1,4 +1,4 @@
-#include "chroma-renderer/gui/ChromaGui.h"
+#include "chroma-renderer/gui/chroma_gui.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
