@@ -4,10 +4,10 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "space-partition",
-    srcs = ["BVH.cpp"],
+    srcs = ["bvh.cpp"],
     hdrs = [
-        "BVH.h",
-        "ISpacePartitioningStructure.h",
+        "bvh.h",
+        "i_space_partitioning_structure.h",
     ],
     deps = [
         "//chroma-renderer/core/types",
