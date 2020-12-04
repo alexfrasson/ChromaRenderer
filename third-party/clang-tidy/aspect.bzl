@@ -77,6 +77,8 @@ def _clang_tidy_aspect_impl(target, ctx):
             for f in src.files.to_list():
                 if "cpp" in f.extension:
                     rule_srcs.append(f)
+                elif "h" in f.extension:
+                    rule_hdrs.append(f)
 
     if hasattr(ctx.rule.attr, "hdrs"):
         rule_hdrs = [f for t in ctx.rule.attr.hdrs for f in t.files.to_list()]
