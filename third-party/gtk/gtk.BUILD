@@ -12,6 +12,7 @@ cc_library(
         ":cairo",
         ":gdk-pixbuf",
         ":glib",
+        ":harfbuzz",
         ":pango",
     ],
 )
@@ -54,4 +55,10 @@ cc_library(
     name = "pango",
     hdrs = glob(["include/pango-1.0/**/*.h"]),
     includes = ["include/pango-1.0"],
+)
+
+cc_library(
+    name = "harfbuzz",
+    hdrs = glob(["include/harfbuzz/**/*.h"]),
+    includes = ["include/harfbuzz"],
 )
