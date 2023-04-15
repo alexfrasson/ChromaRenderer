@@ -35,11 +35,27 @@ void Image::genOpenGLTexture()
     // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer_);
     if (color_components_ == 1)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width_, height_, 0, GL_RED, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_R32F,
+                     static_cast<std::int32_t>(width_),
+                     static_cast<std::int32_t>(height_),
+                     0,
+                     GL_RED,
+                     GL_FLOAT,
+                     nullptr);
     }
     else
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_, height_, 0, GL_RGBA, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA32F,
+                     static_cast<std::int32_t>(width_),
+                     static_cast<std::int32_t>(height_),
+                     0,
+                     GL_RGBA,
+                     GL_FLOAT,
+                     nullptr);
     }
 
     // Restore state
@@ -90,11 +106,27 @@ void Image::updateOpenGLTexture()
 
     if (color_components_ == 1)
     {
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width_, height_, GL_RED, GL_FLOAT, &buffer_[0]);
+        glTexSubImage2D(GL_TEXTURE_2D,
+                        0,
+                        0,
+                        0,
+                        static_cast<std::int32_t>(width_),
+                        static_cast<std::int32_t>(height_),
+                        GL_RED,
+                        GL_FLOAT,
+                        &buffer_[0]);
     }
     else
     {
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &buffer_[0]);
+        glTexSubImage2D(GL_TEXTURE_2D,
+                        0,
+                        0,
+                        0,
+                        static_cast<std::int32_t>(width_),
+                        static_cast<std::int32_t>(height_),
+                        GL_RGBA,
+                        GL_FLOAT,
+                        &buffer_[0]);
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);

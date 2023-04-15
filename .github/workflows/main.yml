@@ -5,23 +5,24 @@ on:
 
 jobs:
   format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.7.7
+          python-version: 3.8.10
       - name: Formatting checks
         shell: bash
         run: |
           ./scripts/formatting-checks.sh
-          python3.7 ./scripts/file_naming.py
+          python3 ./scripts/file_naming.py
 
   windows:
     needs: format
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     env:
+      BAZEL_VC_FULL_VERSION: 14.29.30133
       BAZEL_VC: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC
       BAZEL_VS: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
 
@@ -34,9 +35,9 @@ jobs:
 
   gcc:
     needs: format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
-      CUDA_PATH: /usr/local/cuda-10.2
+      CUDA_PATH: /usr/local/cuda-12.1
       CC_CONFIGURE_DEBUG: 1
     steps:
       - uses: actions/checkout@v2
@@ -53,9 +54,9 @@ jobs:
 
   clang:
     needs: format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
-      CUDA_PATH: /usr/local/cuda-10.2
+      CUDA_PATH: /usr/local/cuda-12.1
       CC_CONFIGURE_DEBUG: 1
     steps:
       - uses: actions/checkout@v2

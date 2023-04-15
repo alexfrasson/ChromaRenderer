@@ -91,7 +91,7 @@ def _cuda_library_impl(ctx):
         #args.add("--compiler-bindir=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Tools\\MSVC\\14.16.27023\\bin\\Hostx64\\x64\"")
         #args.add("--compiler-bindir={}".format(c_compiler_path))
 
-        args.add("-gencode=arch=compute_30,code=\"sm_30,compute_30\"")
+        # args.add("-gencode=arch=compute_30,code=\"sm_30,compute_30\"")
         args.add("-gencode=arch=compute_75,code=\"sm_75,compute_75\"")
 
         #args.add("--use-local-env")

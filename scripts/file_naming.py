@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.8
 import re
 import os
 import sys
@@ -65,11 +65,11 @@ def main():
     files_to_be_fixed = get_files_to_be_fixed(files)
 
     if args.fix:
-        for (original_name, correct_name) in files_to_be_fixed:
+        for original_name, correct_name in files_to_be_fixed:
             print("Replacing occurences of '{}'".format(original_name))
             replace_name_in_files(files, original_name, correct_name)
 
-    for (original_name, correct_name) in files_to_be_fixed:
+    for original_name, correct_name in files_to_be_fixed:
         if args.fix:
             os.rename(original_name, correct_name)
             print("'{}' renamed to '{}'".format(original_name, correct_name))

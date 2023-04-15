@@ -34,12 +34,12 @@ build:gcc_clang_base --cxxopt=-mavx
 build:gcc_clang_base --linkopt=-lstdc++fs
 
 build:gcc --config=gcc_clang_base
-build:gcc --client_env=CC=/usr/bin/gcc-8
-build:gcc --client_env=CXX=/usr/bin/g++-8
+build:gcc --client_env=CC=/usr/bin/gcc-10
+build:gcc --client_env=CXX=/usr/bin/g++-10
 
 build:clang --config=gcc_clang_base
-build:clang --client_env=CC=/usr/bin/clang-8
-build:clang --client_env=CXX=/usr/bin/clang++-8
+build:clang --client_env=CC=/usr/bin/clang-12
+build:clang --client_env=CXX=/usr/bin/clang++-12
 
 build:clang_tidy --config=clang
 build:clang_tidy --cxxopt=-Wno-pragma-once-outside-header

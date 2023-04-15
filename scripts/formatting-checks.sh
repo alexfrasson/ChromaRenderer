@@ -8,7 +8,7 @@ function install_buildifier() {
 }
 
 function install_clang_format() {
-    sudo apt-get -y -qq install clang-format-10 >/dev/null
+    sudo apt-get -y -qq install clang-format-12 >/dev/null
 }
 
 function install_black() {
@@ -25,4 +25,4 @@ install_black
 echo
 echo "Running formatting checks..."
 
-python3.7 ./scripts/format.py --check
+python3 ./scripts/format.py --check

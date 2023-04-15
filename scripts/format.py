@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.8
 import subprocess
 import glob
 import argparse
@@ -58,7 +58,7 @@ def handle_cpp_files(check_only):
         if check_only:
             proc_result = subprocess.run(
                 [
-                    "clang-format-10",
+                    "clang-format-12",
                     "--verbose",
                     "--style=file",
                     "--fallback-style=none",
@@ -76,7 +76,7 @@ def handle_cpp_files(check_only):
         else:
             subprocess.run(
                 [
-                    "clang-format-10",
+                    "clang-format-12",
                     "--verbose",
                     "--style=file",
                     "--fallback-style=none",
@@ -103,7 +103,7 @@ def handle_python_files(check_only):
     if check_only:
         proc_result = subprocess.run(
             [
-                "python3.7",
+                "python3",
                 "-m",
                 "black",
                 "--diff",
@@ -120,7 +120,7 @@ def handle_python_files(check_only):
     else:
         subprocess.run(
             [
-                "python3.7",
+                "python3",
                 "-m",
                 "black",
                 "./scripts",
