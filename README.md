@@ -6,23 +6,23 @@ Yet another path tracer. It was written during my time in college and it is slow
 
 ## Required system installed dependencies
 - [Bazel 3.0](https://docs.bazel.build/versions/master/install.html) or [Bazelisk](https://github.com/bazelbuild/bazelisk/releases)
-- Cuda 10.2 (older releases may also work)
+- Cuda 12.1 (older releases may also work)
   - Environment variable **CUDA_PATH** must be set. Examples:
-    - Windows: `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v10.2`
-    - Ubuntu: `/usr/local/cuda-10.2`
+    - Windows: `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.1`
+    - Ubuntu: `/usr/local/cuda-12.1`
     
-On Windows 10:
+On Windows:
 - MSVC++ 14.1 or later
 - See [Build C++ with MSVC](https://docs.bazel.build/versions/master/windows.html#build-c-with-msvc) in case you have multiple MSVC++ versions installed on your system
 
-On Ubuntu 18.04:
-- g++-8 or clang-8
+On Ubuntu:
+- g++-10 or clang-12
 - libgtk-3-dev
 
 ## Building
 
 Simply run the following command from within the workspace. It should fetch all dependencies, build, and run the application. Choose the correct configuration based on your OS/compiler.
 
-`bazel run --config=[windows|gcc|clang] //chroma-renderer/gui`
+`bazel run --config=[msvc|gcc|clang] //chroma-renderer/gui`
 
 An example scene and several unclipped environment maps can be found in `chroma-renderer/resources`.
