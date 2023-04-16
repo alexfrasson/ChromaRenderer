@@ -5,7 +5,7 @@ Yet another path tracer. It was written during my time in college and it is slow
 ![alt text](chroma-renderer/samples/sample.jpg?raw=true)
 
 ## Required system installed dependencies
-- [Bazel 3.0](https://docs.bazel.build/versions/master/install.html) or [Bazelisk](https://github.com/bazelbuild/bazelisk/releases)
+- [Bazelisk](https://docs.bazel.build/versions/master/install.html)
 - Cuda 12.1 (older releases may also work)
   - Environment variable **CUDA_PATH** must be set. Examples:
     - Windows: `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.1`
