@@ -1,18 +1,18 @@
 build --compilation_mode=opt
 build --spawn_strategy=local
 
-build:windows --cxxopt=/MD
-build:windows --cxxopt=/WX
-build:windows --cxxopt=/experimental:external
-build:windows --cxxopt=/external:Ithird-party
-build:windows --cxxopt=/external:W0
-build:windows --per_file_copt=chroma-renderer/.*@/W4
-build:windows --per_file_copt=third-party/.*@/W0
-build:windows --per_file_copt=external/.*@/W0
-build:windows --cxxopt=/std:c++17
-build:windows --enable_runfiles
+build:msvc --cxxopt=/MD
+build:msvc --cxxopt=/WX
+build:msvc --cxxopt=/experimental:external
+build:msvc --cxxopt=/external:Ithird-party
+build:msvc --cxxopt=/external:W0
+build:msvc --per_file_copt=chroma-renderer/.*@/W4
+build:msvc --per_file_copt=third-party/.*@/W0
+build:msvc --per_file_copt=external/.*@/W0
+build:msvc --cxxopt=/std:c++17
+build:msvc --enable_runfiles
 
-build:windows_dbg --config=windows
+build:windows_dbg --config=msvc
 build:windows_dbg --compilation_mode=dbg
 build:windows_dbg --cxxopt=/MDd
 

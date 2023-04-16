@@ -3,18 +3,19 @@
 echo "Current directory: %cd%"
 echo "TEMP: %TEMP%"
 
-set CUDA_PATH=%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v10.2
+set CUDA_PATH=%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.1
 echo "CUDA_PATH: %CUDA_PATH%"
 
-echo "Downloading CUDA toolkit 10.2"
-curl -L --url "http://developer.download.nvidia.com/compute/cuda/10.2/Prod/network_installers/cuda_10.2.89_win10_network.exe" --output "%TEMP%\cuda_installer.exe"
-echo "Installing CUDA toolkit 10.2"
-%TEMP%\cuda_installer.exe -s nvcc_10.2 ^
-                             curand_10.2 ^
-                             curand_dev_10.2 ^
-                             cudart_10.2
+echo "Downloading CUDA toolkit 12.1"
+curl -L --url "https://developer.download.nvidia.com/compute/cuda/12.1.0/network_installers/cuda_12.1.0_windows_network.exe" --output "%TEMP%\cuda_installer.exe"
+echo "Installing CUDA toolkit 12.1"
+%TEMP%\cuda_installer.exe -s nvcc_12.1 ^
+                             curand_12.1 ^
+                             curand_dev_12.1 ^
+                             thrust_12.1 ^
+                             cudart_12.1
 
-if NOT EXIST "%CUDA_PATH%\bin\cudart64_102.dll" ( 
+if NOT EXIST "%CUDA_PATH%\bin\cudart64_12.dll" ( 
     echo "CUDA installation failed!"
     exit /B 1
 )
@@ -37,5 +38,5 @@ if NOT EXIST "%BAZELISK_PATH%\bazel.exe" (
 
 set CC_CONFIGURE_DEBUG=1
 
-bazel build --config=windows --verbose_failures //...
-bazel test --config=windows --verbose_failures //...
+bazel build --config=msvc --verbose_failures //...
+bazel test --config=msvc --verbose_failures //...
