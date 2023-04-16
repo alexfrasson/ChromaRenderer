@@ -48,7 +48,7 @@ def _cuda_library_impl(ctx):
     # get cuda includes
 
     compilation_context = cc_common.create_compilation_context()
-    linking_context = cc_common.create_linking_context(libraries_to_link = [], user_link_flags = [])
+    linking_context = cc_common.create_linking_context(linker_inputs = depset([]))
 
     #cudainfo = ctx.toolchains["//third-party/cuda/toolchain:toolchain_type"].cudainfo
 
@@ -161,7 +161,7 @@ def _cuda_library_impl(ctx):
             #executable = "nvcc",
             executable = ctx.executable.nvcc,
             #executable = cudainfo.nvcc_path,
-            inputs = depset(items = [src] + lib_hdrs, transitive = deps_headers),
+            inputs = depset([src] + lib_hdrs, transitive = deps_headers),
             outputs = [obj_file],
             arguments = [args],
             use_default_shell_env = True,

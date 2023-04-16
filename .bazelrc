@@ -10,7 +10,7 @@ build:windows --per_file_copt=chroma-renderer/.*@/W4
 build:windows --per_file_copt=third-party/.*@/W0
 build:windows --per_file_copt=external/.*@/W0
 build:windows --cxxopt=/std:c++17
-build:windows --experimental_enable_runfiles
+build:windows --enable_runfiles
 
 build:windows_dbg --config=windows
 build:windows_dbg --compilation_mode=dbg
